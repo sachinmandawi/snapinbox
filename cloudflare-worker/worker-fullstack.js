@@ -69,9 +69,24 @@ function decodeBase64(input, charset = 'utf-8') {
   }
 }
 
-// Advanced Multi-pattern OTP Extractor
-function extractOtp(subject, body) {
-  const fullText = `${subject || ''} \n ${body || ''}`;
+// Advanced Multi-pattern OTP Extractor (Clean HTML & Text support)
+function extractOtp(subject, body, html) {
+  const cleanHtml = (html || '')
+    .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
+    .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/&nbsp;/gi, ' ')
+    .replace(/&#39;/g, "'")
+    .replace(/&quot;/g, '"')
+    .replace(/&amp;/g, '&')
+    .replace(/\s+/g, ' ');
+
+  const cleanBody = (body || '')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/&nbsp;/gi, ' ')
+    .replace(/\s+/g, ' ');
+
+  const fullText = `${subject || ''} \n ${cleanBody} \n ${cleanHtml}`;
   const patterns = [
     /(?:code|otp|pin|token|verification|password|login|secret)\s*(?:is|:|-|=)?\s*([0-9]{4,8})\b/i,
     /(?:enter|use)\s*([0-9]{4,8})\b/i,
@@ -208,7 +223,7 @@ export default {
         receivedAt: new Date().toISOString(),
         read: false,
         size: (bodyHtml.length || 0) + (bodyText.length || 0),
-        extractedOtp: extractOtp(subject, bodyText || bodyHtml),
+        extractedOtp: extractOtp(subject, bodyText, bodyHtml),
         extractedLink: extractActionLink(bodyText, bodyHtml),
         security: { spf: isSpfPass, dkim: isDkimPass }
       };
@@ -1281,9 +1296,25 @@ function getProAppHtml() {
 
           if (newEmails.length > currentEmails.length) {
             playChime();
+            // Auto-open newest email only when inbox list is showing (no email open)
+            if (!selectedEmail && newEmails.length > 0) {
+              selectedEmail = newEmails[0];
+            }
           }
 
           currentEmails = newEmails;
+
+          // KEY FIX: Sync selectedEmail to fresh data from server
+          // Prevents stale OTP/content when polling refreshes email list
+          if (selectedEmail) {
+            const freshEmail = currentEmails.find(e => e.id === selectedEmail.id);
+            if (freshEmail) {
+              selectedEmail = freshEmail; // Always use the latest server version
+            } else if (currentEmails.length === 0) {
+              selectedEmail = null; // All emails cleared
+            }
+          }
+
           renderMainView();
         }
       } catch (err) {

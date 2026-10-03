@@ -1,9 +1,8 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Header } from '@/components/Header';
 import { EmailControlBar } from '@/components/EmailControlBar';
-import { EmailList } from '@/components/EmailList';
 import { EmailViewer } from '@/components/EmailViewer';
 import { CustomEmailModal } from '@/components/CustomEmailModal';
 import { QrModal } from '@/components/QrModal';
@@ -13,15 +12,7 @@ import { DeleteConfirmModal } from '@/components/DeleteConfirmModal';
 import { EmailMessage } from '@/types/email';
 import { generateRandomUsername } from '@/lib/utils';
 import confetti from 'canvas-confetti';
-import {
-  ShieldCheck,
-  Zap,
-  Lock,
-  Globe,
-  ChevronDown,
-  RefreshCw,
-  Trash2,
-} from 'lucide-react';
+import { ChevronDown, RefreshCw, Trash2 } from 'lucide-react';
 
 const AVAILABLE_DOMAINS = ['snapinbox.tech', 'mendoneet.me'];
 const DEFAULT_DOMAIN = process.env.NEXT_PUBLIC_APP_DOMAIN || 'snapinbox.tech';
@@ -31,6 +22,9 @@ export default function Home() {
   const [recoveryKey, setRecoveryKey] = useState<string>('');
   const [emails, setEmails] = useState<EmailMessage[]>([]);
   const [selectedEmail, setSelectedEmail] = useState<EmailMessage | null>(null);
+  // Ref always holds the LATEST selectedEmail — safe to read inside async callbacks
+  const selectedEmailRef = useRef<EmailMessage | null>(null);
+  useEffect(() => { selectedEmailRef.current = selectedEmail; }, [selectedEmail]);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [copiedRowOtpId, setCopiedRowOtpId] = useState<string | null>(null);
@@ -120,20 +114,33 @@ export default function Home() {
         if (res.ok) {
           const data = await res.json();
           const newEmails: EmailMessage[] = data.emails || [];
+          // Read the CURRENT selected email via ref (never stale)
+          const currentSelected = selectedEmailRef.current;
 
           setEmails((prev) => {
             if (newEmails.length > prev.length) {
               playChime();
-              if (!selectedEmail && newEmails.length > 0) {
+              // Only auto-open newest if NO email is currently being viewed
+              if (!currentSelected && newEmails.length > 0) {
                 setSelectedEmail(newEmails[0]);
               }
             }
             return newEmails;
           });
 
-          if (selectedEmail) {
-            const updated = newEmails.find((e) => e.id === selectedEmail.id);
-            if (updated) setSelectedEmail(updated);
+          // If an email is open in the viewer, sync it with fresh server data
+          // This ensures the OTP, link, and content are always up to date
+          if (currentSelected) {
+            const freshEmail = newEmails.find((e) => e.id === currentSelected.id);
+            if (freshEmail) {
+              // Only update if data actually changed (avoid unnecessary re-renders)
+              if (JSON.stringify(freshEmail) !== JSON.stringify(currentSelected)) {
+                setSelectedEmail(freshEmail);
+              }
+            } else if (newEmails.length === 0) {
+              // All emails cleared — close viewer
+              setSelectedEmail(null);
+            }
           }
         }
       } catch (err) {
@@ -144,7 +151,9 @@ export default function Home() {
         }
       }
     },
-    [emailAddress, playChime, selectedEmail]
+    // selectedEmail intentionally NOT in deps — we use selectedEmailRef instead
+    // This prevents the polling interval from resetting on every email open
+    [emailAddress, playChime]
   );
 
   // Polling loop: fetch emails every 4 seconds
@@ -205,12 +214,11 @@ export default function Home() {
 
   const executeDeleteSingle = async (id: string) => {
     try {
-      const res = await fetch(`/api/emails?address=${encodeURIComponent(emailAddress)}&id=${id}`, {
-        method: 'DELETE',
-      });
+      // Correct endpoint: DELETE /api/emails/[id] (not /api/emails?id= which clears ALL)
+      const res = await fetch(`/api/emails/${id}`, { method: 'DELETE' });
       if (res.ok) {
         setEmails((prev) => prev.filter((item) => item.id !== id));
-        if (selectedEmail?.id === id) setSelectedEmail(null);
+        if (selectedEmailRef.current?.id === id) setSelectedEmail(null);
       }
     } catch (err) {
       console.error('Delete email failed:', err);

@@ -57,8 +57,8 @@ export async function POST(request: NextRequest) {
     const text = body.text || '';
     const html = body.html || (text ? `<pre style="font-family: inherit; white-space: pre-wrap;">${text}</pre>` : '');
 
-    // Extract OTP & Verification links
-    const extractedOtp = extractOtp(subject, text || html);
+    // Extract OTP & Verification links (searches subject, text, and html)
+    const extractedOtp = extractOtp(subject, text, html);
     const extractedLink = extractVerificationLink(html, text);
 
     const email: EmailMessage = {

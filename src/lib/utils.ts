@@ -24,8 +24,25 @@ export function generateRandomUsername(): string {
 }
 
 // Extract OTP / verification pin from text/html
-export function extractOtp(subject: string, content?: string): string | null {
-  const fullText = `${subject} ${content || ''}`;
+// Extract OTP / verification pin from text/html
+export function extractOtp(subject: string, content?: string, html?: string): string | null {
+  // Strip HTML tags and entities so tags like <strong>123456</strong> or &nbsp; don't break regex boundaries
+  const cleanHtml = (html || '')
+    .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
+    .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/&nbsp;/gi, ' ')
+    .replace(/&#39;/g, "'")
+    .replace(/&quot;/g, '"')
+    .replace(/&amp;/g, '&')
+    .replace(/\s+/g, ' ');
+
+  const cleanContent = (content || '')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/&nbsp;/gi, ' ')
+    .replace(/\s+/g, ' ');
+
+  const fullText = `${subject} ${cleanContent} ${cleanHtml}`;
 
   // Patterns like "code: 123456", "verification code is 849201", "OTP: 4920"
   const keywordMatches = [
