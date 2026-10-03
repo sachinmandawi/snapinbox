@@ -506,71 +506,71 @@ function getProAppHtml() {
         </button>
       </div>
 
-      <!-- The 4 Signature Action Cards Grid - Zero Text Truncation -->
-      <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3.5">
+      <!-- The 4 Signature Action Cards Grid - 100% Responsive on All Screen Sizes -->
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3.5">
         
         <!-- 1. Refresh Button Card -->
-        <button onclick="fetchEmails(true)" class="h-[74px] sm:h-[76px] action-card rounded-2xl px-3 sm:px-4 flex items-center justify-between text-left group overflow-hidden">
-          <div class="flex items-center gap-2.5 sm:gap-3">
+        <button onclick="fetchEmails(true)" class="h-[72px] sm:h-[76px] action-card rounded-2xl px-2.5 sm:px-4 flex items-center justify-between text-left group overflow-hidden">
+          <div class="flex items-center gap-2 sm:gap-3 min-w-0">
             <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-zinc-300 group-hover:text-indigo-400 group-hover:border-indigo-500/40 shrink-0 transition">
               <svg id="refreshIcon" class="w-3.5 h-3.5 sm:w-4 sm:h-4 transition duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
               </svg>
             </div>
-            <div>
+            <div class="min-w-0">
               <div class="font-bold text-xs sm:text-sm text-zinc-100 whitespace-nowrap">Refresh</div>
               <div class="text-[10px] sm:text-[11px] text-zinc-400 whitespace-nowrap">Sync inbox</div>
             </div>
           </div>
-          <span id="refreshTimerBadge" class="text-[10px] sm:text-[11px] font-mono font-medium text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded-full border border-indigo-500/20 shrink-0 ml-1">10s</span>
+          <span id="refreshTimerBadge" class="text-[10px] sm:text-[11px] font-mono font-medium text-indigo-400 bg-indigo-500/10 px-1.5 sm:px-2 py-0.5 rounded-full border border-indigo-500/20 shrink-0 ml-1">10s</span>
         </button>
 
         <!-- 2. Change / Custom Email Card -->
-        <button onclick="openCustomModal()" class="h-[74px] sm:h-[76px] action-card rounded-2xl px-3 sm:px-4 flex items-center justify-between text-left group overflow-hidden">
-          <div class="flex items-center gap-2.5 sm:gap-3">
+        <button onclick="openCustomModal()" class="h-[72px] sm:h-[76px] action-card rounded-2xl px-2.5 sm:px-4 flex items-center justify-between text-left group overflow-hidden">
+          <div class="flex items-center gap-2 sm:gap-3 min-w-0">
             <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-violet-500/10 border border-violet-500/20 flex items-center justify-center text-zinc-300 group-hover:text-violet-400 group-hover:border-violet-500/40 shrink-0 transition">
               <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
               </svg>
             </div>
-            <div>
+            <div class="min-w-0">
               <div class="font-bold text-xs sm:text-sm text-zinc-100 whitespace-nowrap">Change</div>
               <div class="text-[10px] sm:text-[11px] text-zinc-400 whitespace-nowrap">Custom alias</div>
             </div>
           </div>
-          <span class="text-[10px] sm:text-[11px] font-semibold text-zinc-300 bg-white/5 group-hover:bg-white/10 px-2 py-0.5 rounded-full border border-white/10 shrink-0 ml-1 transition">Edit</span>
+          <span class="hidden sm:inline-flex text-[10px] sm:text-[11px] font-semibold text-zinc-300 bg-white/5 group-hover:bg-white/10 px-2 py-0.5 rounded-full border border-white/10 shrink-0 ml-1 transition">Edit</span>
         </button>
 
         <!-- 3. Delete / Wipe Mailbox Card -->
-        <button onclick="openDeleteModal()" class="h-[74px] sm:h-[76px] action-card rounded-2xl px-3 sm:px-4 flex items-center justify-between text-left group border-rose-500/20 bg-rose-500/[0.03] hover:bg-rose-500/[0.08] overflow-hidden">
-          <div class="flex items-center gap-2.5 sm:gap-3">
+        <button onclick="openDeleteModal()" class="h-[72px] sm:h-[76px] action-card rounded-2xl px-2.5 sm:px-4 flex items-center justify-between text-left group border-rose-500/20 bg-rose-500/[0.03] hover:bg-rose-500/[0.08] overflow-hidden">
+          <div class="flex items-center gap-2 sm:gap-3 min-w-0">
             <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-rose-500/10 border border-rose-500/25 flex items-center justify-center text-rose-400 shrink-0 group-hover:border-rose-400/50 group-hover:scale-105 transition">
               <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
               </svg>
             </div>
-            <div>
+            <div class="min-w-0">
               <div class="font-bold text-xs sm:text-sm text-zinc-100 group-hover:text-rose-200 whitespace-nowrap transition">Delete</div>
               <div class="text-[10px] sm:text-[11px] text-rose-400/80 whitespace-nowrap">Wipe inbox</div>
             </div>
           </div>
-          <span class="text-[10px] sm:text-[11px] font-semibold text-rose-400 bg-rose-500/10 px-2 py-0.5 rounded-full border border-rose-500/20 shrink-0 ml-1">Wipe</span>
+          <span class="hidden sm:inline-flex text-[10px] sm:text-[11px] font-semibold text-rose-400 bg-rose-500/10 px-2 py-0.5 rounded-full border border-rose-500/20 shrink-0 ml-1">Wipe</span>
         </button>
 
         <!-- 4. Recovery Key Card -->
-        <button onclick="openRecoveryModal()" class="h-[74px] sm:h-[76px] action-card rounded-2xl px-3 sm:px-4 flex items-center justify-between text-left group border-amber-500/20 bg-amber-500/[0.04] hover:bg-amber-500/[0.08] overflow-hidden">
-          <div class="flex items-center gap-2.5 sm:gap-3">
+        <button onclick="openRecoveryModal()" class="h-[72px] sm:h-[76px] action-card rounded-2xl px-2.5 sm:px-4 flex items-center justify-between text-left group border-amber-500/20 bg-amber-500/[0.04] hover:bg-amber-500/[0.08] overflow-hidden">
+          <div class="flex items-center gap-2 sm:gap-3 min-w-0">
             <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-amber-500/10 border border-amber-500/25 flex items-center justify-center text-amber-400 shrink-0 group-hover:border-amber-400/40 group-hover:scale-105 transition">
               <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path>
               </svg>
             </div>
-            <div>
+            <div class="min-w-0">
               <div class="font-bold text-xs sm:text-sm text-zinc-100 group-hover:text-amber-200 whitespace-nowrap transition">Recovery Key</div>
               <div class="text-[10px] sm:text-[11px] text-amber-400/80 whitespace-nowrap font-mono">30d restore</div>
             </div>
           </div>
-          <span class="text-[10px] sm:text-[11px] font-semibold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/20 shrink-0 ml-1">30d</span>
+          <span class="hidden sm:inline-flex text-[10px] sm:text-[11px] font-semibold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/20 shrink-0 ml-1">30d</span>
         </button>
 
       </div>
@@ -719,7 +719,7 @@ function getProAppHtml() {
 
   <!-- 1. RECOVERY KEY MODAL (Save & Restore) -->
   <div id="recoveryModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
-    <div class="glass-card bg-[#141416] max-w-md w-full rounded-3xl p-6 sm:p-7 relative border border-white/10 shadow-2xl space-y-6">
+    <div class="glass-card bg-[#141416] max-w-md w-full rounded-3xl p-5 sm:p-7 relative border border-white/10 shadow-2xl space-y-5 sm:space-y-6">
       <button onclick="closeRecoveryModal()" class="absolute top-5 right-5 text-zinc-400 hover:text-white text-lg">✕</button>
       
       <div class="flex items-center gap-3">
@@ -735,9 +735,9 @@ function getProAppHtml() {
       <!-- Current Key Section -->
       <div class="p-4 rounded-2xl bg-white/[0.03] border border-white/[0.08] space-y-2">
         <span class="text-[11px] uppercase font-bold tracking-wider text-zinc-400">Active Recovery Key</span>
-        <div class="flex items-center justify-between gap-2 bg-[#0a0a0c] p-3 rounded-xl border border-amber-500/25">
-          <span id="activeRecoveryKeyDisplay" class="font-mono text-base font-bold text-amber-400 tracking-wider">SNAP-XXXX-XXXX</span>
-          <button onclick="copyRecoveryKey()" class="px-3 py-1 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 text-xs font-semibold transition">
+        <div class="flex items-center justify-between gap-2 bg-[#0a0a0c] p-2.5 sm:p-3 rounded-xl border border-amber-500/25">
+          <span id="activeRecoveryKeyDisplay" class="font-mono text-sm sm:text-base font-bold text-amber-400 tracking-wider truncate">SNAP-XXXX-XXXX</span>
+          <button onclick="copyRecoveryKey()" class="px-2.5 sm:px-3 py-1 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 text-xs font-semibold shrink-0 transition">
             Copy
           </button>
         </div>
@@ -750,9 +750,9 @@ function getProAppHtml() {
       <div class="space-y-3">
         <span class="text-xs font-semibold text-zinc-200">Restore a previous mailbox:</span>
         <div class="space-y-2">
-          <input type="text" id="restoreKeyInput" placeholder="Enter Recovery Key (e.g. SNAP-9A21-44B2)" class="w-full bg-[#0a0a0c] border border-white/15 focus:border-indigo-500 rounded-xl px-4 py-3 text-sm text-white font-mono placeholder:text-zinc-600 focus:outline-none transition uppercase">
+          <input type="text" id="restoreKeyInput" placeholder="Enter Recovery Key (e.g. SNAP-9A21-44B2)" class="w-full bg-[#0a0a0c] border border-white/15 focus:border-indigo-500 rounded-xl px-3.5 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm text-white font-mono placeholder:text-zinc-600 focus:outline-none transition uppercase">
           <div id="restoreError" class="text-xs text-rose-400 hidden"></div>
-          <button onclick="handleRestoreSubmit()" id="restoreSubmitBtn" class="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 font-semibold text-xs sm:text-sm text-white shadow-lg shadow-indigo-600/30 transition">
+          <button onclick="handleRestoreSubmit()" id="restoreSubmitBtn" class="w-full py-2.5 sm:py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 font-semibold text-xs sm:text-sm text-white shadow-lg shadow-indigo-600/30 transition">
             Restore Inbox
           </button>
         </div>
@@ -762,11 +762,11 @@ function getProAppHtml() {
 
   <!-- 2. CHANGE EMAIL MODAL (EXACT TEMPMAILLAB STYLE) -->
   <div id="customModal" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-[#0e0f12] border border-white/10 rounded-[28px] max-w-[480px] w-full p-7 shadow-2xl relative space-y-6">
+    <div class="bg-[#0e0f12] border border-white/10 rounded-[28px] max-w-[480px] w-full p-5 sm:p-7 shadow-2xl relative space-y-5 sm:space-y-6">
       
       <!-- Top Header: Title & Pill Close Button -->
       <div class="flex items-center justify-between">
-        <h2 class="text-xl font-bold text-white tracking-tight">Change Email</h2>
+        <h2 class="text-lg sm:text-xl font-bold text-white tracking-tight">Change Email</h2>
         <button type="button" onclick="closeCustomModal()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-semibold text-zinc-300 hover:text-white transition active:scale-95">
           <span>✕</span>
           <span>Close</span>
@@ -774,19 +774,19 @@ function getProAppHtml() {
       </div>
 
       <!-- Subtitle -->
-      <p class="text-xs sm:text-sm text-zinc-400 leading-relaxed -mt-3">
+      <p class="text-xs sm:text-sm text-zinc-400 leading-relaxed -mt-2 sm:-mt-3">
         Choose a custom name and domain. You can also generate a random name.
       </p>
 
-      <form onsubmit="handleCustomSubmit(event)" class="space-y-5">
+      <form onsubmit="handleCustomSubmit(event)" class="space-y-4 sm:space-y-5">
         <!-- EMAIL NAME SECTION -->
         <div class="space-y-2">
           <label class="block text-[11px] font-bold text-zinc-400 uppercase tracking-wider">
             EMAIL NAME
           </label>
-          <div class="flex items-center gap-2.5">
-            <input type="text" id="customInput" placeholder="yourname" class="flex-1 bg-[#070709] border border-white/15 focus:border-[#0284c7] focus:ring-1 focus:ring-[#0284c7] rounded-xl px-4 py-3 text-sm text-white font-mono placeholder:text-zinc-600 focus:outline-none transition">
-            <button type="button" onclick="randomizeCustomInput()" class="px-5 py-3 rounded-xl bg-transparent hover:bg-white/5 border border-white/20 hover:border-white/30 text-xs font-bold text-white transition active:scale-95 shrink-0">
+          <div class="flex items-center gap-2 sm:gap-2.5">
+            <input type="text" id="customInput" placeholder="yourname" class="flex-1 min-w-0 bg-[#070709] border border-white/15 focus:border-[#0284c7] focus:ring-1 focus:ring-[#0284c7] rounded-xl px-3.5 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm text-white font-mono placeholder:text-zinc-600 focus:outline-none transition">
+            <button type="button" onclick="randomizeCustomInput()" class="px-3.5 sm:px-5 py-2.5 sm:py-3 rounded-xl bg-transparent hover:bg-white/5 border border-white/20 hover:border-white/30 text-xs font-bold text-white transition active:scale-95 shrink-0">
               Random
             </button>
           </div>
@@ -831,7 +831,7 @@ function getProAppHtml() {
         </div>
 
         <!-- Confirm Change Button - Exact TempMailLab Solid Cyan/Blue -->
-        <button type="submit" class="w-full py-3.5 px-4 rounded-xl bg-[#0284c7] hover:bg-[#0369a1] active:bg-[#075985] text-white font-bold text-sm tracking-wide transition shadow-lg shadow-sky-600/25 active:scale-98 mt-2">
+        <button type="submit" class="w-full py-3 sm:py-3.5 px-4 rounded-xl bg-[#0284c7] hover:bg-[#0369a1] active:bg-[#075985] text-white font-bold text-xs sm:text-sm tracking-wide transition shadow-lg shadow-sky-600/25 active:scale-98 mt-2">
           Confirm Change
         </button>
       </form>
@@ -840,7 +840,7 @@ function getProAppHtml() {
 
   <!-- 3. MODERN DELETE CONFIRMATION MODAL -->
   <div id="deleteModal" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-[#0e0f12] border border-rose-500/20 rounded-[28px] max-w-[420px] w-full p-7 shadow-2xl relative space-y-6">
+    <div class="bg-[#0e0f12] border border-rose-500/20 rounded-[28px] max-w-[420px] w-full p-5 sm:p-7 shadow-2xl relative space-y-5 sm:space-y-6">
       <div class="flex items-center justify-between">
         <div class="flex items-center gap-3">
           <div class="w-10 h-10 rounded-xl bg-rose-500/10 border border-rose-500/25 flex items-center justify-center text-rose-400">
@@ -848,16 +848,16 @@ function getProAppHtml() {
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
             </svg>
           </div>
-          <h2 class="text-xl font-bold text-white tracking-tight" id="deleteModalTitle">Wipe Mailbox?</h2>
+          <h2 class="text-lg sm:text-xl font-bold text-white tracking-tight" id="deleteModalTitle">Wipe Mailbox?</h2>
         </div>
         <button onclick="closeDeleteModal()" class="flex items-center justify-center w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white transition">✕</button>
       </div>
-      <p class="text-sm text-zinc-400 leading-relaxed" id="deleteModalDesc">
+      <p class="text-xs sm:text-sm text-zinc-400 leading-relaxed" id="deleteModalDesc">
         Are you sure you want to wipe all emails in this temporary inbox? This action cannot be reversed.
       </p>
-      <div class="flex items-center gap-3 pt-1">
-        <button onclick="closeDeleteModal()" class="flex-1 py-3 px-4 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-semibold text-zinc-300 hover:text-white transition">Cancel</button>
-        <button onclick="executeConfirmDelete()" class="flex-1 py-3 px-4 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs tracking-wide transition shadow-lg shadow-rose-600/30 active:scale-95">Confirm</button>
+      <div class="flex items-center gap-2.5 sm:gap-3 pt-1">
+        <button onclick="closeDeleteModal()" class="flex-1 py-2.5 sm:py-3 px-4 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-semibold text-zinc-300 hover:text-white transition">Cancel</button>
+        <button onclick="executeConfirmDelete()" class="flex-1 py-2.5 sm:py-3 px-4 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs tracking-wide transition shadow-lg shadow-rose-600/30 active:scale-95">Confirm</button>
       </div>
     </div>
   </div>
@@ -1524,9 +1524,9 @@ function getProAppHtml() {
                         <!-- Right Actions: OTP Pill, Trash & Arrow -->
                         <div class="flex items-center gap-2 sm:gap-3 shrink-0">
                           \${eml.extractedOtp ? \`
-                            <button onclick="event.stopPropagation(); copyRowOtp('\${eml.id}', '\${eml.extractedOtp}')" id="otpBtn-\${eml.id}" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-amber-400/30 bg-amber-400/10 hover:bg-amber-400/20 text-amber-300 font-mono text-xs font-bold transition active:scale-95 shadow-sm" title="Click to copy OTP">
+                            <button onclick="event.stopPropagation(); copyRowOtp('\${eml.id}', '\${eml.extractedOtp}')" id="otpBtn-\${eml.id}" class="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1 sm:py-1.5 rounded-xl border border-amber-400/30 bg-amber-400/10 hover:bg-amber-400/20 text-amber-300 font-mono text-xs font-bold transition active:scale-95 shadow-sm" title="Click to copy OTP">
                               <span>🔑 \${eml.extractedOtp}</span>
-                              <span class="text-[10px] border-l border-amber-400/30 pl-1.5 font-sans font-medium" id="otpLbl-\${eml.id}">Copy</span>
+                              <span class="hidden sm:inline text-[10px] border-l border-amber-400/30 pl-1.5 font-sans font-medium" id="otpLbl-\${eml.id}">Copy</span>
                             </button>
                           \` : ''}
                           <button onclick="event.stopPropagation(); deleteSingleEmail('\${eml.id}')" title="Delete this email" class="p-1.5 sm:p-2 rounded-xl text-zinc-500 hover:text-rose-400 hover:bg-rose-500/10 border border-transparent hover:border-rose-500/20 transition active:scale-90">

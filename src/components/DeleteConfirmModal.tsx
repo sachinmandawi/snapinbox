@@ -20,7 +20,7 @@ export const DeleteConfirmModal: React.FC<DeleteConfirmModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-sm animate-fade-in">
-      <div className="bg-[#0e0f12] border border-rose-500/20 rounded-[28px] w-full max-w-[420px] p-7 shadow-2xl relative space-y-6">
+      <div className="bg-[#0e0f12] border border-rose-500/20 rounded-[28px] w-full max-w-[420px] p-5 sm:p-7 shadow-2xl relative space-y-5 sm:space-y-6">
         
         {/* Top Header */}
         <div className="flex items-center justify-between">

@@ -83,11 +83,11 @@ export const CustomEmailModal: React.FC<CustomEmailModalProps> = ({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-sm animate-fade-in">
       {/* Modal Card - Exact TempMailLab Style */}
-      <div className="bg-[#0e0f12] border border-white/10 rounded-[28px] w-full max-w-[480px] p-7 shadow-2xl relative space-y-6">
+      <div className="bg-[#0e0f12] border border-white/10 rounded-[28px] w-full max-w-[480px] p-5 sm:p-7 shadow-2xl relative space-y-5 sm:space-y-6">
         
         {/* Top Header: Title & Pill Close Button */}
         <div className="flex items-center justify-between">
-          <h2 className="text-xl font-bold text-white tracking-tight">Change Email</h2>
+          <h2 className="text-lg sm:text-xl font-bold text-white tracking-tight">Change Email</h2>
           <button
             type="button"
             onClick={onClose}
@@ -99,17 +99,17 @@ export const CustomEmailModal: React.FC<CustomEmailModalProps> = ({
         </div>
 
         {/* Subtitle */}
-        <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed -mt-3">
+        <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed -mt-2 sm:-mt-3">
           Choose a custom name and domain. You can also generate a random name.
         </p>
 
-        <form onSubmit={handleSubmit} className="space-y-5">
+        <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
           {/* EMAIL NAME SECTION */}
           <div className="space-y-2">
             <label className="block text-[11px] font-bold text-zinc-400 uppercase tracking-wider">
               EMAIL NAME
             </label>
-            <div className="flex items-center gap-2.5">
+            <div className="flex items-center gap-2 sm:gap-2.5">
               <input
                 type="text"
                 value={prefix}
@@ -119,12 +119,12 @@ export const CustomEmailModal: React.FC<CustomEmailModalProps> = ({
                 }}
                 placeholder="username"
                 autoFocus
-                className="flex-1 bg-[#070709] border border-white/15 focus:border-[#0284c7] focus:ring-1 focus:ring-[#0284c7] rounded-xl px-4 py-3 text-sm text-white font-mono placeholder:text-zinc-600 focus:outline-none transition"
+                className="flex-1 min-w-0 bg-[#070709] border border-white/15 focus:border-[#0284c7] focus:ring-1 focus:ring-[#0284c7] rounded-xl px-3.5 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm text-white font-mono placeholder:text-zinc-600 focus:outline-none transition"
               />
               <button
                 type="button"
                 onClick={handleRandom}
-                className="px-5 py-3 rounded-xl bg-transparent hover:bg-white/5 border border-white/20 hover:border-white/30 text-xs font-bold text-white transition active:scale-95 shrink-0"
+                className="px-3.5 sm:px-5 py-2.5 sm:py-3 rounded-xl bg-transparent hover:bg-white/5 border border-white/20 hover:border-white/30 text-xs font-bold text-white transition active:scale-95 shrink-0"
               >
                 Random
               </button>

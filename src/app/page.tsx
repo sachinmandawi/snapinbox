@@ -400,7 +400,7 @@ export default function Home() {
                                   setTimeout(() => setCopiedRowOtpId(null), 2000);
                                 }
                               }}
-                              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-mono font-bold transition active:scale-95 shadow-sm ${
+                              className={`flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1 sm:py-1.5 rounded-xl border text-xs font-mono font-bold transition active:scale-95 shadow-sm ${
                                 copiedRowOtpId === email.id
                                   ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
                                   : 'bg-amber-400/10 hover:bg-amber-400/20 border-amber-400/30 text-amber-300'
@@ -408,7 +408,7 @@ export default function Home() {
                               title="Click to copy OTP"
                             >
                               <span>🔑 {email.extractedOtp}</span>
-                              <span className="text-[10px] border-l border-current/30 pl-1.5 font-sans font-medium">
+                              <span className="hidden sm:inline text-[10px] border-l border-current/30 pl-1.5 font-sans font-medium">
                                 {copiedRowOtpId === email.id ? 'Copied!' : 'Copy'}
                               </span>
                             </button>

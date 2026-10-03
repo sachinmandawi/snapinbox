@@ -59,7 +59,7 @@ export const RecoveryKeyModal: React.FC<RecoveryKeyModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
-      <div className="bg-[#141416] border border-white/10 max-w-md w-full rounded-3xl p-6 sm:p-7 relative shadow-2xl space-y-6">
+      <div className="bg-[#141416] border border-white/10 max-w-md w-full rounded-3xl p-5 sm:p-7 relative shadow-2xl space-y-5 sm:space-y-6">
         <button
           onClick={onClose}
           className="absolute top-5 right-5 text-zinc-400 hover:text-white transition"
