@@ -92,16 +92,16 @@ function extractOtp(subject, body, html) {
     /\bG-([0-9]{4,8})\b/i,
 
     // 2. Number BEFORE keyword (e.g. "849201 is your verification code", "74910 is your security code")
-    /\b([0-9]{4,8})\s*(?:is|as)?\s*(?:your|the)?\s*(?:one-time|verification|confirmation|login|security|access)?\s*(?:code|otp|pin|password)\b/i,
+    /\b([0-9]{4,8})\s*(?:is|as)?\s*(?:your|the)?\s*(?:one-time|verification|confirmation|login|security|access|authentication)?\s*(?:code|otp|pin|password|passcode)\b/i,
 
     // 3. Keyword followed by hyphenated/spaced code (e.g. "code: 123-456" or "code is: 849 201")
-    /(?:code|otp|pin|token|verification|password|login|secret)[\s:=_-]*(?:is|as)?[\s:=_-]*([0-9]{3}[-\s][0-9]{3})\b/i,
+    /(?:code|otp|pin|token|verification|confirmation|security|authentication|passcode|password|login|secret|access)[\s:=_-]*(?:is|as)?[\s:=_-]*([0-9]{3}[-\s][0-9]{3})\b/i,
 
     // 4. Keyword followed by 4-8 digit standard code (e.g. "code: 123456", "code is: 849201")
-    /(?:code|otp|pin|token|verification|password|login|secret)[\s:=_-]*(?:is|as)?[\s:=_-]*([0-9]{4,8})\b/i,
+    /(?:code|otp|pin|token|verification|confirmation|security|authentication|passcode|password|login|secret|access)[\s:=_-]*(?:is|as)?[\s:=_-]*([0-9]{4,8})\b/i,
 
     // 5. Action verb followed by code (e.g. "enter 123456", "use code 849201")
-    /(?:enter|use)\s*(?:code)?\s*([0-9]{4,8})\b/i,
+    /(?:enter|use|input)\s*(?:code)?\s*([0-9]{4,8})\b/i,
 
     // 6. Standalone 6-digit code
     /\b([0-9]{6})\b/,
@@ -170,7 +170,11 @@ export default {
   // --- 2. EMAIL RECEIVING ENGINE ---
   async email(message, env, ctx) {
     try {
-      const recipient = message.to.toLowerCase().trim();
+      let recipient = (message.to || "").toLowerCase().trim();
+      const toMatch = recipient.match(/<?([a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,})>?/i);
+      if (toMatch) {
+        recipient = toMatch[1].toLowerCase().trim();
+      }
       const rawSender = message.from;
       const rawSubject = message.headers.get("subject") || "(No Subject)";
       const subject = decodeMimeHeader(rawSubject);
@@ -219,7 +223,18 @@ export default {
 
       if (!bodyText && !bodyHtml) {
         const split = rawText.split(/\r?\n\r?\n/);
-        bodyText = split.slice(1).join("\n\n").trim() || rawText.substring(0, 10000);
+        let rawBody = split.slice(1).join("\n\n").trim() || rawText.substring(0, 10000);
+        const topEncoding = message.headers.get("content-transfer-encoding") || "";
+        if (/quoted-printable/i.test(topEncoding)) {
+          rawBody = decodeQuotedPrintable(rawBody);
+        } else if (/base64/i.test(topEncoding)) {
+          rawBody = decodeBase64(rawBody);
+        }
+        if (contentType.toLowerCase().includes("text/html")) {
+          bodyHtml = rawBody;
+        } else {
+          bodyText = rawBody;
+        }
       }
 
       // Parse sender name & address
@@ -287,7 +302,7 @@ export default {
     if (url.pathname === "/api/emails" && request.method === "GET") {
       const address = (url.searchParams.get("address") || "").toLowerCase().trim();
       const emails = address ? await getEmails(address, env) : [];
-      return new Response(JSON.stringify({ success: true, address, count: emails.length, emails }), {
+      return new Response(JSON.stringify({ success: true, address, count: emails.length, storage: (env && env.SNAPINBOX_KV) ? "kv" : "memory", emails }), {
         headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" }
       });
     }
