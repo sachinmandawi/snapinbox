@@ -1287,8 +1287,8 @@ function getProAppHtml() {
 
     // Helper to inject clean typography and responsive styling into email HTML
     function prepareEmailHtml(rawHtml, rawText) {
-      var content = rawHtml || ('<div style="white-space: pre-wrap; font-family: -apple-system, BlinkMacSystemFont, \\'Segoe UI\\', Roboto, sans-serif;">' + ((rawText || 'No message content.').replace(/</g, '&lt;').replace(/>/g, '&gt;')) + '</div>');
-      var resetStyles = '<meta name="viewport" content="width=device-width, initial-scale=1.0"><style>body{margin:0;padding:24px;font-family:-apple-system,BlinkMacSystemFont,\\'Segoe UI\\',Roboto,Helvetica,Arial,sans-serif;font-size:15px;line-height:1.6;color:#1f2937;background-color:#ffffff;word-break:break-word;}img{max-width:100%!important;height:auto!important;}table{max-width:100%!important;}a{color:#4f46e5;text-decoration:underline;}pre,code{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;background:#f3f4f6;padding:2px 6px;border-radius:4px;}</style>';
+      var content = rawHtml || ('<div style="white-space: pre-wrap; font-family: system-ui, -apple-system, sans-serif; line-height: 1.6; color: #1f2937; padding: 20px;">' + ((rawText || 'No message content.').replace(/</g, '&lt;').replace(/>/g, '&gt;')) + '</div>');
+      var resetStyles = '<meta name="viewport" content="width=device-width, initial-scale=1.0"><style>body{margin:0;padding:24px;font-family:system-ui,-apple-system,sans-serif;font-size:15px;line-height:1.6;color:#1f2937;background-color:#ffffff;word-break:break-word;}img{max-width:100%!important;height:auto!important;}table{max-width:100%!important;}a{color:#4f46e5;text-decoration:underline;}pre,code{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;background:#f3f4f6;padding:2px 6px;border-radius:4px;}</style>';
 
       if (content.includes('<head>') || content.includes('<head ')) {
         return content.replace(/<head[^>]*>/i, function(m) { return m + resetStyles; });
