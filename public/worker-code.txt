@@ -1252,6 +1252,34 @@ function getProAppHtml() {
       if (el) el.innerText = soundEnabled ? '🔊' : '🔇';
     }
 
+    function formatBytes(bytes) {
+      if (!bytes || bytes === 0) return '0 B';
+      const k = 1024;
+      const sizes = ['B', 'KB', 'MB', 'GB'];
+      const i = Math.floor(Math.log(bytes) / Math.log(k));
+      return (bytes / Math.pow(k, i)).toFixed(1) + ' ' + sizes[i];
+    }
+
+    function renderAttachmentsHtml(attachments) {
+      if (!attachments || !attachments.length) return '';
+      let h = '<div class="p-3 sm:p-3.5 rounded-2xl bg-white/[0.03] border border-white/[0.08] space-y-2">';
+      h += '<span class="text-[11px] uppercase font-bold tracking-wider text-zinc-400 flex items-center gap-1.5">';
+      h += '<svg class="w-3.5 h-3.5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path></svg>';
+      h += '<span>Attachments (' + attachments.length + ')</span></span><div class="flex flex-wrap gap-2">';
+      for (let i = 0; i < attachments.length; i++) {
+        const a = attachments[i];
+        h += '<div class="flex items-center gap-2 bg-black/40 border border-white/10 px-3 py-1.5 rounded-xl text-xs">';
+        h += '<span class="font-medium text-white truncate max-w-[180px]">' + (a.filename || 'attachment') + '</span>';
+        h += '<span class="text-zinc-500 font-mono text-[10px]">' + formatBytes(a.size) + '</span>';
+        if (a.contentUrl) {
+          h += '<a href="' + a.contentUrl + '" download="' + (a.filename || 'attachment') + '" class="text-indigo-400 hover:text-indigo-300 font-semibold text-[11px] underline">Download</a>';
+        }
+        h += '</div>';
+      }
+      h += '</div></div>';
+      return h;
+    }
+
     // --- BULLETPROOF COPY HELPER WITH FALLBACK & SAFE CONFETTI ---
     async function safeCopy(text) {
       let ok = false;
@@ -1353,6 +1381,11 @@ function getProAppHtml() {
           }
 
           renderMainView();
+          if (typeof document !== 'undefined') {
+            document.title = currentEmails.length > 0
+              ? '(' + currentEmails.length + ') SnapInbox - Free Disposable Mail & OTP'
+              : 'SnapInbox - Free Temp Mail with Recovery Key';
+          }
         }
       } catch (err) {
         console.error('Fetch error:', err);
@@ -1479,6 +1512,9 @@ function getProAppHtml() {
                   </a>
                 </div>
               \` : ''}
+
+              <!-- Attachments Section if present -->
+              \${renderAttachmentsHtml(eml.attachments)}
             </div>
 
             <!-- Tab Headers -->
@@ -1532,6 +1568,9 @@ function getProAppHtml() {
               </div>
 
               <div class="flex items-center gap-2">
+                <button onclick="toggleSound()" id="soundToggle" title="Toggle audio notification" class="p-1.5 sm:p-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-semibold text-zinc-300 hover:text-white transition active:scale-95">
+                  \${soundEnabled ? '🔊' : '🔇'}
+                </button>
                 <button onclick="fetchEmails(true)" class="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-semibold text-zinc-200 hover:text-white transition active:scale-95">
                   <svg id="inboxRefreshIcon" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
                   <span>Refresh</span>

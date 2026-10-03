@@ -12,7 +12,7 @@ import { DeleteConfirmModal } from '@/components/DeleteConfirmModal';
 import { EmailMessage } from '@/types/email';
 import { generateRandomUsername } from '@/lib/utils';
 import confetti from 'canvas-confetti';
-import { ChevronDown, RefreshCw, Trash2 } from 'lucide-react';
+import { ChevronDown, RefreshCw, Trash2, Volume2, VolumeX } from 'lucide-react';
 
 const AVAILABLE_DOMAINS = ['snapinbox.tech', 'mendoneet.me'];
 const DEFAULT_DOMAIN = process.env.NEXT_PUBLIC_APP_DOMAIN || 'snapinbox.tech';
@@ -91,16 +91,27 @@ export default function Home() {
     } catch (e) {}
   }, []);
 
-  // Initialize or restore email address
+  // Update browser tab title with email count so user sees incoming OTP from other tabs
   useEffect(() => {
-    const saved = localStorage.getItem('mendoneet_temp_email');
+    if (typeof document !== 'undefined') {
+      const count = emails.length;
+      document.title = count > 0 
+        ? `(${count}) SnapInbox - Free Disposable Mail & OTP` 
+        : 'SnapInbox - Free Temp Mail with Recovery Key';
+    }
+  }, [emails.length]);
+
+  // Initialize or restore email address (supports both snapinbox_email and mendoneet_temp_email)
+  useEffect(() => {
+    const saved = localStorage.getItem('snapinbox_email') || localStorage.getItem('mendoneet_temp_email');
     let activeEmail = '';
     if (saved && AVAILABLE_DOMAINS.some(d => saved.endsWith(`@${d}`))) {
       activeEmail = saved;
     } else {
       activeEmail = `${generateRandomUsername()}@${DEFAULT_DOMAIN}`;
-      localStorage.setItem('mendoneet_temp_email', activeEmail);
     }
+    localStorage.setItem('snapinbox_email', activeEmail);
+    localStorage.setItem('mendoneet_temp_email', activeEmail);
     setEmailAddress(activeEmail);
     syncRecoveryKey(activeEmail);
   }, [syncRecoveryKey]);
@@ -186,6 +197,7 @@ export default function Home() {
     const currentDomain = (emailAddress && emailAddress.includes('@')) ? emailAddress.split('@')[1] : DEFAULT_DOMAIN;
     const newAddress = `${generateRandomUsername()}@${currentDomain}`;
     setEmailAddress(newAddress);
+    localStorage.setItem('snapinbox_email', newAddress);
     localStorage.setItem('mendoneet_temp_email', newAddress);
     syncRecoveryKey(newAddress);
     setEmails([]);
@@ -194,6 +206,7 @@ export default function Home() {
 
   const handleSelectCustom = (newEmail: string) => {
     setEmailAddress(newEmail);
+    localStorage.setItem('snapinbox_email', newEmail);
     localStorage.setItem('mendoneet_temp_email', newEmail);
     syncRecoveryKey(newEmail);
     setEmails([]);
@@ -211,6 +224,7 @@ export default function Home() {
       if (data.success && data.address) {
         setEmailAddress(data.address);
         setRecoveryKey(key);
+        localStorage.setItem('snapinbox_email', data.address);
         localStorage.setItem('mendoneet_temp_email', data.address);
         localStorage.setItem(`snapinbox_rec_${data.address.toLowerCase().trim()}`, key);
         setEmails(data.emails || []);
@@ -328,6 +342,18 @@ export default function Home() {
                 </div>
 
                 <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setSoundEnabled((prev) => !prev)}
+                    title={soundEnabled ? 'Mute arrival sound' : 'Unmute arrival sound'}
+                    className="p-1.5 sm:p-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-semibold text-zinc-300 hover:text-white transition active:scale-95"
+                  >
+                    {soundEnabled ? (
+                      <Volume2 className="w-3.5 h-3.5 text-indigo-400" />
+                    ) : (
+                      <VolumeX className="w-3.5 h-3.5 text-zinc-500" />
+                    )}
+                  </button>
+
                   <button
                     onClick={() => fetchEmails(true)}
                     disabled={isRefreshing}

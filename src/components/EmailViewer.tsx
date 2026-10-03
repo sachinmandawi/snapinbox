@@ -13,8 +13,10 @@ import {
   Calendar,
   User,
   ShieldCheck,
+  Paperclip,
 } from 'lucide-react';
 import { EmailMessage } from '@/types/email';
+import { formatBytes } from '@/lib/utils';
 
 interface EmailViewerProps {
   email: EmailMessage | null;
@@ -212,6 +214,36 @@ ${email.html || email.text || ''}`;
               <span>Open Link</span>
               <ExternalLink className="w-3.5 h-3.5" />
             </a>
+          </div>
+        )}
+
+        {/* Attachments Section if present */}
+        {email.attachments && email.attachments.length > 0 && (
+          <div className="p-3.5 sm:p-4 rounded-2xl bg-white/[0.03] border border-white/[0.08] space-y-2">
+            <span className="text-[11px] uppercase font-bold tracking-wider text-zinc-400 flex items-center gap-1.5">
+              <Paperclip className="w-3.5 h-3.5 text-indigo-400" />
+              <span>Attachments ({email.attachments.length})</span>
+            </span>
+            <div className="flex flex-wrap gap-2">
+              {email.attachments.map((att, idx) => (
+                <div
+                  key={idx}
+                  className="flex items-center gap-2 bg-black/40 border border-white/10 px-3 py-1.5 rounded-xl text-xs"
+                >
+                  <span className="font-medium text-white truncate max-w-[180px]">{att.filename}</span>
+                  <span className="text-zinc-500 font-mono text-[10px]">{formatBytes(att.size)}</span>
+                  {att.contentUrl && (
+                    <a
+                      href={att.contentUrl}
+                      download={att.filename}
+                      className="text-indigo-400 hover:text-indigo-300 font-semibold text-[11px] underline"
+                    >
+                      Download
+                    </a>
+                  )}
+                </div>
+              ))}
+            </div>
           </div>
         )}
       </div>
