@@ -578,58 +578,59 @@ function getProAppHtml() {
         </button>
       </div>
 
-      <!-- The 3 Signature Action Cards (Exact TempMailLab Layout) -->
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-3.5 mt-4">
+      <!-- The 3 Signature Action Cards (Exact Identical Size h-[70px] - Zero Overlap) -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-4">
         
         <!-- 1. Refresh Button Card -->
-        <button onclick="fetchEmails(true)" class="action-card rounded-2xl p-3.5 flex items-center justify-between text-left group">
-          <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-zinc-300 group-hover:text-indigo-400 group-hover:border-indigo-500/30 transition">
+        <button onclick="fetchEmails(true)" class="h-[70px] action-card rounded-2xl px-3.5 flex items-center justify-between text-left group min-w-0">
+          <div class="flex items-center gap-3 min-w-0 flex-1 mr-2">
+            <div class="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-zinc-300 group-hover:text-indigo-400 group-hover:border-indigo-500/30 shrink-0 transition">
               <svg id="refreshIcon" class="w-4 h-4 transition duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
               </svg>
             </div>
-            <div>
-              <div class="font-semibold text-sm text-zinc-100">Refresh</div>
-              <div class="text-[11px] text-zinc-400">Sync inbox</div>
+            <div class="min-w-0 flex-1">
+              <div class="font-semibold text-xs sm:text-sm text-zinc-100 truncate">Refresh</div>
+              <div class="text-[10px] sm:text-[11px] text-zinc-400 truncate">Sync inbox</div>
             </div>
           </div>
-          <span id="refreshTimerBadge" class="text-[11px] font-mono font-medium text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded-full border border-indigo-500/20">10s</span>
+          <span id="refreshTimerBadge" class="text-[11px] font-mono font-medium text-indigo-400 bg-indigo-500/10 px-2.5 py-1 rounded-full border border-indigo-500/20 shrink-0">10s</span>
         </button>
 
         <!-- 2. Change / Custom Email Card -->
-        <button onclick="openCustomModal()" class="action-card rounded-2xl p-3.5 flex items-center justify-between text-left group">
-          <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-zinc-300 group-hover:text-indigo-400 group-hover:border-indigo-500/30 transition">
+        <button onclick="openCustomModal()" class="h-[70px] action-card rounded-2xl px-3.5 flex items-center justify-between text-left group min-w-0">
+          <div class="flex items-center gap-3 min-w-0 flex-1 mr-2">
+            <div class="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-zinc-300 group-hover:text-indigo-400 group-hover:border-indigo-500/30 shrink-0 transition">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
               </svg>
             </div>
-            <div>
-              <div class="font-semibold text-sm text-zinc-100">Change</div>
-              <div class="text-[11px] text-zinc-400">Custom username</div>
+            <div class="min-w-0 flex-1">
+              <div class="font-semibold text-xs sm:text-sm text-zinc-100 truncate">Change</div>
+              <div class="text-[10px] sm:text-[11px] text-zinc-400 truncate">Custom username</div>
             </div>
           </div>
-          <span class="text-xs text-zinc-500 group-hover:text-zinc-300 transition">✏️</span>
+          <span class="text-[11px] font-semibold text-zinc-300 bg-white/5 group-hover:bg-white/10 px-2.5 py-1 rounded-full border border-white/10 shrink-0 transition">Edit</span>
         </button>
 
-        <!-- 3. Recovery Key Card (Signature Feature) -->
-        <button onclick="openRecoveryModal()" class="action-card rounded-2xl p-3.5 flex items-center justify-between text-left group border-amber-500/20 bg-amber-500/[0.04] hover:bg-amber-500/[0.08]">
-          <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/25 flex items-center justify-center text-amber-400 group-hover:border-amber-400/40 transition">
+        <!-- 3. Recovery Key Card (Exact Identical Size) -->
+        <button onclick="openRecoveryModal()" class="h-[70px] action-card rounded-2xl px-3.5 flex items-center justify-between text-left group border-amber-500/20 bg-amber-500/[0.04] hover:bg-amber-500/[0.08] min-w-0">
+          <div class="flex items-center gap-3 min-w-0 flex-1 mr-2">
+            <div class="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/25 flex items-center justify-center text-amber-400 shrink-0 group-hover:border-amber-400/40 transition">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path>
               </svg>
             </div>
-            <div>
-              <div class="font-semibold text-sm text-zinc-100 flex items-center gap-1.5">
-                <span>Recovery Key</span>
-                <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
+            <div class="min-w-0 flex-1">
+              <div class="font-semibold text-xs sm:text-sm text-zinc-100 truncate">
+                Recovery Key
               </div>
-              <div class="text-[11px] text-amber-400/90 font-mono tracking-wider" id="heroKeyPreview">SNAP-••••</div>
+              <div class="text-[10px] sm:text-[11px] text-amber-400/80 truncate font-mono">
+                30-day restore
+              </div>
             </div>
           </div>
-          <span class="text-[11px] font-semibold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/20">30d</span>
+          <span class="text-[11px] font-semibold text-amber-400 bg-amber-500/10 px-2.5 py-1 rounded-full border border-amber-500/20 shrink-0">30d</span>
         </button>
 
       </div>
