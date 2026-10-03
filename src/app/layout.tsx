@@ -2,18 +2,18 @@ import type { Metadata, Viewport } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'SnapInbox - Free Disposable Temporary Email',
+  title: 'Free Temp Mail with Password & Recovery Key | SnapInbox',
   description:
-    'Instant, anonymous temporary disposable email service powered by SnapInbox on mendoneet.me. Protect your personal inbox from spam, bot crawlers, and newsletters.',
+    'Create free temp mail with a password-style Recovery Key, custom domain options, and support for OTP and verification emails. Restore your temporary inbox for up to 30 days.',
   keywords: [
+    'free temp mail',
+    'temp mail with password',
+    'temp mail with recovery key',
+    'temporary email with multiple domains',
+    'temporary inbox for verification',
+    '30-day restore temp mail',
     'snapinbox',
-    'temp mail',
-    'disposable email',
-    'mendoneet',
-    'fake email',
-    '10 minute mail',
-    'anonymous email',
-    'otp receiver',
+    'mendoneet.me',
   ],
 };
 
@@ -30,7 +30,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className="dark">
-      <body className="min-h-screen bg-[#090d16] text-slate-100 antialiased selection:bg-indigo-500 selection:text-white">
+      <body className="min-h-screen bg-[#050505] text-[#f5f5f5] antialiased selection:bg-indigo-500/30 selection:text-indigo-200">
         {children}
       </body>
     </html>

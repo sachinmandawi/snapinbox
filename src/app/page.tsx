@@ -1,54 +1,59 @@
 'use client';
 
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Header } from '@/components/Header';
 import { EmailControlBar } from '@/components/EmailControlBar';
 import { EmailList } from '@/components/EmailList';
 import { EmailViewer } from '@/components/EmailViewer';
 import { CustomEmailModal } from '@/components/CustomEmailModal';
 import { QrModal } from '@/components/QrModal';
+import { RecoveryKeyModal } from '@/components/RecoveryKeyModal';
 import { SetupGuideModal } from '@/components/SetupGuideModal';
 import { EmailMessage } from '@/types/email';
 import { generateRandomUsername } from '@/lib/utils';
-import { ShieldCheck, Zap, Lock, Sparkles, RefreshCw, Volume2, VolumeX } from 'lucide-react';
+import {
+  ShieldCheck,
+  Zap,
+  Lock,
+  Globe,
+  ChevronDown,
+} from 'lucide-react';
 
 const DOMAIN = process.env.NEXT_PUBLIC_APP_DOMAIN || 'mendoneet.me';
-const DEFAULT_EXPIRY_SECONDS = 60 * 60; // 60 minutes
 
 export default function Home() {
   const [emailAddress, setEmailAddress] = useState<string>('');
+  const [recoveryKey, setRecoveryKey] = useState<string>('');
   const [emails, setEmails] = useState<EmailMessage[]>([]);
   const [selectedEmail, setSelectedEmail] = useState<EmailMessage | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [expirySeconds, setExpirySeconds] = useState(DEFAULT_EXPIRY_SECONDS);
   const [soundEnabled, setSoundEnabled] = useState(true);
 
   // Modals
   const [isCustomModalOpen, setIsCustomModalOpen] = useState(false);
+  const [isRecoveryModalOpen, setIsRecoveryModalOpen] = useState(false);
   const [isQrModalOpen, setIsQrModalOpen] = useState(false);
   const [isSetupGuideOpen, setIsSetupGuideOpen] = useState(false);
 
-  // Notification audio using Web Audio API (no external file dependencies)
+  // Audio Chime
   const playChime = useCallback(() => {
     if (!soundEnabled || typeof window === 'undefined') return;
     try {
       const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
       if (!AudioContext) return;
       const ctx = new AudioContext();
-
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
 
       osc.type = 'sine';
-      osc.frequency.setValueAtTime(587.33, ctx.currentTime); // D5
-      osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.15); // A5
+      osc.frequency.setValueAtTime(587.33, ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.15);
 
       gain.gain.setValueAtTime(0.2, ctx.currentTime);
       gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
 
       osc.connect(gain);
       gain.connect(ctx.destination);
-
       osc.start();
       osc.stop(ctx.currentTime + 0.4);
     } catch (e) {
@@ -56,17 +61,45 @@ export default function Home() {
     }
   }, [soundEnabled]);
 
+  // Generate unique recovery key
+  const generateRecoveryKey = () => {
+    const part1 = Math.random().toString(36).substring(2, 6).toUpperCase();
+    const part2 = Math.random().toString(36).substring(2, 6).toUpperCase();
+    return `SNAP-${part1}-${part2}`;
+  };
+
+  // Ensure recovery key is active and synced
+  const syncRecoveryKey = useCallback(async (email: string) => {
+    const storageKey = `snapinbox_rec_${email.toLowerCase().trim()}`;
+    let key = localStorage.getItem(storageKey);
+    if (!key) {
+      key = generateRecoveryKey();
+      localStorage.setItem(storageKey, key);
+    }
+    setRecoveryKey(key);
+
+    try {
+      await fetch('/api/recovery/save', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ address: email, recoveryKey: key }),
+      });
+    } catch (e) {}
+  }, []);
+
   // Initialize or restore email address
   useEffect(() => {
     const saved = localStorage.getItem('mendoneet_temp_email');
+    let activeEmail = '';
     if (saved && saved.endsWith(`@${DOMAIN}`)) {
-      setEmailAddress(saved);
+      activeEmail = saved;
     } else {
-      const newAddress = `${generateRandomUsername()}@${DOMAIN}`;
-      setEmailAddress(newAddress);
-      localStorage.setItem('mendoneet_temp_email', newAddress);
+      activeEmail = `${generateRandomUsername()}@${DOMAIN}`;
+      localStorage.setItem('mendoneet_temp_email', activeEmail);
     }
-  }, []);
+    setEmailAddress(activeEmail);
+    syncRecoveryKey(activeEmail);
+  }, [syncRecoveryKey]);
 
   // Fetch emails for the active email address
   const fetchEmails = useCallback(
@@ -81,10 +114,8 @@ export default function Home() {
           const newEmails: EmailMessage[] = data.emails || [];
 
           setEmails((prev) => {
-            // Check if there are newly arrived emails
             if (newEmails.length > prev.length) {
               playChime();
-              // If no email is currently selected, select the newest
               if (!selectedEmail && newEmails.length > 0) {
                 setSelectedEmail(newEmails[0]);
               }
@@ -92,7 +123,6 @@ export default function Home() {
             return newEmails;
           });
 
-          // Update selected email if it was modified
           if (selectedEmail) {
             const updated = newEmails.find((e) => e.id === selectedEmail.id);
             if (updated) setSelectedEmail(updated);
@@ -113,54 +143,51 @@ export default function Home() {
   useEffect(() => {
     if (!emailAddress) return;
     fetchEmails();
-
-    const interval = setInterval(() => {
-      fetchEmails();
-    }, 4000);
-
+    const interval = setInterval(() => fetchEmails(), 4000);
     return () => clearInterval(interval);
   }, [emailAddress, fetchEmails]);
-
-  // Expiry countdown timer
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setExpirySeconds((prev) => {
-        if (prev <= 1) {
-          // Time expired, generate new random address
-          const fresh = `${generateRandomUsername()}@${DOMAIN}`;
-          setEmailAddress(fresh);
-          localStorage.setItem('mendoneet_temp_email', fresh);
-          setEmails([]);
-          setSelectedEmail(null);
-          return DEFAULT_EXPIRY_SECONDS;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, []);
 
   // Handlers
   const handleRandomize = () => {
     const newAddress = `${generateRandomUsername()}@${DOMAIN}`;
     setEmailAddress(newAddress);
     localStorage.setItem('mendoneet_temp_email', newAddress);
+    syncRecoveryKey(newAddress);
     setEmails([]);
     setSelectedEmail(null);
-    setExpirySeconds(DEFAULT_EXPIRY_SECONDS);
   };
 
   const handleSelectCustom = (newEmail: string) => {
     setEmailAddress(newEmail);
     localStorage.setItem('mendoneet_temp_email', newEmail);
+    syncRecoveryKey(newEmail);
     setEmails([]);
     setSelectedEmail(null);
-    setExpirySeconds(DEFAULT_EXPIRY_SECONDS);
   };
 
-  const handleExtendExpiry = () => {
-    setExpirySeconds((prev) => prev + 10 * 60); // add 10 minutes
+  const handleRestoreRecoveryKey = async (key: string): Promise<boolean> => {
+    try {
+      const res = await fetch('/api/recovery/restore', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ recoveryKey: key }),
+      });
+      const data = await res.json();
+      if (data.success && data.address) {
+        setEmailAddress(data.address);
+        setRecoveryKey(key);
+        localStorage.setItem('mendoneet_temp_email', data.address);
+        localStorage.setItem(`snapinbox_rec_${data.address.toLowerCase().trim()}`, key);
+        setEmails(data.emails || []);
+        if (data.emails && data.emails.length > 0) {
+          setSelectedEmail(data.emails[0]);
+        }
+        return true;
+      }
+      return false;
+    } catch (e) {
+      return false;
+    }
   };
 
   const handleTriggerTestSend = async () => {
@@ -170,7 +197,7 @@ export default function Home() {
       const res = await fetch('/api/emails/test-send', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ recipient: emailAddress }),
+        body: JSON.stringify({ recipient: emailAddress, preset: 'netflix' }),
       });
       if (res.ok) {
         await fetchEmails(false);
@@ -185,12 +212,12 @@ export default function Home() {
   const handleDeleteEmail = async (id: string, e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
     try {
-      const res = await fetch(`/api/emails/${id}`, { method: 'DELETE' });
+      const res = await fetch(`/api/emails?address=${encodeURIComponent(emailAddress)}&id=${id}`, {
+        method: 'DELETE',
+      });
       if (res.ok) {
         setEmails((prev) => prev.filter((item) => item.id !== id));
-        if (selectedEmail?.id === id) {
-          setSelectedEmail(null);
-        }
+        if (selectedEmail?.id === id) setSelectedEmail(null);
       }
     } catch (err) {
       console.error('Delete email failed:', err);
@@ -212,49 +239,60 @@ export default function Home() {
     }
   };
 
-  const handleSelectEmail = (email: EmailMessage) => {
-    setSelectedEmail(email);
-    // Mark read locally
-    setEmails((prev) =>
-      prev.map((item) => (item.id === email.id ? { ...item, read: true } : item))
-    );
-  };
-
   return (
-    <div className="min-h-screen flex flex-col bg-[#090d16] text-slate-100">
+    <div className="min-h-screen flex flex-col bg-[#050505] text-[#f5f5f5] selection:bg-indigo-500/30 selection:text-indigo-200">
+      {/* Ambient Top Glow */}
+      <div className="fixed top-0 left-1/2 -translate-x-1/2 w-[850px] h-[360px] bg-gradient-to-b from-indigo-600/12 via-indigo-900/5 to-transparent blur-[120px] pointer-events-none -z-10" />
+
       {/* Top Navigation */}
-      <Header domain={DOMAIN} onOpenSetupGuide={() => setIsSetupGuideOpen(true)} />
+      <Header onOpenRecoveryModal={() => setIsRecoveryModalOpen(true)} />
 
       {/* Main Content Area */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6">
-        {/* Email Address Control Bar */}
+      <main className="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 pt-10 sm:pt-14 pb-16 space-y-10">
+        
+        {/* Hero Headline & Subtitle */}
+        <div className="text-center max-w-2xl mx-auto space-y-3">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium bg-white/5 border border-white/10 text-zinc-300 mb-1">
+            <span className="w-1.5 h-1.5 rounded-full bg-indigo-400" />
+            <span>Free Temp Mail with Password &amp; Recovery Key</span>
+          </div>
+          <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-white leading-tight">
+            Free Temp Mail with{' '}
+            <span className="bg-gradient-to-r from-indigo-400 via-indigo-300 to-cyan-300 bg-clip-text text-transparent">
+              Recovery Key
+            </span>
+          </h1>
+          <p className="text-sm sm:text-base text-zinc-400 leading-relaxed">
+            Create free temp mail with a password-style Recovery Key, additional custom options, and
+            support for OTP and verification emails. Restore your temporary inbox for up to 30 days.
+          </p>
+        </div>
+
+        {/* TempMailLab Pill Address Control Bar */}
         <EmailControlBar
           currentEmail={emailAddress || `loading@${DOMAIN}`}
           onRefresh={() => fetchEmails(true)}
           onRandomize={handleRandomize}
           onOpenCustomModal={() => setIsCustomModalOpen(true)}
-          onOpenQrModal={() => setIsQrModalOpen(true)}
+          onOpenRecoveryModal={() => setIsRecoveryModalOpen(true)}
           onTriggerTestSend={handleTriggerTestSend}
           onDeleteAll={handleDeleteAll}
           isRefreshing={isRefreshing}
-          expirySeconds={expirySeconds}
-          onExtendExpiry={handleExtendExpiry}
+          recoveryKeyPreview={recoveryKey ? recoveryKey.substring(0, 9) + '••••' : 'SNAP-••••'}
         />
 
         {/* Inbox Grid: List & Detail View */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-          {/* Left Column: Email List (5 cols on large screens) */}
           <div className="lg:col-span-5 space-y-4">
             <EmailList
               emails={emails}
               selectedEmailId={selectedEmail?.id || null}
-              onSelectEmail={handleSelectEmail}
+              onSelectEmail={(e) => setSelectedEmail(e)}
               onDeleteEmail={handleDeleteEmail}
               currentEmail={emailAddress}
             />
           </div>
 
-          {/* Right Column: Email Viewer (7 cols on large screens) */}
           <div className="lg:col-span-7">
             <EmailViewer
               email={selectedEmail}
@@ -264,67 +302,145 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Feature Highlights Banner */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-6 border-t border-slate-800/80">
-          <div className="bg-slate-900/40 border border-slate-800/60 rounded-xl p-4 flex items-start gap-3">
-            <div className="w-8 h-8 rounded-lg bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400 shrink-0">
-              <ShieldCheck className="w-4 h-4" />
-            </div>
-            <div>
-              <h4 className="text-xs font-semibold text-white">100% Anonymous & Private</h4>
-              <p className="text-[11px] text-slate-400 mt-0.5">
-                No registration, password, or IP tracking. Keeps your personal inbox clean from spam.
-              </p>
-            </div>
+        {/* Below-The-Fold: Feature Showcase Section (Mirrored from TempMailLab) */}
+        <section className="pt-12 border-t border-white/[0.08]">
+          <div className="text-center max-w-xl mx-auto mb-10 space-y-2">
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+              Why Choose SnapInbox?
+            </h2>
+            <p className="text-sm text-zinc-400">
+              Engineered for extreme privacy, lightning edge speeds, and zero headaches.
+            </p>
           </div>
 
-          <div className="bg-slate-900/40 border border-slate-800/60 rounded-xl p-4 flex items-start gap-3">
-            <div className="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 shrink-0">
-              <Zap className="w-4 h-4" />
-            </div>
-            <div>
-              <h4 className="text-xs font-semibold text-white">Instant OTP & Link Detection</h4>
-              <p className="text-[11px] text-slate-400 mt-0.5">
-                Automatically detects and extracts verification codes, 2FA tokens, and activation links.
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div className="bg-[#121214]/80 border border-white/10 hover:border-white/20 rounded-3xl p-6 sm:p-7 space-y-3 transition duration-200 shadow-xl">
+              <div className="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 text-xl">
+                🔑
+              </div>
+              <h3 className="text-lg font-bold text-white">Password &amp; Recovery Key</h3>
+              <p className="text-sm text-zinc-400 leading-relaxed">
+                Never lose your temporary inbox. Each address comes with an encrypted Recovery Key that
+                lets you restore your inbox and emails on any device for up to 30 days.
               </p>
             </div>
+
+            <div className="bg-[#121214]/80 border border-white/10 hover:border-white/20 rounded-3xl p-6 sm:p-7 space-y-3 transition duration-200 shadow-xl">
+              <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400 text-xl">
+                ⚡
+              </div>
+              <h3 className="text-lg font-bold text-white">Instant OTP &amp; Link Extractor</h3>
+              <p className="text-sm text-zinc-400 leading-relaxed">
+                Stop digging through long email bodies. Our regex edge parser instantly detects 4-to-8
+                digit verification codes and activation links, showing them right in your inbox list.
+              </p>
+            </div>
+
+            <div className="bg-[#121214]/80 border border-white/10 hover:border-white/20 rounded-3xl p-6 sm:p-7 space-y-3 transition duration-200 shadow-xl">
+              <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 text-xl">
+                🛡️
+              </div>
+              <h3 className="text-lg font-bold text-white">100% Anonymous &amp; Private</h3>
+              <p className="text-sm text-zinc-400 leading-relaxed">
+                No signup, no tracking cookies, and no personal logs. Your emails are stored safely in
+                edge KV storage and can be wiped instantly with a single click.
+              </p>
+            </div>
+
+            <div className="bg-[#121214]/80 border border-white/10 hover:border-white/20 rounded-3xl p-6 sm:p-7 space-y-3 transition duration-200 shadow-xl">
+              <div className="w-12 h-12 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400 text-xl">
+                🌐
+              </div>
+              <h3 className="text-lg font-bold text-white">Cloudflare Edge Architecture</h3>
+              <p className="text-sm text-zinc-400 leading-relaxed">
+                Built directly on Cloudflare Email Routing &amp; Workers across 300+ global locations for
+                ultra-low latency sub-second email delivery and 99.99% availability.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        {/* Below-The-Fold: FAQ Accordion (Mirrored from TempMailLab) */}
+        <section className="pt-6 pb-12 max-w-3xl mx-auto">
+          <div className="text-center max-w-xl mx-auto mb-8 space-y-2">
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+              Frequently Asked Questions
+            </h2>
+            <p className="text-sm text-zinc-400">Everything you need to know about temporary disposable mail.</p>
           </div>
 
-          <div className="bg-slate-900/40 border border-slate-800/60 rounded-xl p-4 flex items-start gap-3">
-            <div className="w-8 h-8 rounded-lg bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400 shrink-0">
-              <Lock className="w-4 h-4" />
-            </div>
-            <div>
-              <h4 className="text-xs font-semibold text-white">Auto-Expiring Clean Storage</h4>
-              <p className="text-[11px] text-slate-400 mt-0.5">
-                Emails auto-destruct after expiration so no sensitive data remains stored indefinitely.
+          <div className="space-y-3.5">
+            <details className="bg-[#121214]/80 border border-white/10 rounded-2xl p-5 cursor-pointer group">
+              <summary className="flex items-center justify-between font-semibold text-zinc-200 group-hover:text-white text-sm sm:text-base list-none">
+                <span>What is a temporary disposable email?</span>
+                <ChevronDown className="w-4 h-4 text-zinc-400 group-hover:text-white transition duration-200 group-open:rotate-180" />
+              </summary>
+              <p className="mt-3 text-sm text-zinc-400 leading-relaxed">
+                A temporary disposable email is a short-lived inbox that allows you to receive emails
+                without exposing your personal or business address. It protects you from spam, newsletters,
+                and data breaches.
               </p>
-            </div>
+            </details>
+
+            <details className="bg-[#121214]/80 border border-white/10 rounded-2xl p-5 cursor-pointer group">
+              <summary className="flex items-center justify-between font-semibold text-zinc-200 group-hover:text-white text-sm sm:text-base list-none">
+                <span>How does the Recovery Key feature work?</span>
+                <ChevronDown className="w-4 h-4 text-zinc-400 group-hover:text-white transition duration-200 group-open:rotate-180" />
+              </summary>
+              <p className="mt-3 text-sm text-zinc-400 leading-relaxed">
+                Every temporary email generated on SnapInbox has a unique Recovery Key (e.g.{' '}
+                <code>SNAP-XXXX-XXXX</code>). If you switch browsers, accidentally close the tab, or need to
+                verify a service 15 days later, you can enter your Recovery Key to immediately restore your
+                exact same inbox and previous emails!
+              </p>
+            </details>
+
+            <details className="bg-[#121214]/80 border border-white/10 rounded-2xl p-5 cursor-pointer group">
+              <summary className="flex items-center justify-between font-semibold text-zinc-200 group-hover:text-white text-sm sm:text-base list-none">
+                <span>Can I receive OTP codes from Netflix, Google, or Telegram?</span>
+                <ChevronDown className="w-4 h-4 text-zinc-400 group-hover:text-white transition duration-200 group-open:rotate-180" />
+              </summary>
+              <p className="mt-3 text-sm text-zinc-400 leading-relaxed">
+                Yes! Our catch-all edge server receives standard RFC-compliant emails from all major services.
+                Our built-in OTP parser highlights your 4-to-8 digit code right on the screen with a 1-click
+                copy button.
+              </p>
+            </details>
+
+            <details className="bg-[#121214]/80 border border-white/10 rounded-2xl p-5 cursor-pointer group">
+              <summary className="flex items-center justify-between font-semibold text-zinc-200 group-hover:text-white text-sm sm:text-base list-none">
+                <span>Can I customize my username?</span>
+                <ChevronDown className="w-4 h-4 text-zinc-400 group-hover:text-white transition duration-200 group-open:rotate-180" />
+              </summary>
+              <p className="mt-3 text-sm text-zinc-400 leading-relaxed">
+                Yes, simply click the <strong>Change</strong> button under the address bar to create any
+                custom username you prefer (e.g. <code>myname@mendoneet.me</code>).
+              </p>
+            </details>
+
+            <details className="bg-[#121214]/80 border border-white/10 rounded-2xl p-5 cursor-pointer group">
+              <summary className="flex items-center justify-between font-semibold text-zinc-200 group-hover:text-white text-sm sm:text-base list-none">
+                <span>Is this service completely free?</span>
+                <ChevronDown className="w-4 h-4 text-zinc-400 group-hover:text-white transition duration-200 group-open:rotate-180" />
+              </summary>
+              <p className="mt-3 text-sm text-zinc-400 leading-relaxed">
+                100% free with unlimited disposable addresses, zero ads, and no premium paywalls.
+              </p>
+            </details>
           </div>
-        </div>
+        </section>
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-slate-800/80 bg-[#070b13] py-6 text-center text-xs text-slate-500">
-        <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
-          <p>
-            &copy; {new Date().getFullYear()} <strong className="text-slate-400">SnapInbox</strong>. Powered by <code className="text-indigo-400 font-mono">@{DOMAIN}</code>
-          </p>
-          <div className="flex items-center gap-4">
-            <button
-              onClick={() => setIsSetupGuideOpen(true)}
-              className="text-slate-400 hover:text-indigo-300 transition"
-            >
-              Domain Setup Guide
-            </button>
-            <button
-              onClick={() => setSoundEnabled((v) => !v)}
-              className="flex items-center gap-1 text-slate-400 hover:text-white transition"
-              title={soundEnabled ? 'Disable notification sound' : 'Enable notification sound'}
-            >
-              {soundEnabled ? <Volume2 className="w-3.5 h-3.5" /> : <VolumeX className="w-3.5 h-3.5" />}
-              <span>{soundEnabled ? 'Sound On' : 'Muted'}</span>
-            </button>
+      <footer className="border-t border-white/[0.08] bg-[#050505] py-8 text-center text-xs text-zinc-500">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-2">
+            <span className="font-bold text-white">SnapInbox</span>
+            <span>&bull;</span>
+            <span>Free Disposable Email &amp; OTP Lab</span>
+          </div>
+          <div>
+            <span>Powered by Cloudflare Workers &amp; Email Routing</span>
           </div>
         </div>
       </footer>
@@ -335,6 +451,13 @@ export default function Home() {
         onClose={() => setIsCustomModalOpen(false)}
         domain={DOMAIN}
         onSelectCustom={handleSelectCustom}
+      />
+
+      <RecoveryKeyModal
+        isOpen={isRecoveryModalOpen}
+        onClose={() => setIsRecoveryModalOpen(false)}
+        activeRecoveryKey={recoveryKey}
+        onRestore={handleRestoreRecoveryKey}
       />
 
       <QrModal

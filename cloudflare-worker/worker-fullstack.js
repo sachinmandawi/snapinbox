@@ -517,32 +517,22 @@ function getProAppHtml() {
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
           </svg>
         </div>
-        <div>
-          <div class="flex items-center gap-2">
-            <span class="font-bold text-lg tracking-tight text-white">Snap<span class="text-indigo-400">Inbox</span></span>
-            <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">@mendoneet.me</span>
-          </div>
-        </div>
+        <span class="font-bold text-lg tracking-tight text-white">Snap<span class="text-indigo-400">Inbox</span></span>
       </a>
 
       <!-- Navigation & Action Controls -->
       <div class="flex items-center gap-2 sm:gap-3">
-        <button onclick="openRecoveryModal()" class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-amber-300 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/25 rounded-lg transition shadow-sm">
+        <button onclick="openRecoveryModal()" class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-amber-300 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/25 rounded-xl transition shadow-sm">
           <span>🔑 Restore</span>
         </button>
 
-        <button onclick="toggleHistoryModal()" class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-zinc-300 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg transition">
+        <button onclick="toggleHistoryModal()" class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-zinc-300 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl transition">
           <span>🕒 History</span>
         </button>
 
-        <button onclick="toggleSound()" id="soundToggle" class="p-2 text-zinc-400 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg transition" title="Toggle Sound">
+        <button onclick="toggleSound()" id="soundToggle" class="p-2 text-zinc-400 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl transition" title="Toggle Sound">
           🔊
         </button>
-
-        <div class="hidden sm:flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-lg">
-          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-          <span>Edge Live</span>
-        </div>
       </div>
     </div>
   </header>
@@ -997,6 +987,12 @@ function getProAppHtml() {
     </div>
   </div>
 
+  <!-- Floating Toast Notification -->
+  <div id="toastNotification" class="fixed bottom-6 right-6 z-50 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none flex items-center gap-2.5 px-4 py-3 rounded-2xl bg-[#1c1c1f] border border-white/20 text-white text-xs font-semibold shadow-2xl backdrop-blur-xl">
+    <span id="toastIcon" class="text-base">✨</span>
+    <span id="toastMsg">Notification message</span>
+  </div>
+
   <!-- ================= CLIENT JAVASCRIPT ================= -->
   <script>
     const DOMAIN = 'mendoneet.me';
@@ -1007,6 +1003,21 @@ function getProAppHtml() {
     let refreshCountdown = 10;
     let refreshTimerInterval = null;
     let soundEnabled = true;
+    let toastTimeout = null;
+
+    function showToast(msg, icon = '✨') {
+      const el = document.getElementById('toastNotification');
+      const msgEl = document.getElementById('toastMsg');
+      const iconEl = document.getElementById('toastIcon');
+      if (!el || !msgEl) return;
+      msgEl.innerText = msg;
+      if (iconEl) iconEl.innerText = icon;
+      el.classList.remove('translate-y-20', 'opacity-0', 'pointer-events-none');
+      if (toastTimeout) clearTimeout(toastTimeout);
+      toastTimeout = setTimeout(() => {
+        el.classList.add('translate-y-20', 'opacity-0', 'pointer-events-none');
+      }, 2800);
+    }
 
     // --- RECOVERY KEY HELPERS ---
     function generateRecoveryKey() {
@@ -1092,6 +1103,7 @@ function getProAppHtml() {
       navigator.clipboard.writeText(currentEmail);
       const btnText = document.getElementById('copyBtnText');
       btnText.innerText = 'Copied! ✨';
+      showToast('Email address copied to clipboard!', '📋');
       confetti({
         particleCount: 45,
         spread: 60,
@@ -1104,14 +1116,14 @@ function getProAppHtml() {
     function copyText(str) {
       navigator.clipboard.writeText(str);
       confetti({ particleCount: 30, spread: 50, origin: { y: 0.4 } });
-      alert('Copied to clipboard: ' + str);
+      showToast('Copied: ' + str, '🔑');
     }
 
     function copyRecoveryKey() {
       if (!currentRecoveryKey) return;
       navigator.clipboard.writeText(currentRecoveryKey);
       confetti({ particleCount: 30, spread: 50, origin: { y: 0.4 } });
-      alert('Recovery Key copied! Save this key to restore your inbox anytime.');
+      showToast('Recovery Key copied to clipboard! ✨', '🔑');
     }
 
     // --- FETCH EMAILS FROM BACKEND ---
@@ -1258,7 +1270,7 @@ function getProAppHtml() {
           updateEmailUI();
           closeRecoveryModal();
           confetti({ particleCount: 50, spread: 70, origin: { y: 0.3 } });
-          alert('Inbox restored successfully for: ' + currentEmail);
+          showToast('Inbox restored: ' + currentEmail, '🎉');
         } else {
           errEl.innerText = data.error || 'Recovery Key not found or expired.';
           errEl.classList.remove('hidden');

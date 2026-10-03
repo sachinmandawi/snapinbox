@@ -34,10 +34,10 @@ export const EmailViewer: React.FC<EmailViewerProps> = ({
 
   if (!email) {
     return (
-      <div className="bg-[#111827]/70 border border-slate-800 rounded-2xl p-12 text-center flex flex-col items-center justify-center min-h-[460px] text-slate-500">
-        <Mail className="w-12 h-12 mb-3 text-slate-600 stroke-[1.5]" />
-        <h4 className="text-base font-medium text-slate-300">No email selected</h4>
-        <p className="text-xs text-slate-500 mt-1">
+      <div className="bg-[#121214]/80 border border-white/10 rounded-3xl p-12 text-center flex flex-col items-center justify-center min-h-[460px] text-zinc-500 shadow-2xl">
+        <Mail className="w-12 h-12 mb-3 text-zinc-600 stroke-[1.5]" />
+        <h4 className="text-base font-medium text-zinc-300">No email selected</h4>
+        <p className="text-xs text-zinc-500 mt-1">
           Select an email from the inbox list to read its content.
         </p>
       </div>
@@ -74,9 +74,9 @@ ${email.html || email.text || ''}`;
   };
 
   return (
-    <div className="bg-[#111827]/90 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl flex flex-col h-full min-h-[580px] backdrop-blur-xl">
+    <div className="bg-[#121214]/80 border border-white/10 rounded-3xl overflow-hidden shadow-2xl flex flex-col h-full min-h-[580px] backdrop-blur-xl">
       {/* Top Header Bar */}
-      <div className="p-4 sm:p-6 border-b border-slate-800 bg-slate-900/60">
+      <div className="p-4 sm:p-6 border-b border-white/[0.08] bg-white/[0.02]">
         <div className="flex items-start justify-between gap-4 mb-4">
           <h2 className="text-lg sm:text-xl font-bold text-white break-words">
             {email.subject || '(No Subject)'}

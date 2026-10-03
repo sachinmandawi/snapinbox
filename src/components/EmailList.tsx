@@ -22,18 +22,18 @@ export const EmailList: React.FC<EmailListProps> = ({
 }) => {
   if (emails.length === 0) {
     return (
-      <div className="bg-[#111827]/70 border border-slate-800 rounded-2xl p-8 sm:p-12 text-center flex flex-col items-center justify-center min-h-[360px]">
+      <div className="bg-[#121214]/80 border border-white/10 rounded-3xl p-8 sm:p-12 text-center flex flex-col items-center justify-center min-h-[360px] shadow-2xl">
         {/* Radar pulsing effect */}
         <div className="relative mb-6">
-          <div className="w-20 h-20 rounded-full bg-indigo-500/10 flex items-center justify-center radar-active border border-indigo-500/30">
+          <div className="w-20 h-20 rounded-2xl bg-gradient-to-tr from-indigo-600/30 to-indigo-400/20 flex items-center justify-center border border-indigo-500/30 shadow-lg shadow-indigo-600/20">
             <Inbox className="w-8 h-8 text-indigo-400" />
           </div>
         </div>
 
-        <h3 className="text-lg font-bold text-slate-100 mb-2">
-          Your inbox is ready and listening!
+        <h3 className="text-lg font-bold text-white mb-2">
+          Waiting for incoming messages...
         </h3>
-        <p className="text-sm text-slate-400 max-w-sm mb-6 leading-relaxed">
+        <p className="text-sm text-zinc-400 max-w-sm mb-6 leading-relaxed">
           Send an email or verification code to{' '}
           <span className="font-mono text-indigo-300 font-semibold break-all">
             {currentEmail}
@@ -41,22 +41,22 @@ export const EmailList: React.FC<EmailListProps> = ({
           . Incoming messages will appear here in real-time.
         </p>
 
-        <div className="flex items-center gap-2 text-xs text-slate-500 bg-slate-900/60 px-3 py-1.5 rounded-full border border-slate-800">
+        <div className="flex items-center gap-2 text-xs text-zinc-500 bg-white/5 px-3 py-1.5 rounded-full border border-white/10">
           <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-          <span>Polling server every 4 seconds</span>
+          <span>Real-time listener active</span>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="bg-[#111827]/70 border border-slate-800 rounded-2xl divide-y divide-slate-800/80 overflow-hidden shadow-xl">
-      <div className="px-4 py-3 bg-slate-900/80 flex items-center justify-between text-xs font-semibold text-slate-400 border-b border-slate-800">
+    <div className="bg-[#121214]/80 border border-white/10 rounded-3xl divide-y divide-white/[0.08] overflow-hidden shadow-2xl">
+      <div className="px-5 py-3.5 bg-white/[0.02] flex items-center justify-between text-xs font-semibold text-zinc-400 border-b border-white/[0.08]">
         <span>INBOX ({emails.length})</span>
         <span>LATEST FIRST</span>
       </div>
 
-      <div className="divide-y divide-slate-800/60 max-h-[600px] overflow-y-auto">
+      <div className="divide-y divide-white/[0.06] max-h-[600px] overflow-y-auto">
         {emails.map((email) => {
           const isSelected = email.id === selectedEmailId;
           const senderInitial = (email.from.name || email.from.address || '?')
