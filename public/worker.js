@@ -259,6 +259,19 @@ export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
 
+    // Global CORS preflight handler
+    if (request.method === "OPTIONS") {
+      return new Response(null, {
+        status: 204,
+        headers: {
+          "Access-Control-Allow-Origin": "*",
+          "Access-Control-Allow-Methods": "GET, POST, DELETE, OPTIONS",
+          "Access-Control-Allow-Headers": "Content-Type, Authorization, x-webhook-secret",
+          "Access-Control-Max-Age": "86400"
+        }
+      });
+    }
+
     // Serve user brand logo & favicon
     if (url.pathname === "/logo.png" || url.pathname === "/favicon.png" || url.pathname === "/favicon.ico" || url.pathname === "/apple-touch-icon.png") {
       const binary = Uint8Array.from(atob(LOGO_BASE64), c => c.charCodeAt(0));
@@ -295,6 +308,41 @@ export default {
       return new Response(JSON.stringify({ success: true }), {
         headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" }
       });
+    }
+
+    // API: TEST SEND EMAIL (Development & Testing)
+    if (url.pathname === "/api/emails/test-send" && request.method === "POST") {
+      try {
+        const body = await request.json();
+        const recipient = (body.recipient || "").toLowerCase().trim();
+        if (!recipient) {
+          return new Response(JSON.stringify({ error: "Recipient email address is required" }), { status: 400 });
+        }
+        const otp = Math.floor(100000 + Math.random() * 900000).toString();
+        const testEmail = {
+          id: "test_" + Date.now().toString(36) + Math.random().toString(36).substring(2, 6),
+          recipient,
+          from: { address: "security@google.com", name: "Google Accounts" },
+          subject: "Your Google verification code is " + otp,
+          text: "G-" + otp + " is your Google verification code. Never share this code with anyone.",
+          html: '<div style="font-family: sans-serif; padding: 20px;"><h2 style="color: #1a73e8;">Verify your Google Account</h2><p>Your one-time code is: <strong style="font-size: 28px; letter-spacing: 4px; color: #1a73e8;">' + otp + '</strong></p><p style="color: #666; font-size: 12px;">This code expires in 10 minutes.</p></div>',
+          rawMime: "",
+          receivedAt: new Date().toISOString(),
+          read: false,
+          size: 450,
+          extractedOtp: otp,
+          extractedLink: null,
+          security: { spf: true, dkim: true }
+        };
+        const existing = await getEmails(recipient, env);
+        existing.unshift(testEmail);
+        await saveEmails(recipient, existing.slice(0, 50), env);
+        return new Response(JSON.stringify({ success: true, message: "Test email generated", email: testEmail }), {
+          headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" }
+        });
+      } catch (e) {
+        return new Response(JSON.stringify({ error: e.message }), { status: 500 });
+      }
     }
 
     // API: RECOVERY KEY - SAVE MAPPING (30 Days)

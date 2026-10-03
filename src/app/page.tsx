@@ -12,7 +12,7 @@ import { DeleteConfirmModal } from '@/components/DeleteConfirmModal';
 import { EmailMessage } from '@/types/email';
 import { generateRandomUsername } from '@/lib/utils';
 import confetti from 'canvas-confetti';
-import { ChevronDown, RefreshCw, Trash2, Volume2, VolumeX } from 'lucide-react';
+import { ChevronDown, RefreshCw, Trash2, Volume2, VolumeX, Search, X } from 'lucide-react';
 
 const AVAILABLE_DOMAINS = ['snapinbox.tech', 'mendoneet.me'];
 const DEFAULT_DOMAIN = process.env.NEXT_PUBLIC_APP_DOMAIN || 'snapinbox.tech';
@@ -21,6 +21,7 @@ export default function Home() {
   const [emailAddress, setEmailAddress] = useState<string>('');
   const [recoveryKey, setRecoveryKey] = useState<string>('');
   const [emails, setEmails] = useState<EmailMessage[]>([]);
+  const [searchQuery, setSearchQuery] = useState<string>('');
   const [selectedEmail, setSelectedEmail] = useState<EmailMessage | null>(null);
   // Refs always hold the LATEST values — safe to read inside async polling callbacks
   const selectedEmailRef = useRef<EmailMessage | null>(null);
@@ -193,6 +194,29 @@ export default function Home() {
     };
   }, [emailAddress, fetchEmails]);
 
+  // Keyboard shortcuts: Esc to close modals/viewer, R to refresh
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement;
+      if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA')) {
+        if (e.key === 'Escape') target.blur();
+        return;
+      }
+      if (e.key === 'Escape') {
+        if (selectedEmailRef.current) setSelectedEmail(null);
+        setIsCustomModalOpen(false);
+        setIsRecoveryModalOpen(false);
+        setIsQrModalOpen(false);
+        setIsSetupGuideOpen(false);
+        setIsDeleteAllModalOpen(false);
+      } else if (e.key === 'r' || e.key === 'R') {
+        fetchEmails(true);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [fetchEmails]);
+
   const handleRandomize = () => {
     const currentDomain = (emailAddress && emailAddress.includes('@')) ? emailAddress.split('@')[1] : DEFAULT_DOMAIN;
     const newAddress = `${generateRandomUsername()}@${currentDomain}`;
@@ -275,6 +299,17 @@ export default function Home() {
     }
   };
 
+  const filteredEmails = emails.filter((eml) => {
+    if (!searchQuery.trim()) return true;
+    const q = searchQuery.toLowerCase().trim();
+    return (
+      (eml.subject || '').toLowerCase().includes(q) ||
+      (eml.from?.name || '').toLowerCase().includes(q) ||
+      (eml.from?.address || '').toLowerCase().includes(q) ||
+      (eml.extractedOtp || '').toLowerCase().includes(q)
+    );
+  });
+
   return (
     <div className="min-h-screen flex flex-col bg-[#050505] text-[#f5f5f5] selection:bg-indigo-500/30 selection:text-indigo-200 overflow-x-hidden">
       {/* Ambient Top Glow */}
@@ -341,6 +376,27 @@ export default function Home() {
                   )}
                 </div>
 
+                {emails.length > 0 && (
+                  <div className="relative flex-1 max-w-[170px] sm:max-w-[220px] mx-2">
+                    <Search className="w-3 h-3 sm:w-3.5 sm:h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-zinc-500" />
+                    <input
+                      type="text"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      placeholder="Search..."
+                      className="w-full bg-white/5 border border-white/10 rounded-xl pl-7 sm:pl-8 pr-6 py-1 sm:py-1.5 text-xs text-white placeholder:text-zinc-500 focus:outline-none focus:border-indigo-500/50 transition"
+                    />
+                    {searchQuery && (
+                      <button
+                        onClick={() => setSearchQuery('')}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-white"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    )}
+                  </div>
+                )}
+
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => setSoundEnabled((prev) => !prev)}
@@ -388,9 +444,19 @@ export default function Home() {
                     Waiting for incoming emails
                   </p>
                 </div>
+              ) : filteredEmails.length === 0 ? (
+                <div className="py-16 px-4 text-center space-y-2">
+                  <p className="text-sm text-zinc-400">No emails matching &quot;{searchQuery}&quot;</p>
+                  <button
+                    onClick={() => setSearchQuery('')}
+                    className="text-xs text-indigo-400 hover:underline"
+                  >
+                    Clear search
+                  </button>
+                </div>
               ) : (
                 <div className="divide-y divide-white/[0.06] max-h-[650px] overflow-y-auto">
-                  {emails.map((email) => {
+                  {filteredEmails.map((email) => {
                     const senderName = email.from.name || email.from.address;
                     const senderInitial = senderName.charAt(0).toUpperCase();
                     const cleanSnippet = (email.text || '').replace(/\s+/g, ' ').trim().substring(0, 95);
