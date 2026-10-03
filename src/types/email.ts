@@ -13,6 +13,7 @@ export interface EmailMessage {
   size?: number; // size in bytes
   extractedOtp?: string | null;
   extractedLink?: string | null;
+  rawMime?: string;
   attachments?: EmailAttachment[];
 }
 

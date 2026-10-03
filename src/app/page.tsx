@@ -11,6 +11,7 @@ import { RecoveryKeyModal } from '@/components/RecoveryKeyModal';
 import { SetupGuideModal } from '@/components/SetupGuideModal';
 import { EmailMessage } from '@/types/email';
 import { generateRandomUsername } from '@/lib/utils';
+import confetti from 'canvas-confetti';
 import {
   ShieldCheck,
   Zap,
@@ -30,6 +31,7 @@ export default function Home() {
   const [selectedEmail, setSelectedEmail] = useState<EmailMessage | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(true);
+  const [copiedRowOtpId, setCopiedRowOtpId] = useState<string | null>(null);
 
   // Modals
   const [isCustomModalOpen, setIsCustomModalOpen] = useState(false);
@@ -324,58 +326,84 @@ export default function Home() {
                   </p>
                 </div>
               ) : (
-                <div className="divide-y divide-white/[0.08] max-h-[650px] overflow-y-auto">
+                <div className="divide-y divide-white/[0.06] max-h-[650px] overflow-y-auto">
                   {emails.map((email) => {
-                    const senderInitial = (email.from.name || email.from.address || '?').charAt(0).toUpperCase();
+                    const senderName = email.from.name || email.from.address;
+                    const senderInitial = senderName.charAt(0).toUpperCase();
+                    const cleanSnippet = (email.text || '').replace(/\s+/g, ' ').trim().substring(0, 95);
+                    const timeStr = new Date(email.receivedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
                     return (
                       <div
                         key={email.id}
                         onClick={() => setSelectedEmail(email)}
-                        className="p-3.5 sm:p-5 hover:bg-white/[0.04] flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 cursor-pointer transition group"
+                        className="p-4 sm:p-5 hover:bg-white/[0.035] flex items-center justify-between gap-3 sm:gap-4 cursor-pointer transition-all duration-150 group border-l-2 border-transparent hover:border-indigo-500"
                       >
-                        <div className="flex items-start gap-3 sm:gap-3.5 min-w-0 flex-1">
-                          <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/25 flex items-center justify-center font-bold text-indigo-400 text-sm shrink-0 mt-0.5">
+                        <div className="flex items-center gap-3 sm:gap-3.5 min-w-0 flex-1">
+                          {/* Sender Avatar */}
+                          <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-gradient-to-tr from-indigo-500/20 to-indigo-600/10 border border-indigo-500/30 flex items-center justify-center font-extrabold text-indigo-300 text-sm sm:text-base shrink-0 shadow-sm group-hover:scale-105 transition">
                             {senderInitial}
                           </div>
-                          <div className="min-w-0 flex-1">
-                            <div className="flex items-center gap-2">
-                              <span className="font-bold text-sm text-white group-hover:text-indigo-300 transition truncate">
-                                {email.from.name || email.from.address}
-                              </span>
-                              <span className="text-[11px] text-zinc-500 font-mono truncate hidden sm:inline">
-                                &lt;{email.from.address}&gt;
+
+                          {/* Email Content Details */}
+                          <div className="min-w-0 flex-1 space-y-1">
+                            <div className="flex items-center justify-between gap-2">
+                              <div className="flex items-center gap-2 min-w-0">
+                                <span className="font-bold text-sm text-white group-hover:text-indigo-300 transition truncate">
+                                  {senderName}
+                                </span>
+                                <span className="text-[11px] text-zinc-500 font-mono truncate hidden md:inline">
+                                  &lt;{email.from.address}&gt;
+                                </span>
+                              </div>
+                              <span className="text-xs text-zinc-400 font-mono shrink-0">
+                                {timeStr}
                               </span>
                             </div>
-                            <div className="text-xs sm:text-sm text-zinc-200 font-medium truncate mt-0.5">
-                              {email.subject || '(No Subject)'}
-                            </div>
-                            <div className="text-xs text-zinc-500 truncate mt-0.5">
-                              {(email.text || '').substring(0, 95)}...
+
+                            <div className="text-xs sm:text-sm truncate leading-relaxed">
+                              <span className="font-semibold text-zinc-100">
+                                {email.subject || '(No Subject)'}
+                              </span>
+                              {cleanSnippet && (
+                                <span className="text-zinc-400 font-normal">
+                                  {' — '}{cleanSnippet}
+                                </span>
+                              )}
                             </div>
                           </div>
                         </div>
 
-                        <div className="flex items-center justify-between sm:justify-end gap-3 shrink-0">
+                        {/* Right Actions: OTP Pill & Arrow */}
+                        <div className="flex items-center gap-3 shrink-0">
                           {email.extractedOtp && (
-                            <div
+                            <button
                               onClick={(e) => {
                                 e.stopPropagation();
                                 if (email.extractedOtp) {
                                   navigator.clipboard.writeText(email.extractedOtp);
+                                  setCopiedRowOtpId(email.id);
+                                  try {
+                                    confetti({ particleCount: 30, spread: 50, origin: { y: 0.5 } });
+                                  } catch (err) {}
+                                  setTimeout(() => setCopiedRowOtpId(null), 2000);
                                 }
                               }}
-                              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-300 font-mono text-xs font-bold transition active:scale-95"
+                              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-mono font-bold transition active:scale-95 shadow-sm ${
+                                copiedRowOtpId === email.id
+                                  ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
+                                  : 'bg-amber-400/10 hover:bg-amber-400/20 border-amber-400/30 text-amber-300'
+                              }`}
                               title="Click to copy OTP"
                             >
                               <span>🔑 {email.extractedOtp}</span>
-                              <span className="text-[10px] underline ml-0.5">Copy</span>
-                            </div>
+                              <span className="text-[10px] border-l border-current/30 pl-1.5 font-sans font-medium">
+                                {copiedRowOtpId === email.id ? 'Copied!' : 'Copy'}
+                              </span>
+                            </button>
                           )}
-                          <div className="flex items-center gap-2 text-xs text-zinc-500 font-mono">
-                            <span>
-                              {new Date(email.receivedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                            </span>
-                            <span className="text-zinc-500 group-hover:text-white transition">→</span>
+                          <div className="text-zinc-600 group-hover:text-indigo-400 group-hover:translate-x-1 transition duration-150 hidden sm:block">
+                            →
                           </div>
                         </div>
                       </div>
@@ -556,7 +584,7 @@ export default function Home() {
       <SetupGuideModal
         isOpen={isSetupGuideOpen}
         onClose={() => setIsSetupGuideOpen(false)}
-        domain={DOMAIN}
+        domain={DEFAULT_DOMAIN}
       />
     </div>
   );

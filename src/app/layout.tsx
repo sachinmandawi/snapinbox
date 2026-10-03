@@ -13,8 +13,17 @@ export const metadata: Metadata = {
     'temporary inbox for verification',
     '30-day restore temp mail',
     'snapinbox',
+    'snapinbox.tech',
     'mendoneet.me',
   ],
+  icons: {
+    icon: [
+      { url: '/logo.png', type: 'image/png' },
+      { url: '/favicon.png', type: 'image/png' },
+    ],
+    shortcut: '/logo.png',
+    apple: '/apple-touch-icon.png',
+  },
 };
 
 export const viewport: Viewport = {

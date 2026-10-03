@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <defs>
+    <!-- Background Gradient: Deep Cyber Indigo to Violet -->
+    <linearGradient id="snapBg" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#4F46E5"/>
+      <stop offset="55%" stop-color="#4338CA"/>
+      <stop offset="100%" stop-color="#312E81"/>
+    </linearGradient>
+
+    <!-- Specular Border Highlight -->
+    <linearGradient id="snapBorder" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#A5B4FC" stop-opacity="0.8"/>
+      <stop offset="50%" stop-color="#6366F1" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#38BDF8" stop-opacity="0.6"/>
+    </linearGradient>
+
+    <!-- Electric Snap Bolt: Vivid Cyan to Indigo to Purple -->
+    <linearGradient id="snapBolt" x1="38" y1="12" x2="24" y2="52" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#38BDF8"/>
+      <stop offset="45%" stop-color="#818CF8"/>
+      <stop offset="100%" stop-color="#C084FC"/>
+    </linearGradient>
+
+    <!-- Ambient Glow Filter -->
+    <filter id="snapGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="2" stdDeviation="3.5" flood-color="#38BDF8" flood-opacity="0.65"/>
+    </filter>
+  </defs>
+
+  <!-- Squircle Base with 3D Bevel Rim -->
+  <rect width="64" height="64" rx="18" fill="url(#snapBg)"/>
+  <rect x="1" y="1" width="62" height="62" rx="17" stroke="url(#snapBorder)" stroke-width="1.75"/>
+
+  <!-- Sleek Mail Envelope Base -->
+  <rect x="14" y="20" width="36" height="26" rx="5" fill="#0D0D12" fill-opacity="0.6" stroke="rgba(255, 255, 255, 0.4)" stroke-width="2"/>
+  <path d="M15 22L32 34L49 22" stroke="rgba(255, 255, 255, 0.65)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- High-Energy Lightning Snap Bolt cutting across -->
+  <path d="M35 13L23 31H31L27 51L41 29H33L35 13Z" fill="url(#snapBolt)" filter="url(#snapGlow)"/>
+</svg>
