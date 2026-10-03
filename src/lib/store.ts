@@ -28,7 +28,6 @@ async function ensureDataFileExists() {
 }
 
 async function loadEmails(): Promise<void> {
-  if (isInitialized) return;
   try {
     await ensureDataFileExists();
     const content = await fs.readFile(DATA_FILE, 'utf-8');
