@@ -302,9 +302,14 @@ export default {
       }
     }
 
-    // Serve HTML Dashboard
+    // Serve HTML Dashboard (Strict No-Cache to ensure browsers always run latest script)
     return new Response(getProAppHtml(), {
-      headers: { "Content-Type": "text/html; charset=utf-8" }
+      headers: {
+        "Content-Type": "text/html; charset=utf-8",
+        "Cache-Control": "no-cache, no-store, must-revalidate",
+        "Pragma": "no-cache",
+        "Expires": "0"
+      }
     });
   }
 };
@@ -1029,34 +1034,66 @@ function getProAppHtml() {
 
     function toggleSound() {
       soundEnabled = !soundEnabled;
-      document.getElementById('soundToggle').innerText = soundEnabled ? '🔊' : '🔇';
+      const el = document.getElementById('soundToggle');
+      if (el) el.innerText = soundEnabled ? '🔊' : '🔇';
     }
 
-    // --- COPY HELPER WITH CONFETTI ---
-    function copyEmail() {
-      navigator.clipboard.writeText(currentEmail);
+    // --- BULLETPROOF COPY HELPER WITH FALLBACK & SAFE CONFETTI ---
+    async function safeCopy(text) {
+      let ok = false;
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        try {
+          await navigator.clipboard.writeText(text);
+          ok = true;
+        } catch (e) {}
+      }
+      if (!ok) {
+        try {
+          const ta = document.createElement('textarea');
+          ta.value = text;
+          ta.style.position = 'fixed';
+          ta.style.opacity = '0';
+          document.body.appendChild(ta);
+          ta.focus();
+          ta.select();
+          document.execCommand('copy');
+          document.body.removeChild(ta);
+          ok = true;
+        } catch (e) {}
+      }
+      return ok;
+    }
+
+    function fireConfetti(opts) {
+      if (typeof confetti === 'function') {
+        try { confetti(opts); } catch (e) {}
+      }
+    }
+
+    async function copyEmail() {
+      await safeCopy(currentEmail);
       const btnText = document.getElementById('copyBtnText');
-      btnText.innerText = 'Copied! ✨';
+      if (btnText) btnText.innerText = 'Copied! ✨';
       showToast('Email address copied to clipboard!', '📋');
-      confetti({
+      fireConfetti({
         particleCount: 45,
         spread: 60,
         origin: { y: 0.35 },
         colors: ['#6366f1', '#a855f7', '#38bdf8']
       });
-      setTimeout(() => { btnText.innerText = 'Copy'; }, 2000);
+      setTimeout(() => { if (btnText) btnText.innerText = 'Copy'; }, 2000);
     }
 
-    function copyText(str) {
-      navigator.clipboard.writeText(str);
-      confetti({ particleCount: 30, spread: 50, origin: { y: 0.4 } });
+    async function copyText(str) {
+      await safeCopy(str);
+      fireConfetti({ particleCount: 30, spread: 50, origin: { y: 0.4 } });
       showToast('Copied: ' + str, '🔑');
     }
 
-    function copyRecoveryKey() {
+    async function copyRecoveryKey() {
       if (!currentRecoveryKey) return;
-      navigator.clipboard.writeText(currentRecoveryKey);
-      confetti({ particleCount: 30, spread: 50, origin: { y: 0.4 } });
+      await safeCopy(currentRecoveryKey);
+      fireConfetti({ particleCount: 30, spread: 50, origin: { y: 0.4 } });
       showToast('Recovery Key copied to clipboard! ✨', '🔑');
     }
 
