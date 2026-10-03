@@ -1,0 +1,7 @@
+name = "mendoneet-email-worker"
+main = "worker.js"
+compatibility_date = "2024-09-01"
+
+[vars]
+WEBHOOK_URL = "https://YOUR_WEBSITE_DOMAIN.vercel.app/api/webhook/incoming"
+WEBHOOK_SECRET = "mendoneet_secret_key_change_me_123"
