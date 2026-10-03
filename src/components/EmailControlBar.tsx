@@ -8,6 +8,7 @@ import {
   Edit3,
   Key,
   Mail,
+  Trash2,
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
@@ -27,6 +28,7 @@ export const EmailControlBar: React.FC<EmailControlBarProps> = ({
   onRefresh,
   onOpenCustomModal,
   onOpenRecoveryModal,
+  onDeleteAll,
   isRefreshing,
 }) => {
   const [copied, setCopied] = useState(false);
@@ -48,17 +50,17 @@ export const EmailControlBar: React.FC<EmailControlBarProps> = ({
   };
 
   return (
-    <div className="w-full max-w-2xl mx-auto space-y-3 sm:space-y-3.5">
+    <div className="w-full max-w-3xl mx-auto space-y-3.5">
       {/* Centerpiece: TempMailLab Pill Address Bar */}
-      <div className="bg-[#141416] border border-white/15 hover:border-indigo-500/40 focus-within:border-indigo-500/50 rounded-full p-1.5 sm:p-2.5 pl-3.5 sm:pl-6 flex items-center justify-between shadow-2xl transition-all duration-300">
+      <div className="bg-[#121215]/90 border border-white/15 hover:border-indigo-500/40 focus-within:border-indigo-500/50 rounded-full p-1.5 sm:p-2.5 pl-3.5 sm:pl-6 flex items-center justify-between shadow-2xl backdrop-blur-xl transition-all duration-300">
         {/* Left: Envelope Icon + Monospace Address */}
         <div
           onClick={handleCopy}
           className="flex items-center gap-2 sm:gap-3 overflow-hidden flex-1 min-w-0 pr-2 cursor-pointer group"
           title="Click to copy address"
         >
-          <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center shrink-0 text-indigo-400 group-hover:scale-105 transition">
-            <Mail className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+          <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-gradient-to-tr from-indigo-500/20 to-purple-500/20 border border-indigo-500/30 flex items-center justify-center shrink-0 text-indigo-400 group-hover:scale-105 group-hover:text-indigo-300 transition shadow-inner">
+            <Mail className="w-4 h-4" />
           </div>
           <span className="font-mono text-xs sm:text-base md:text-lg font-bold tracking-wide text-white select-all truncate group-hover:text-indigo-300 transition">
             {currentEmail}
@@ -79,16 +81,16 @@ export const EmailControlBar: React.FC<EmailControlBarProps> = ({
         </button>
       </div>
 
-      {/* The 3 Signature Action Cards Grid - Exact Identical Size (h-[68px] sm:h-[70px]) */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-3">
+      {/* The 4 Signature Action Cards Grid - Exact Identical Sleek Proportion */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3">
         {/* 1. Refresh Button Card */}
         <button
           onClick={onRefresh}
           disabled={isRefreshing}
-          className="h-[68px] sm:h-[70px] bg-white/[0.035] hover:bg-white/[0.075] border border-white/[0.08] hover:border-white/20 rounded-2xl px-3 sm:px-3.5 flex items-center justify-between text-left transition duration-200 shadow-lg group active:scale-98 min-w-0"
+          className="h-[68px] sm:h-[72px] bg-[#121215]/80 hover:bg-white/[0.06] border border-white/[0.08] hover:border-indigo-500/30 rounded-2xl px-3 sm:px-3.5 flex items-center justify-between text-left transition-all duration-200 shadow-lg group active:scale-95 min-w-0"
         >
           <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1 mr-1.5 sm:mr-2">
-            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-zinc-300 group-hover:text-indigo-400 group-hover:border-indigo-500/30 shrink-0 transition">
+            <div className="w-9 h-9 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-zinc-300 group-hover:text-indigo-400 group-hover:border-indigo-500/40 shrink-0 transition">
               <RefreshCw
                 className={`w-4 h-4 ${isRefreshing ? 'animate-spin text-indigo-400' : ''}`}
               />
@@ -98,7 +100,7 @@ export const EmailControlBar: React.FC<EmailControlBarProps> = ({
               <div className="text-[10px] sm:text-[11px] text-zinc-400 truncate">Sync inbox</div>
             </div>
           </div>
-          <span className="text-[10px] sm:text-[11px] font-mono font-medium text-indigo-400 bg-indigo-500/10 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full border border-indigo-500/20 shrink-0">
+          <span className="text-[10px] sm:text-[11px] font-mono font-medium text-indigo-400 bg-indigo-500/10 px-2 py-0.5 sm:py-1 rounded-full border border-indigo-500/20 shrink-0">
             10s
           </span>
         </button>
@@ -106,41 +108,64 @@ export const EmailControlBar: React.FC<EmailControlBarProps> = ({
         {/* 2. Change / Custom Email Card */}
         <button
           onClick={onOpenCustomModal}
-          className="h-[68px] sm:h-[70px] bg-white/[0.035] hover:bg-white/[0.075] border border-white/[0.08] hover:border-white/20 rounded-2xl px-3 sm:px-3.5 flex items-center justify-between text-left transition duration-200 shadow-lg group active:scale-98 min-w-0"
+          className="h-[68px] sm:h-[72px] bg-[#121215]/80 hover:bg-white/[0.06] border border-white/[0.08] hover:border-violet-500/30 rounded-2xl px-3 sm:px-3.5 flex items-center justify-between text-left transition-all duration-200 shadow-lg group active:scale-95 min-w-0"
         >
           <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1 mr-1.5 sm:mr-2">
-            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-zinc-300 group-hover:text-indigo-400 group-hover:border-indigo-500/30 shrink-0 transition">
+            <div className="w-9 h-9 rounded-xl bg-violet-500/10 border border-violet-500/20 flex items-center justify-center text-zinc-300 group-hover:text-violet-400 group-hover:border-violet-500/40 shrink-0 transition">
               <Edit3 className="w-4 h-4" />
             </div>
             <div className="min-w-0 flex-1">
               <div className="font-semibold text-xs sm:text-sm text-zinc-100 truncate">Change</div>
-              <div className="text-[10px] sm:text-[11px] text-zinc-400 truncate">Custom username</div>
+              <div className="text-[10px] sm:text-[11px] text-zinc-400 truncate">Custom alias</div>
             </div>
           </div>
-          <span className="text-[10px] sm:text-[11px] font-semibold text-zinc-300 bg-white/5 group-hover:bg-white/10 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full border border-white/10 shrink-0 transition">
+          <span className="text-[10px] sm:text-[11px] font-semibold text-zinc-300 bg-white/5 group-hover:bg-white/10 px-2 py-0.5 sm:py-1 rounded-full border border-white/10 shrink-0 transition">
             Edit
           </span>
         </button>
 
-        {/* 3. Recovery Key Card (Exact Identical Size) */}
+        {/* 3. Delete / Clear Mailbox Card */}
         <button
-          onClick={onOpenRecoveryModal}
-          className="h-[68px] sm:h-[70px] bg-amber-500/[0.04] hover:bg-amber-500/[0.08] border border-amber-500/20 hover:border-amber-400/40 rounded-2xl px-3 sm:px-3.5 flex items-center justify-between text-left transition duration-200 shadow-lg group active:scale-98 min-w-0"
+          onClick={onDeleteAll}
+          className="h-[68px] sm:h-[72px] bg-rose-500/[0.03] hover:bg-rose-500/[0.08] border border-rose-500/20 hover:border-rose-500/40 rounded-2xl px-3 sm:px-3.5 flex items-center justify-between text-left transition-all duration-200 shadow-lg group active:scale-95 min-w-0"
         >
           <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1 mr-1.5 sm:mr-2">
-            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-amber-500/10 border border-amber-500/25 flex items-center justify-center text-amber-400 shrink-0 group-hover:border-amber-400/40 transition">
-              <Key className="w-4 h-4" />
+            <div className="w-9 h-9 rounded-xl bg-rose-500/10 border border-rose-500/25 flex items-center justify-center text-rose-400 group-hover:border-rose-400/50 group-hover:scale-105 shrink-0 transition">
+              <Trash2 className="w-4 h-4" />
             </div>
             <div className="min-w-0 flex-1">
-              <div className="font-semibold text-xs sm:text-sm text-zinc-100 truncate">
-                Recovery Key
+              <div className="font-semibold text-xs sm:text-sm text-zinc-100 group-hover:text-rose-200 truncate transition">
+                Delete
               </div>
-              <div className="text-[10px] sm:text-[11px] text-amber-400/80 truncate font-mono">
-                30-day restore
+              <div className="text-[10px] sm:text-[11px] text-rose-400/80 truncate">
+                Wipe emails
               </div>
             </div>
           </div>
-          <span className="text-[10px] sm:text-[11px] font-semibold text-amber-400 bg-amber-500/10 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full border border-amber-500/20 shrink-0">
+          <span className="text-[10px] sm:text-[11px] font-semibold text-rose-400 bg-rose-500/10 px-2 py-0.5 sm:py-1 rounded-full border border-rose-500/20 shrink-0">
+            Wipe
+          </span>
+        </button>
+
+        {/* 4. Recovery Key Card */}
+        <button
+          onClick={onOpenRecoveryModal}
+          className="h-[68px] sm:h-[72px] bg-amber-500/[0.03] hover:bg-amber-500/[0.08] border border-amber-500/20 hover:border-amber-400/40 rounded-2xl px-3 sm:px-3.5 flex items-center justify-between text-left transition-all duration-200 shadow-lg group active:scale-95 min-w-0"
+        >
+          <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1 mr-1.5 sm:mr-2">
+            <div className="w-9 h-9 rounded-xl bg-amber-500/10 border border-amber-500/25 flex items-center justify-center text-amber-400 shrink-0 group-hover:border-amber-400/40 group-hover:scale-105 transition">
+              <Key className="w-4 h-4" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <div className="font-semibold text-xs sm:text-sm text-zinc-100 group-hover:text-amber-200 truncate transition">
+                Recovery Key
+              </div>
+              <div className="text-[10px] sm:text-[11px] text-amber-400/80 truncate font-mono">
+                30d restore
+              </div>
+            </div>
+          </div>
+          <span className="text-[10px] sm:text-[11px] font-semibold text-amber-400 bg-amber-500/10 px-2 py-0.5 sm:py-1 rounded-full border border-amber-500/20 shrink-0">
             30d
           </span>
         </button>

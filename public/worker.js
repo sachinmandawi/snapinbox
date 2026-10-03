@@ -506,14 +506,14 @@ function getProAppHtml() {
         </button>
       </div>
 
-      <!-- The 3 Signature Action Cards (Exact Identical Size h-[68px] sm:h-[70px] - Zero Overlap) -->
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-3">
+      <!-- The 4 Signature Action Cards (Exact Identical Proportion - Refresh, Change, Delete, Recovery Key) -->
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3">
         
         <!-- 1. Refresh Button Card -->
-        <button onclick="fetchEmails(true)" class="h-[68px] sm:h-[70px] action-card rounded-2xl px-3 sm:px-3.5 flex items-center justify-between text-left group min-w-0">
-          <div class="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1 mr-1.5 sm:mr-2">
-            <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-zinc-300 group-hover:text-indigo-400 group-hover:border-indigo-500/30 shrink-0 transition">
-              <svg id="refreshIcon" class="w-4 h-4 transition duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <button onclick="fetchEmails(true)" class="h-[68px] sm:h-[72px] action-card rounded-2xl px-3 sm:px-3.5 flex items-center justify-between text-left group min-w-0">
+          <div class="flex items-center gap-2 sm:gap-2.5 min-w-0 flex-1 mr-1">
+            <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-zinc-300 group-hover:text-indigo-400 group-hover:border-indigo-500/40 shrink-0 transition">
+              <svg id="refreshIcon" class="w-3.5 h-3.5 sm:w-4 sm:h-4 transition duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
               </svg>
             </div>
@@ -522,43 +522,55 @@ function getProAppHtml() {
               <div class="text-[10px] sm:text-[11px] text-zinc-400 truncate">Sync inbox</div>
             </div>
           </div>
-          <span id="refreshTimerBadge" class="text-[10px] sm:text-[11px] font-mono font-medium text-indigo-400 bg-indigo-500/10 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full border border-indigo-500/20 shrink-0">10s</span>
+          <span id="refreshTimerBadge" class="text-[10px] sm:text-[11px] font-mono font-medium text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded-full border border-indigo-500/20 shrink-0">10s</span>
         </button>
 
         <!-- 2. Change / Custom Email Card -->
-        <button onclick="openCustomModal()" class="h-[68px] sm:h-[70px] action-card rounded-2xl px-3 sm:px-3.5 flex items-center justify-between text-left group min-w-0">
-          <div class="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1 mr-1.5 sm:mr-2">
-            <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-zinc-300 group-hover:text-indigo-400 group-hover:border-indigo-500/30 shrink-0 transition">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <button onclick="openCustomModal()" class="h-[68px] sm:h-[72px] action-card rounded-2xl px-3 sm:px-3.5 flex items-center justify-between text-left group min-w-0">
+          <div class="flex items-center gap-2 sm:gap-2.5 min-w-0 flex-1 mr-1">
+            <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-violet-500/10 border border-violet-500/20 flex items-center justify-center text-zinc-300 group-hover:text-violet-400 group-hover:border-violet-500/40 shrink-0 transition">
+              <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
               </svg>
             </div>
             <div class="min-w-0 flex-1">
               <div class="font-semibold text-xs sm:text-sm text-zinc-100 truncate">Change</div>
-              <div class="text-[10px] sm:text-[11px] text-zinc-400 truncate">Custom username</div>
+              <div class="text-[10px] sm:text-[11px] text-zinc-400 truncate">Custom name</div>
             </div>
           </div>
-          <span class="text-[10px] sm:text-[11px] font-semibold text-zinc-300 bg-white/5 group-hover:bg-white/10 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full border border-white/10 shrink-0 transition">Edit</span>
+          <span class="text-[10px] sm:text-[11px] font-semibold text-zinc-300 bg-white/5 group-hover:bg-white/10 px-2 py-0.5 rounded-full border border-white/10 shrink-0 transition">Edit</span>
         </button>
 
-        <!-- 3. Recovery Key Card (Exact Identical Size) -->
-        <button onclick="openRecoveryModal()" class="h-[68px] sm:h-[70px] action-card rounded-2xl px-3 sm:px-3.5 flex items-center justify-between text-left group border-amber-500/20 bg-amber-500/[0.04] hover:bg-amber-500/[0.08] min-w-0">
-          <div class="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1 mr-1.5 sm:mr-2">
-            <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-amber-500/10 border border-amber-500/25 flex items-center justify-center text-amber-400 shrink-0 group-hover:border-amber-400/40 transition">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <!-- 3. Delete / Wipe Mailbox Card -->
+        <button onclick="openDeleteModal()" class="h-[68px] sm:h-[72px] action-card rounded-2xl px-3 sm:px-3.5 flex items-center justify-between text-left group border-rose-500/20 bg-rose-500/[0.03] hover:bg-rose-500/[0.08] min-w-0">
+          <div class="flex items-center gap-2 sm:gap-2.5 min-w-0 flex-1 mr-1">
+            <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-rose-500/10 border border-rose-500/25 flex items-center justify-center text-rose-400 shrink-0 group-hover:border-rose-400/50 group-hover:scale-105 transition">
+              <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+              </svg>
+            </div>
+            <div class="min-w-0 flex-1">
+              <div class="font-semibold text-xs sm:text-sm text-zinc-100 group-hover:text-rose-200 truncate transition">Delete</div>
+              <div class="text-[10px] sm:text-[11px] text-rose-400/80 truncate">Wipe inbox</div>
+            </div>
+          </div>
+          <span class="text-[10px] sm:text-[11px] font-semibold text-rose-400 bg-rose-500/10 px-2 py-0.5 rounded-full border border-rose-500/20 shrink-0">Wipe</span>
+        </button>
+
+        <!-- 4. Recovery Key Card -->
+        <button onclick="openRecoveryModal()" class="h-[68px] sm:h-[72px] action-card rounded-2xl px-3 sm:px-3.5 flex items-center justify-between text-left group border-amber-500/20 bg-amber-500/[0.04] hover:bg-amber-500/[0.08] min-w-0">
+          <div class="flex items-center gap-2 sm:gap-2.5 min-w-0 flex-1 mr-1">
+            <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-amber-500/10 border border-amber-500/25 flex items-center justify-center text-amber-400 shrink-0 group-hover:border-amber-400/40 group-hover:scale-105 transition">
+              <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path>
               </svg>
             </div>
             <div class="min-w-0 flex-1">
-              <div class="font-semibold text-xs sm:text-sm text-zinc-100 truncate">
-                Recovery Key
-              </div>
-              <div class="text-[10px] sm:text-[11px] text-amber-400/80 truncate font-mono">
-                30-day restore
-              </div>
+              <div class="font-semibold text-xs sm:text-sm text-zinc-100 truncate">Recovery Key</div>
+              <div class="text-[10px] sm:text-[11px] text-amber-400/80 truncate font-mono">30d restore</div>
             </div>
           </div>
-          <span class="text-[10px] sm:text-[11px] font-semibold text-amber-400 bg-amber-500/10 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full border border-amber-500/20 shrink-0">30d</span>
+          <span class="text-[10px] sm:text-[11px] font-semibold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/20 shrink-0">30d</span>
         </button>
 
       </div>
@@ -748,45 +760,105 @@ function getProAppHtml() {
     </div>
   </div>
 
-  <!-- 2. CUSTOM USERNAME MODAL -->
-  <div id="customModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
-    <div class="glass-card bg-[#141416] max-w-md w-full rounded-3xl p-6 sm:p-7 relative border border-white/10 shadow-2xl space-y-5">
-      <button onclick="closeCustomModal()" class="absolute top-5 right-5 text-zinc-400 hover:text-white text-lg">✕</button>
+  <!-- 2. CHANGE EMAIL MODAL (EXACT TEMPMAILLAB STYLE) -->
+  <div id="customModal" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-[#0e0f12] border border-white/10 rounded-[28px] max-w-[480px] w-full p-7 shadow-2xl relative space-y-6">
       
-      <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/25 flex items-center justify-center text-indigo-400 text-lg">
-          ✏️
-        </div>
-        <div>
-          <h3 class="text-lg font-bold text-white">Create Custom Address</h3>
-          <p class="text-xs text-zinc-400">Choose your preferred mailbox username</p>
-        </div>
+      <!-- Top Header: Title & Pill Close Button -->
+      <div class="flex items-center justify-between">
+        <h2 class="text-xl font-bold text-white tracking-tight">Change Email</h2>
+        <button type="button" onclick="closeCustomModal()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-semibold text-zinc-300 hover:text-white transition active:scale-95">
+          <span>✕</span>
+          <span>Close</span>
+        </button>
       </div>
 
-      <form onsubmit="handleCustomSubmit(event)" class="space-y-4">
-        <div>
-          <label class="block text-xs font-semibold text-zinc-300 mb-1.5">Username &amp; Domain</label>
-          <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
-            <div class="flex-1 bg-[#0a0a0c] border border-white/15 focus-within:border-indigo-500 rounded-xl px-3.5 py-2.5 transition">
-              <input type="text" id="customInput" placeholder="yourname" class="w-full bg-transparent text-sm text-white focus:outline-none font-mono placeholder:text-zinc-600">
-            </div>
-            <select id="customDomainSelect" class="bg-[#0a0a0c] border border-white/15 focus:border-indigo-500 rounded-xl px-3 py-2.5 text-xs sm:text-sm text-indigo-300 font-mono font-semibold focus:outline-none shrink-0 cursor-pointer">
-              <option value="snapinbox.tech" selected>@snapinbox.tech</option>
-              <option value="mendoneet.me">@mendoneet.me</option>
-            </select>
+      <!-- Subtitle -->
+      <p class="text-xs sm:text-sm text-zinc-400 leading-relaxed -mt-3">
+        Choose a custom name and domain. You can also generate a random name.
+      </p>
+
+      <form onsubmit="handleCustomSubmit(event)" class="space-y-5">
+        <!-- EMAIL NAME SECTION -->
+        <div class="space-y-2">
+          <label class="block text-[11px] font-bold text-zinc-400 uppercase tracking-wider">
+            EMAIL NAME
+          </label>
+          <div class="flex items-center gap-2.5">
+            <input type="text" id="customInput" placeholder="yourname" class="flex-1 bg-[#070709] border border-white/15 focus:border-[#0284c7] focus:ring-1 focus:ring-[#0284c7] rounded-xl px-4 py-3 text-sm text-white font-mono placeholder:text-zinc-600 focus:outline-none transition">
+            <button type="button" onclick="randomizeCustomInput()" class="px-5 py-3 rounded-xl bg-transparent hover:bg-white/5 border border-white/20 hover:border-white/30 text-xs font-bold text-white transition active:scale-95 shrink-0">
+              Random
+            </button>
           </div>
-          <p id="customError" class="text-xs text-rose-400 mt-1.5 hidden"></p>
+          <p id="customError" class="text-xs text-rose-400 font-medium hidden mt-1.5"></p>
         </div>
 
-        <div class="flex items-center gap-2 pt-2">
-          <button type="button" onclick="randomizeEmail(); closeCustomModal();" class="flex-1 py-3 rounded-xl bg-white/5 hover:bg-white/10 text-xs font-semibold text-zinc-300 border border-white/10 transition">
-            🎲 Randomize
-          </button>
-          <button type="submit" class="flex-1 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-xs font-semibold text-white shadow-lg shadow-indigo-600/30 transition">
-            Apply Address
-          </button>
+        <!-- DOMAIN SECTION -->
+        <div class="space-y-2 relative" id="domainDropdownContainer">
+          <label class="block text-[11px] font-bold text-zinc-400 uppercase tracking-wider">
+            DOMAIN
+          </label>
+          
+          <div class="relative">
+            <button type="button" onclick="toggleDomainDropdown()" id="domainDropdownBtn" class="w-full flex items-center justify-between bg-[#070709] border border-white/15 hover:border-white/30 rounded-xl px-4 py-3 text-sm font-mono text-white transition cursor-pointer">
+              <span id="selectedDomainLabel" class="font-semibold text-zinc-100">snapinbox.tech</span>
+              <svg id="domainChevron" class="w-4 h-4 text-zinc-400 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+              </svg>
+            </button>
+
+            <!-- Floating Dropdown Options -->
+            <div id="domainDropdownMenu" class="hidden absolute left-0 right-0 top-full mt-2 bg-[#121318] border border-white/15 rounded-xl p-1.5 shadow-2xl z-50 backdrop-blur-2xl">
+              <div onclick="selectDomainOption('snapinbox.tech')" class="flex items-center justify-between px-3.5 py-2.5 rounded-lg cursor-pointer text-xs font-mono text-zinc-300 hover:bg-white/5 hover:text-white transition">
+                <div class="flex items-center gap-2.5">
+                  <span>snapinbox.tech</span>
+                  <span class="text-[9px] px-1.5 py-0.5 rounded uppercase font-sans font-bold tracking-wider bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">Primary</span>
+                </div>
+                <span id="domainCheck-snapinbox" class="text-[#38bdf8] font-bold">✓</span>
+              </div>
+              <div onclick="selectDomainOption('mendoneet.me')" class="flex items-center justify-between px-3.5 py-2.5 rounded-lg cursor-pointer text-xs font-mono text-zinc-300 hover:bg-white/5 hover:text-white transition">
+                <div class="flex items-center gap-2.5">
+                  <span>mendoneet.me</span>
+                  <span class="text-[9px] px-1.5 py-0.5 rounded uppercase font-sans font-bold tracking-wider bg-zinc-500/15 text-zinc-400 border border-white/10">Alias</span>
+                </div>
+                <span id="domainCheck-mendoneet" class="text-[#38bdf8] font-bold hidden">✓</span>
+              </div>
+            </div>
+            
+            <!-- Hidden input for backwards compatibility -->
+            <input type="hidden" id="customDomainSelect" value="snapinbox.tech">
+          </div>
         </div>
+
+        <!-- Confirm Change Button - Exact TempMailLab Solid Cyan/Blue -->
+        <button type="submit" class="w-full py-3.5 px-4 rounded-xl bg-[#0284c7] hover:bg-[#0369a1] active:bg-[#075985] text-white font-bold text-sm tracking-wide transition shadow-lg shadow-sky-600/25 active:scale-98 mt-2">
+          Confirm Change
+        </button>
       </form>
+    </div>
+  </div>
+
+  <!-- 3. MODERN DELETE CONFIRMATION MODAL -->
+  <div id="deleteModal" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-[#0e0f12] border border-rose-500/20 rounded-[28px] max-w-[420px] w-full p-7 shadow-2xl relative space-y-6">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-rose-500/10 border border-rose-500/25 flex items-center justify-center text-rose-400">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+            </svg>
+          </div>
+          <h2 class="text-xl font-bold text-white tracking-tight" id="deleteModalTitle">Wipe Mailbox?</h2>
+        </div>
+        <button onclick="closeDeleteModal()" class="flex items-center justify-center w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white transition">✕</button>
+      </div>
+      <p class="text-sm text-zinc-400 leading-relaxed" id="deleteModalDesc">
+        Are you sure you want to wipe all emails in this temporary inbox? This action cannot be reversed.
+      </p>
+      <div class="flex items-center gap-3 pt-1">
+        <button onclick="closeDeleteModal()" class="flex-1 py-3 px-4 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-semibold text-zinc-300 hover:text-white transition">Cancel</button>
+        <button onclick="executeConfirmDelete()" class="flex-1 py-3 px-4 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs tracking-wide transition shadow-lg shadow-rose-600/30 active:scale-95">Confirm</button>
+      </div>
     </div>
   </div>
 
@@ -908,18 +980,64 @@ function getProAppHtml() {
       showToast('New random address generated!', '🎲');
     }
 
-    // --- CUSTOM ADDRESS MODAL ---
+    // --- CUSTOM ADDRESS MODAL & DOMAIN DROPDOWN (TEMPMAILLAB STYLE) ---
+    function randomizeCustomInput() {
+      const input = document.getElementById('customInput');
+      const err = document.getElementById('customError');
+      if (input) input.value = Math.random().toString(36).substring(2, 10);
+      if (err) err.classList.add('hidden');
+    }
+
+    function toggleDomainDropdown() {
+      const menu = document.getElementById('domainDropdownMenu');
+      const chevron = document.getElementById('domainChevron');
+      if (!menu) return;
+      const isHidden = menu.classList.contains('hidden');
+      if (isHidden) {
+        menu.classList.remove('hidden');
+        if (chevron) chevron.classList.add('rotate-180', 'text-[#0284c7]');
+      } else {
+        menu.classList.add('hidden');
+        if (chevron) chevron.classList.remove('rotate-180', 'text-[#0284c7]');
+      }
+    }
+
+    function selectDomainOption(dom) {
+      const label = document.getElementById('selectedDomainLabel');
+      const hiddenInput = document.getElementById('customDomainSelect');
+      const checkSnap = document.getElementById('domainCheck-snapinbox');
+      const checkMendo = document.getElementById('domainCheck-mendoneet');
+      
+      if (label) label.innerText = dom;
+      if (hiddenInput) hiddenInput.value = dom;
+      selectedDomain = dom;
+
+      if (checkSnap) {
+        if (dom === 'snapinbox.tech') checkSnap.classList.remove('hidden');
+        else checkSnap.classList.add('hidden');
+      }
+      if (checkMendo) {
+        if (dom === 'mendoneet.me') checkMendo.classList.remove('hidden');
+        else checkMendo.classList.add('hidden');
+      }
+
+      const menu = document.getElementById('domainDropdownMenu');
+      const chevron = document.getElementById('domainChevron');
+      if (menu) menu.classList.add('hidden');
+      if (chevron) chevron.classList.remove('rotate-180', 'text-[#0284c7]');
+    }
+
     function openCustomModal() {
       const modal = document.getElementById('customModal');
       const input = document.getElementById('customInput');
-      const domainSelect = document.getElementById('customDomainSelect');
       const err = document.getElementById('customError');
       if (err) err.classList.add('hidden');
-      if (input) input.value = (currentEmail || '').split('@')[0];
-      if (domainSelect) {
-        const activeDom = (currentEmail && currentEmail.includes('@')) ? currentEmail.split('@')[1] : DEFAULT_DOMAIN;
-        domainSelect.value = activeDom;
+      if (input) {
+        const activePart = (currentEmail || '').split('@')[0];
+        input.value = activePart || Math.random().toString(36).substring(2, 10);
       }
+      const activeDom = (currentEmail && currentEmail.includes('@')) ? currentEmail.split('@')[1] : DEFAULT_DOMAIN;
+      selectDomainOption(activeDom);
       if (modal) modal.classList.remove('hidden');
       if (input) setTimeout(() => input.focus(), 60);
     }
@@ -929,15 +1047,17 @@ function getProAppHtml() {
       if (modal) modal.classList.add('hidden');
       const err = document.getElementById('customError');
       if (err) err.classList.add('hidden');
+      const menu = document.getElementById('domainDropdownMenu');
+      if (menu) menu.classList.add('hidden');
     }
 
     function handleCustomSubmit(e) {
       if (e) e.preventDefault();
       const input = document.getElementById('customInput');
-      const domainSelect = document.getElementById('customDomainSelect');
+      const hiddenInput = document.getElementById('customDomainSelect');
       const err = document.getElementById('customError');
       const val = (input?.value || '').trim().toLowerCase().replace(/[^a-z0-9._-]/g, '');
-      const dom = domainSelect?.value || DEFAULT_DOMAIN;
+      const dom = hiddenInput?.value || selectedDomain || DEFAULT_DOMAIN;
       if (!val || val.length < 3) {
         if (err) {
           err.innerText = 'Username must be at least 3 characters.';
@@ -949,7 +1069,7 @@ function getProAppHtml() {
       currentEmail = val + '@' + dom;
       closeCustomModal();
       updateEmailUI();
-      showToast('Custom address set: ' + currentEmail, '✏️');
+      showToast('Custom address set: ' + currentEmail, '✨');
     }
 
     // --- RECOVERY KEY MODAL ---
@@ -1229,8 +1349,9 @@ function getProAppHtml() {
                   <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
                   <span class="hidden sm:inline">EML</span>
                 </button>
-                <button onclick="deleteCurrentEmail()" title="Delete this message" class="p-1.5 sm:p-2 rounded-xl text-zinc-400 hover:text-rose-400 hover:bg-rose-500/10 border border-white/10 hover:border-rose-500/30 transition">
-                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                <button onclick="deleteCurrentEmail()" title="Delete this message" class="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-semibold text-rose-300 hover:text-white bg-rose-500/10 hover:bg-rose-500/25 border border-rose-500/20 hover:border-rose-500/40 transition shadow-sm active:scale-95">
+                  <svg class="w-3.5 h-3.5 text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                  <span class="hidden sm:inline">Delete</span>
                 </button>
               </div>
             </div>
@@ -1400,18 +1521,23 @@ function getProAppHtml() {
                         </div>
                       </div>
 
-                      <!-- Right Actions: OTP Pill & Arrow -->
-                      <div class="flex items-center gap-3 shrink-0">
-                        \${eml.extractedOtp ? \`
-                          <button onclick="event.stopPropagation(); copyRowOtp('\${eml.id}', '\${eml.extractedOtp}')" id="otpBtn-\${eml.id}" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-amber-400/30 bg-amber-400/10 hover:bg-amber-400/20 text-amber-300 font-mono text-xs font-bold transition active:scale-95 shadow-sm" title="Click to copy OTP">
-                            <span>🔑 \${eml.extractedOtp}</span>
-                            <span class="text-[10px] border-l border-amber-400/30 pl-1.5 font-sans font-medium" id="otpLbl-\${eml.id}">Copy</span>
+                        <!-- Right Actions: OTP Pill, Trash & Arrow -->
+                        <div class="flex items-center gap-2 sm:gap-3 shrink-0">
+                          \${eml.extractedOtp ? \`
+                            <button onclick="event.stopPropagation(); copyRowOtp('\${eml.id}', '\${eml.extractedOtp}')" id="otpBtn-\${eml.id}" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-amber-400/30 bg-amber-400/10 hover:bg-amber-400/20 text-amber-300 font-mono text-xs font-bold transition active:scale-95 shadow-sm" title="Click to copy OTP">
+                              <span>🔑 \${eml.extractedOtp}</span>
+                              <span class="text-[10px] border-l border-amber-400/30 pl-1.5 font-sans font-medium" id="otpLbl-\${eml.id}">Copy</span>
+                            </button>
+                          \` : ''}
+                          <button onclick="event.stopPropagation(); deleteSingleEmail('\${eml.id}')" title="Delete this email" class="p-1.5 sm:p-2 rounded-xl text-zinc-500 hover:text-rose-400 hover:bg-rose-500/10 border border-transparent hover:border-rose-500/20 transition active:scale-90">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                            </svg>
                           </button>
-                        \` : ''}
-                        <div class="text-zinc-600 group-hover:text-indigo-400 group-hover:translate-x-1 transition duration-150 hidden sm:block">
-                          &rarr;
+                          <div class="text-zinc-600 group-hover:text-indigo-400 group-hover:translate-x-1 transition duration-150 hidden sm:block">
+                            &rarr;
+                          </div>
                         </div>
-                      </div>
                     </div>
                   \`;
                 }).join('')}
@@ -1479,24 +1605,61 @@ function getProAppHtml() {
       }, 200);
     }
 
-    async function deleteCurrentEmail() {
-      if (!selectedEmail) return;
-      if (!confirm('Delete this message?')) return;
-      try {
-        await fetch('/api/emails?address=' + encodeURIComponent(currentEmail) + '&id=' + selectedEmail.id, { method: 'DELETE' });
-        selectedEmail = null;
-        fetchEmails();
-      } catch (e) {}
+    // --- MODERN DELETE MODAL & ACTIONS ---
+    let pendingDeleteEmailId = null;
+
+    function openDeleteModal(emailId = null) {
+      pendingDeleteEmailId = emailId;
+      const modal = document.getElementById('deleteModal');
+      const title = document.getElementById('deleteModalTitle');
+      const desc = document.getElementById('deleteModalDesc');
+      if (emailId) {
+        if (title) title.innerText = 'Delete Email?';
+        if (desc) desc.innerText = 'Are you sure you want to permanently delete this email? This cannot be undone.';
+      } else {
+        if (title) title.innerText = 'Wipe Mailbox?';
+        if (desc) desc.innerText = 'Are you sure you want to wipe all emails in this temporary inbox? This action cannot be reversed.';
+      }
+      if (modal) modal.classList.remove('hidden');
     }
 
-    async function clearAllEmails() {
-      if (currentEmails.length === 0) return;
-      if (!confirm('Delete all messages in this inbox?')) return;
-      try {
-        await fetch('/api/emails?address=' + encodeURIComponent(currentEmail), { method: 'DELETE' });
-        selectedEmail = null;
-        fetchEmails();
-      } catch (e) {}
+    function closeDeleteModal() {
+      pendingDeleteEmailId = null;
+      const modal = document.getElementById('deleteModal');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    async function executeConfirmDelete() {
+      const emailId = pendingDeleteEmailId;
+      closeDeleteModal();
+      if (emailId) {
+        try {
+          await fetch('/api/emails?address=' + encodeURIComponent(currentEmail) + '&id=' + emailId, { method: 'DELETE' });
+          if (selectedEmail && selectedEmail.id === emailId) selectedEmail = null;
+          fetchEmails();
+          showToast('Email deleted successfully', '🗑️');
+        } catch (e) {}
+      } else {
+        try {
+          await fetch('/api/emails?address=' + encodeURIComponent(currentEmail), { method: 'DELETE' });
+          selectedEmail = null;
+          fetchEmails();
+          showToast('Mailbox wiped clean', '🗑️');
+        } catch (e) {}
+      }
+    }
+
+    function deleteSingleEmail(id) {
+      openDeleteModal(id);
+    }
+
+    function deleteCurrentEmail() {
+      if (!selectedEmail) return;
+      openDeleteModal(selectedEmail.id);
+    }
+
+    function clearAllEmails() {
+      openDeleteModal(null);
     }
 
     // --- HISTORY MODAL ---

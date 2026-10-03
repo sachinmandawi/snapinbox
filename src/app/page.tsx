@@ -9,6 +9,7 @@ import { CustomEmailModal } from '@/components/CustomEmailModal';
 import { QrModal } from '@/components/QrModal';
 import { RecoveryKeyModal } from '@/components/RecoveryKeyModal';
 import { SetupGuideModal } from '@/components/SetupGuideModal';
+import { DeleteConfirmModal } from '@/components/DeleteConfirmModal';
 import { EmailMessage } from '@/types/email';
 import { generateRandomUsername } from '@/lib/utils';
 import confetti from 'canvas-confetti';
@@ -19,6 +20,7 @@ import {
   Globe,
   ChevronDown,
   RefreshCw,
+  Trash2,
 } from 'lucide-react';
 
 const AVAILABLE_DOMAINS = ['snapinbox.tech', 'mendoneet.me'];
@@ -38,6 +40,8 @@ export default function Home() {
   const [isRecoveryModalOpen, setIsRecoveryModalOpen] = useState(false);
   const [isQrModalOpen, setIsQrModalOpen] = useState(false);
   const [isSetupGuideOpen, setIsSetupGuideOpen] = useState(false);
+  const [isDeleteAllModalOpen, setIsDeleteAllModalOpen] = useState(false);
+  const [emailToDeleteId, setEmailToDeleteId] = useState<string | null>(null);
 
   // Audio Chime
   const playChime = useCallback(() => {
@@ -194,8 +198,12 @@ export default function Home() {
     }
   };
 
-  const handleDeleteEmail = async (id: string, e?: React.MouseEvent) => {
+  const handleDeleteEmail = (id: string, e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
+    setEmailToDeleteId(id);
+  };
+
+  const executeDeleteSingle = async (id: string) => {
     try {
       const res = await fetch(`/api/emails?address=${encodeURIComponent(emailAddress)}&id=${id}`, {
         method: 'DELETE',
@@ -209,8 +217,11 @@ export default function Home() {
     }
   };
 
-  const handleDeleteAll = async () => {
-    if (!confirm('Are you sure you want to delete all emails in this temporary inbox?')) return;
+  const handleDeleteAll = () => {
+    setIsDeleteAllModalOpen(true);
+  };
+
+  const executeDeleteAll = async () => {
     try {
       const res = await fetch(`/api/emails?address=${encodeURIComponent(emailAddress)}`, {
         method: 'DELETE',
@@ -402,6 +413,13 @@ export default function Home() {
                               </span>
                             </button>
                           )}
+                          <button
+                            onClick={(e) => handleDeleteEmail(email.id, e)}
+                            className="p-1.5 sm:p-2 rounded-xl text-zinc-500 hover:text-rose-400 hover:bg-rose-500/10 border border-transparent hover:border-rose-500/25 transition active:scale-90 shrink-0"
+                            title="Delete this message"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
                           <div className="text-zinc-600 group-hover:text-indigo-400 group-hover:translate-x-1 transition duration-150 hidden sm:block">
                             →
                           </div>
@@ -585,6 +603,24 @@ export default function Home() {
         isOpen={isSetupGuideOpen}
         onClose={() => setIsSetupGuideOpen(false)}
         domain={DEFAULT_DOMAIN}
+      />
+
+      {/* Delete All Modal */}
+      <DeleteConfirmModal
+        isOpen={isDeleteAllModalOpen}
+        onClose={() => setIsDeleteAllModalOpen(false)}
+        onConfirm={executeDeleteAll}
+        isSingle={false}
+      />
+
+      {/* Delete Single Email Modal */}
+      <DeleteConfirmModal
+        isOpen={!!emailToDeleteId}
+        onClose={() => setEmailToDeleteId(null)}
+        onConfirm={() => {
+          if (emailToDeleteId) executeDeleteSingle(emailToDeleteId);
+        }}
+        isSingle={true}
       />
     </div>
   );

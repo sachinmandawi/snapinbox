@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { X, Check, Edit3 } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { X, Check, ChevronDown } from 'lucide-react';
 
 interface CustomEmailModalProps {
   isOpen: boolean;
@@ -23,107 +23,186 @@ export const CustomEmailModal: React.FC<CustomEmailModalProps> = ({
   const [prefix, setPrefix] = useState('');
   const [selectedDomain, setSelectedDomain] = useState(domain);
   const [error, setError] = useState('');
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  const generateRandomName = () => {
+    return Math.random().toString(36).substring(2, 10);
+  };
 
   useEffect(() => {
     if (currentEmail) {
       const parts = currentEmail.split('@');
       if (parts[0]) setPrefix(parts[0]);
       if (parts[1] && domains.includes(parts[1])) setSelectedDomain(parts[1]);
+    } else {
+      setPrefix(generateRandomName());
     }
   }, [currentEmail, domains, isOpen]);
 
+  // Click outside to close custom domain dropdown
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setIsDropdownOpen(false);
+      }
+    };
+    if (isDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isDropdownOpen]);
+
   if (!isOpen) return null;
+
+  const handleRandom = () => {
+    setPrefix(generateRandomName());
+    setError('');
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const cleanPrefix = prefix.trim().toLowerCase().replace(/[^a-z0-9._-]/g, '');
 
     if (!cleanPrefix) {
-      setError('Please enter a valid alias (letters, numbers, dots, dashes)');
+      setError('Please enter a valid mailbox name');
       return;
     }
 
     if (cleanPrefix.length < 3) {
-      setError('Alias must be at least 3 characters long');
+      setError('Mailbox name must be at least 3 characters long');
       return;
     }
 
     onSelectCustom(`${cleanPrefix}@${selectedDomain}`);
-    setPrefix('');
     setError('');
+    setIsDropdownOpen(false);
     onClose();
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in">
-      <div className="bg-[#141416] border border-white/10 rounded-3xl w-full max-w-md p-6 sm:p-7 shadow-2xl relative space-y-5">
-        <button
-          onClick={onClose}
-          className="absolute top-5 right-5 text-zinc-400 hover:text-white p-1 rounded-lg hover:bg-white/5 transition"
-        >
-          <X className="w-5 h-5" />
-        </button>
-
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/25 flex items-center justify-center text-indigo-400">
-            <Edit3 className="w-5 h-5" />
-          </div>
-          <div>
-            <h3 className="text-lg font-bold text-white">Create Custom Address</h3>
-            <p className="text-xs text-zinc-400">Choose your username &amp; domain</p>
-          </div>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-sm animate-fade-in">
+      {/* Modal Card - Exact TempMailLab Style */}
+      <div className="bg-[#0e0f12] border border-white/10 rounded-[28px] w-full max-w-[480px] p-7 shadow-2xl relative space-y-6">
+        
+        {/* Top Header: Title & Pill Close Button */}
+        <div className="flex items-center justify-between">
+          <h2 className="text-xl font-bold text-white tracking-tight">Change Email</h2>
+          <button
+            type="button"
+            onClick={onClose}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-semibold text-zinc-300 hover:text-white transition active:scale-95"
+          >
+            <X className="w-3.5 h-3.5" />
+            <span>Close</span>
+          </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-xs font-semibold text-zinc-300 uppercase tracking-wider mb-2">
-              Email Username &amp; Domain
+        {/* Subtitle */}
+        <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed -mt-3">
+          Choose a custom name and domain. You can also generate a random name.
+        </p>
+
+        <form onSubmit={handleSubmit} className="space-y-5">
+          {/* EMAIL NAME SECTION */}
+          <div className="space-y-2">
+            <label className="block text-[11px] font-bold text-zinc-400 uppercase tracking-wider">
+              EMAIL NAME
             </label>
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
-              <div className="flex-1 rounded-xl bg-[#0a0a0c] border border-white/15 focus-within:border-indigo-500 overflow-hidden px-3.5 py-2.5 transition">
-                <input
-                  type="text"
-                  value={prefix}
-                  onChange={(e) => {
-                    setPrefix(e.target.value);
-                    setError('');
-                  }}
-                  placeholder="e.g. myname, testuser"
-                  autoFocus
-                  className="w-full bg-transparent text-sm text-white placeholder:text-zinc-600 focus:outline-none font-mono"
-                />
-              </div>
-              <select
-                value={selectedDomain}
-                onChange={(e) => setSelectedDomain(e.target.value)}
-                className="bg-[#0a0a0c] border border-white/15 focus:border-indigo-500 rounded-xl px-3 py-2.5 text-xs sm:text-sm text-indigo-300 font-mono font-semibold focus:outline-none shrink-0 cursor-pointer"
+            <div className="flex items-center gap-2.5">
+              <input
+                type="text"
+                value={prefix}
+                onChange={(e) => {
+                  setPrefix(e.target.value);
+                  setError('');
+                }}
+                placeholder="username"
+                autoFocus
+                className="flex-1 bg-[#070709] border border-white/15 focus:border-[#0284c7] focus:ring-1 focus:ring-[#0284c7] rounded-xl px-4 py-3 text-sm text-white font-mono placeholder:text-zinc-600 focus:outline-none transition"
+              />
+              <button
+                type="button"
+                onClick={handleRandom}
+                className="px-5 py-3 rounded-xl bg-transparent hover:bg-white/5 border border-white/20 hover:border-white/30 text-xs font-bold text-white transition active:scale-95 shrink-0"
               >
-                {domains.map((dom) => (
-                  <option key={dom} value={dom} className="bg-[#141416] text-white">
-                    @{dom}
-                  </option>
-                ))}
-              </select>
+                Random
+              </button>
             </div>
-            {error && <p className="text-xs text-rose-400 mt-1.5">{error}</p>}
+            {error && <p className="text-xs text-rose-400 font-medium">{error}</p>}
           </div>
 
-          <div className="flex items-center justify-end gap-2 pt-2">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-4 py-2.5 rounded-xl text-xs font-medium text-zinc-300 hover:bg-white/5 border border-white/10 transition"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              className="flex items-center gap-1.5 px-5 py-2.5 rounded-xl text-xs font-semibold bg-indigo-600 hover:bg-indigo-500 text-white transition shadow-lg shadow-indigo-600/30"
-            >
-              <Check className="w-4 h-4" />
-              <span>Apply Address</span>
-            </button>
+          {/* DOMAIN SECTION */}
+          <div className="space-y-2" ref={dropdownRef}>
+            <label className="block text-[11px] font-bold text-zinc-400 uppercase tracking-wider">
+              DOMAIN
+            </label>
+            
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => setIsDropdownOpen((prev) => !prev)}
+                className={`w-full flex items-center justify-between bg-[#070709] border rounded-xl px-4 py-3 text-sm font-mono text-white transition cursor-pointer ${
+                  isDropdownOpen
+                    ? 'border-[#0284c7] ring-1 ring-[#0284c7]'
+                    : 'border-white/15 hover:border-white/30'
+                }`}
+              >
+                <span className="font-semibold text-zinc-100">{selectedDomain}</span>
+                <ChevronDown
+                  className={`w-4 h-4 text-zinc-400 transition-transform duration-200 ${
+                    isDropdownOpen ? 'rotate-180 text-[#0284c7]' : ''
+                  }`}
+                />
+              </button>
+
+              {/* Floating Dropdown Options */}
+              {isDropdownOpen && (
+                <div className="absolute left-0 right-0 top-full mt-2 bg-[#121318] border border-white/15 rounded-xl p-1.5 shadow-2xl z-50 backdrop-blur-2xl animate-in fade-in zoom-in-95 duration-100">
+                  {domains.map((dom) => {
+                    const isSelected = selectedDomain === dom;
+                    const isPrimary = dom === 'snapinbox.tech';
+                    return (
+                      <div
+                        key={dom}
+                        onClick={() => {
+                          setSelectedDomain(dom);
+                          setIsDropdownOpen(false);
+                        }}
+                        className={`flex items-center justify-between px-3.5 py-2.5 rounded-lg cursor-pointer text-xs font-mono transition ${
+                          isSelected
+                            ? 'bg-[#0284c7]/20 text-[#38bdf8] font-bold border border-[#0284c7]/30'
+                            : 'text-zinc-300 hover:bg-white/5 hover:text-white'
+                        }`}
+                      >
+                        <div className="flex items-center gap-2.5">
+                          <span>{dom}</span>
+                          <span
+                            className={`text-[9px] px-1.5 py-0.5 rounded uppercase font-sans font-bold tracking-wider ${
+                              isPrimary
+                                ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30'
+                                : 'bg-zinc-500/15 text-zinc-400 border border-white/10'
+                            }`}
+                          >
+                            {isPrimary ? 'Primary' : 'Alias'}
+                          </span>
+                        </div>
+                        {isSelected && <Check className="w-3.5 h-3.5 text-[#38bdf8]" />}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
           </div>
+
+          {/* Confirm Change Button - Exact TempMailLab Solid Cyan/Blue */}
+          <button
+            type="submit"
+            className="w-full py-3.5 px-4 rounded-xl bg-[#0284c7] hover:bg-[#0369a1] active:bg-[#075985] text-white font-bold text-sm tracking-wide transition-all duration-200 shadow-lg shadow-sky-600/25 active:scale-98 mt-2"
+          >
+            Confirm Change
+          </button>
         </form>
       </div>
     </div>
