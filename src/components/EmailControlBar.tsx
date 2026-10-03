@@ -87,9 +87,9 @@ export const EmailControlBar: React.FC<EmailControlBarProps> = ({
         <button
           onClick={onRefresh}
           disabled={isRefreshing}
-          className="h-[72px] sm:h-[76px] bg-[#121215]/80 hover:bg-white/[0.06] border border-white/[0.08] hover:border-indigo-500/30 rounded-2xl px-3 sm:px-4 flex items-center justify-between text-left transition-all duration-200 shadow-lg group active:scale-95 overflow-hidden"
+          className="h-[72px] sm:h-[76px] bg-[#121215]/80 hover:bg-white/[0.06] border border-white/[0.08] hover:border-indigo-500/30 rounded-2xl px-2.5 sm:px-4 flex items-center justify-between text-left transition-all duration-200 shadow-lg group active:scale-95 overflow-hidden"
         >
-          <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1 pr-2">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1 pr-1.5 sm:pr-2">
             <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-zinc-300 group-hover:text-indigo-400 group-hover:border-indigo-500/40 shrink-0 transition">
               <RefreshCw
                 className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${isRefreshing ? 'animate-spin text-indigo-400' : ''}`}
@@ -100,7 +100,7 @@ export const EmailControlBar: React.FC<EmailControlBarProps> = ({
               <div className="text-[10px] sm:text-[11px] text-zinc-400 truncate">Sync inbox</div>
             </div>
           </div>
-          <span className="text-[10px] sm:text-[11px] font-mono font-medium text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded-full border border-indigo-500/20 shrink-0">
+          <span className="text-[10px] sm:text-[11px] font-mono font-medium text-indigo-400 bg-indigo-500/10 px-1.5 sm:px-2 py-0.5 rounded-full border border-indigo-500/20 shrink-0">
             10s
           </span>
         </button>
@@ -108,9 +108,9 @@ export const EmailControlBar: React.FC<EmailControlBarProps> = ({
         {/* 2. Change / Custom Email Card */}
         <button
           onClick={onOpenCustomModal}
-          className="h-[72px] sm:h-[76px] bg-[#121215]/80 hover:bg-white/[0.06] border border-white/[0.08] hover:border-violet-500/30 rounded-2xl px-3 sm:px-4 flex items-center text-left transition-all duration-200 shadow-lg group active:scale-95 overflow-hidden"
+          className="h-[72px] sm:h-[76px] bg-[#121215]/80 hover:bg-white/[0.06] border border-white/[0.08] hover:border-violet-500/30 rounded-2xl px-2.5 sm:px-4 flex items-center text-left transition-all duration-200 shadow-lg group active:scale-95 overflow-hidden"
         >
-          <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
             <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-violet-500/10 border border-violet-500/20 flex items-center justify-center text-zinc-300 group-hover:text-violet-400 group-hover:border-violet-500/40 shrink-0 transition">
               <Edit3 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             </div>
@@ -124,9 +124,9 @@ export const EmailControlBar: React.FC<EmailControlBarProps> = ({
         {/* 3. Delete / Clear Mailbox Card */}
         <button
           onClick={onDeleteAll}
-          className="h-[72px] sm:h-[76px] bg-rose-500/[0.03] hover:bg-rose-500/[0.08] border border-rose-500/20 hover:border-rose-500/40 rounded-2xl px-3 sm:px-4 flex items-center text-left transition-all duration-200 shadow-lg group active:scale-95 overflow-hidden"
+          className="h-[72px] sm:h-[76px] bg-rose-500/[0.03] hover:bg-rose-500/[0.08] border border-rose-500/20 hover:border-rose-500/40 rounded-2xl px-2.5 sm:px-4 flex items-center text-left transition-all duration-200 shadow-lg group active:scale-95 overflow-hidden"
         >
-          <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
             <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-rose-500/10 border border-rose-500/25 flex items-center justify-center text-rose-400 group-hover:border-rose-400/50 group-hover:scale-105 shrink-0 transition">
               <Trash2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             </div>
@@ -144,9 +144,9 @@ export const EmailControlBar: React.FC<EmailControlBarProps> = ({
         {/* 4. Recovery Key Card */}
         <button
           onClick={onOpenRecoveryModal}
-          className="h-[72px] sm:h-[76px] bg-amber-500/[0.03] hover:bg-amber-500/[0.08] border border-amber-500/20 hover:border-amber-400/40 rounded-2xl px-3 sm:px-4 flex items-center text-left transition-all duration-200 shadow-lg group active:scale-95 overflow-hidden"
+          className="h-[72px] sm:h-[76px] bg-amber-500/[0.03] hover:bg-amber-500/[0.08] border border-amber-500/20 hover:border-amber-400/40 rounded-2xl px-2.5 sm:px-4 flex items-center text-left transition-all duration-200 shadow-lg group active:scale-95 overflow-hidden"
         >
-          <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
             <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-amber-500/10 border border-amber-500/25 flex items-center justify-center text-amber-400 shrink-0 group-hover:border-amber-400/40 group-hover:scale-105 transition">
               <Key className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             </div>

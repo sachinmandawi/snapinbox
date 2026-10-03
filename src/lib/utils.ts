@@ -29,14 +29,20 @@ export function extractOtp(subject: string, content?: string): string | null {
 
   // Patterns like "code: 123456", "verification code is 849201", "OTP: 4920"
   const keywordMatches = [
-    /(?:code|otp|pin|token|verification|password|login)\s*(?:is|:|-|=)?\s*([0-9]{4,8})\b/i,
+    /(?:code|otp|pin|token|verification|password|login|secret)\s*(?:is|:|-|=)?\s*([0-9]{4,8})\b/i,
+    /(?:enter|use)\s*([0-9]{4,8})\b/i,
     /\b([0-9]{6})\b/, // any standalone 6-digit code
     /\b([0-9]{4})\b/, // any standalone 4-digit code
   ];
 
-  for (const regex of keywordMatches) {
-    const match = fullText.match(regex);
+  for (let i = 0; i < keywordMatches.length; i++) {
+    const match = fullText.match(keywordMatches[i]);
     if (match && match[1]) {
+      // Avoid false positive years (1950-2050) on standalone 4-digit pattern
+      if (i === 3) {
+        const num = parseInt(match[1], 10);
+        if (num >= 1950 && num <= 2050) continue;
+      }
       return match[1];
     }
   }

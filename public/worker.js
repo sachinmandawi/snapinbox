@@ -27,7 +27,7 @@ function decodeMimeHeader(header) {
   return header.replace(/=\?([^?]+)\?([BQbq])\?([^?]+)\?=/g, (_, charset, encoding, text) => {
     try {
       if (encoding.toUpperCase() === 'B') {
-        const bin = atob(text);
+        const bin = typeof atob === 'function' ? atob(text) : (typeof Buffer !== 'undefined' ? Buffer.from(text, 'base64').toString('binary') : text);
         const bytes = Uint8Array.from(bin, c => c.charCodeAt(0));
         return new TextDecoder(charset).decode(bytes);
       } else if (encoding.toUpperCase() === 'Q') {
@@ -61,7 +61,7 @@ function decodeBase64(input, charset = 'utf-8') {
   if (!input) return "";
   try {
     const clean = input.replace(/\s+/g, '');
-    const bin = atob(clean);
+    const bin = typeof atob === 'function' ? atob(clean) : (typeof Buffer !== 'undefined' ? Buffer.from(clean, 'base64').toString('binary') : clean);
     const bytes = Uint8Array.from(bin, c => c.charCodeAt(0));
     return new TextDecoder(charset).decode(bytes);
   } catch (e) {
@@ -78,9 +78,16 @@ function extractOtp(subject, body) {
     /\b([0-9]{6})\b/,
     /\b([0-9]{4})\b/
   ];
-  for (const regex of patterns) {
-    const match = fullText.match(regex);
-    if (match && match[1]) return match[1];
+  for (let i = 0; i < patterns.length; i++) {
+    const match = fullText.match(patterns[i]);
+    if (match && match[1]) {
+      // Avoid false positive years (1950-2050) on standalone 4-digit pattern
+      if (i === 3) {
+        const num = parseInt(match[1], 10);
+        if (num >= 1950 && num <= 2050) continue;
+      }
+      return match[1];
+    }
   }
   return null;
 }
@@ -510,8 +517,8 @@ function getProAppHtml() {
       <div class="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3.5">
         
         <!-- 1. Refresh Button Card -->
-        <button onclick="fetchEmails(true)" class="h-[72px] sm:h-[76px] action-card rounded-2xl px-3 sm:px-4 flex items-center justify-between text-left group overflow-hidden">
-          <div class="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1 pr-2">
+        <button onclick="fetchEmails(true)" class="h-[72px] sm:h-[76px] action-card rounded-2xl px-2.5 sm:px-4 flex items-center justify-between text-left group overflow-hidden">
+          <div class="flex items-center gap-2 sm:gap-3 min-w-0 flex-1 pr-1.5 sm:pr-2">
             <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-zinc-300 group-hover:text-indigo-400 group-hover:border-indigo-500/40 shrink-0 transition">
               <svg id="refreshIcon" class="w-3.5 h-3.5 sm:w-4 sm:h-4 transition duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
@@ -522,12 +529,12 @@ function getProAppHtml() {
               <div class="text-[10px] sm:text-[11px] text-zinc-400 truncate">Sync inbox</div>
             </div>
           </div>
-          <span id="refreshTimerBadge" class="text-[10px] sm:text-[11px] font-mono font-medium text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded-full border border-indigo-500/20 shrink-0">10s</span>
+          <span id="refreshTimerBadge" class="text-[10px] sm:text-[11px] font-mono font-medium text-indigo-400 bg-indigo-500/10 px-1.5 sm:px-2 py-0.5 rounded-full border border-indigo-500/20 shrink-0">10s</span>
         </button>
 
         <!-- 2. Change / Custom Email Card -->
-        <button onclick="openCustomModal()" class="h-[72px] sm:h-[76px] action-card rounded-2xl px-3 sm:px-4 flex items-center text-left group overflow-hidden">
-          <div class="flex items-center gap-2.5 sm:gap-3 min-w-0">
+        <button onclick="openCustomModal()" class="h-[72px] sm:h-[76px] action-card rounded-2xl px-2.5 sm:px-4 flex items-center text-left group overflow-hidden">
+          <div class="flex items-center gap-2 sm:gap-3 min-w-0">
             <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-violet-500/10 border border-violet-500/20 flex items-center justify-center text-zinc-300 group-hover:text-violet-400 group-hover:border-violet-500/40 shrink-0 transition">
               <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
@@ -541,8 +548,8 @@ function getProAppHtml() {
         </button>
 
         <!-- 3. Delete / Wipe Mailbox Card -->
-        <button onclick="openDeleteModal()" class="h-[72px] sm:h-[76px] action-card rounded-2xl px-3 sm:px-4 flex items-center text-left group border-rose-500/20 bg-rose-500/[0.03] hover:bg-rose-500/[0.08] overflow-hidden">
-          <div class="flex items-center gap-2.5 sm:gap-3 min-w-0">
+        <button onclick="openDeleteModal()" class="h-[72px] sm:h-[76px] action-card rounded-2xl px-2.5 sm:px-4 flex items-center text-left group border-rose-500/20 bg-rose-500/[0.03] hover:bg-rose-500/[0.08] overflow-hidden">
+          <div class="flex items-center gap-2 sm:gap-3 min-w-0">
             <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-rose-500/10 border border-rose-500/25 flex items-center justify-center text-rose-400 shrink-0 group-hover:border-rose-400/50 group-hover:scale-105 transition">
               <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
@@ -556,8 +563,8 @@ function getProAppHtml() {
         </button>
 
         <!-- 4. Recovery Key Card -->
-        <button onclick="openRecoveryModal()" class="h-[72px] sm:h-[76px] action-card rounded-2xl px-3 sm:px-4 flex items-center text-left group border-amber-500/20 bg-amber-500/[0.04] hover:bg-amber-500/[0.08] overflow-hidden">
-          <div class="flex items-center gap-2.5 sm:gap-3 min-w-0">
+        <button onclick="openRecoveryModal()" class="h-[72px] sm:h-[76px] action-card rounded-2xl px-2.5 sm:px-4 flex items-center text-left group border-amber-500/20 bg-amber-500/[0.04] hover:bg-amber-500/[0.08] overflow-hidden">
+          <div class="flex items-center gap-2 sm:gap-3 min-w-0">
             <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-amber-500/10 border border-amber-500/25 flex items-center justify-center text-amber-400 shrink-0 group-hover:border-amber-400/40 group-hover:scale-105 transition">
               <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path>
