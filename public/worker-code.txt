@@ -845,6 +845,146 @@ function getProAppHtml() {
       } catch (e) {}
     }
 
+    // --- CORE ADDRESS & UI SYNCHRONIZATION ---
+    async function updateEmailUI() {
+      try {
+        const display = document.getElementById('emailDisplay');
+        if (display) display.innerText = currentEmail;
+
+        localStorage.setItem('snapinbox_email', currentEmail);
+        saveToHistory(currentEmail);
+
+        await ensureRecoveryKeyForEmail(currentEmail);
+
+        selectedEmail = null;
+        renderMainView();
+
+        await fetchEmails(true);
+      } catch (err) {
+        console.error('updateEmailUI error:', err);
+      }
+    }
+
+    // --- RANDOMIZE EMAIL ---
+    function randomizeEmail() {
+      currentEmail = generateRandomEmail();
+      updateEmailUI();
+      showToast('New random address generated!', '🎲');
+    }
+
+    // --- CUSTOM ADDRESS MODAL ---
+    function openCustomModal() {
+      const modal = document.getElementById('customModal');
+      const input = document.getElementById('customInput');
+      const err = document.getElementById('customError');
+      if (err) err.classList.add('hidden');
+      if (input) input.value = (currentEmail || '').split('@')[0];
+      if (modal) modal.classList.remove('hidden');
+      if (input) setTimeout(() => input.focus(), 60);
+    }
+
+    function closeCustomModal() {
+      const modal = document.getElementById('customModal');
+      if (modal) modal.classList.add('hidden');
+      const err = document.getElementById('customError');
+      if (err) err.classList.add('hidden');
+    }
+
+    function handleCustomSubmit(e) {
+      if (e) e.preventDefault();
+      const input = document.getElementById('customInput');
+      const err = document.getElementById('customError');
+      const val = (input?.value || '').trim().toLowerCase().replace(/[^a-z0-9._-]/g, '');
+      if (!val || val.length < 3) {
+        if (err) {
+          err.innerText = 'Username must be at least 3 characters.';
+          err.classList.remove('hidden');
+        }
+        return;
+      }
+      currentEmail = val + '@' + DOMAIN;
+      closeCustomModal();
+      updateEmailUI();
+      showToast('Custom address set: ' + currentEmail, '✏️');
+    }
+
+    // --- RECOVERY KEY MODAL ---
+    function openRecoveryModal() {
+      const modal = document.getElementById('recoveryModal');
+      const display = document.getElementById('activeRecoveryKeyDisplay');
+      const input = document.getElementById('restoreKeyInput');
+      const err = document.getElementById('restoreError');
+      if (display) display.innerText = currentRecoveryKey || 'Loading...';
+      if (input) input.value = '';
+      if (err) err.classList.add('hidden');
+      if (modal) modal.classList.remove('hidden');
+      if (input) setTimeout(() => input.focus(), 60);
+    }
+
+    function closeRecoveryModal() {
+      const modal = document.getElementById('recoveryModal');
+      if (modal) modal.classList.add('hidden');
+      const err = document.getElementById('restoreError');
+      if (err) err.classList.add('hidden');
+    }
+
+    async function handleRestoreSubmit() {
+      const input = document.getElementById('restoreKeyInput');
+      const err = document.getElementById('restoreError');
+      const btn = document.getElementById('restoreSubmitBtn');
+      const key = (input?.value || '').trim().toUpperCase();
+
+      if (!key) {
+        if (err) {
+          err.innerText = 'Please enter a Recovery Key (e.g. SNAP-XXXX-XXXX).';
+          err.classList.remove('hidden');
+        }
+        return;
+      }
+
+      if (btn) {
+        btn.disabled = true;
+        btn.innerText = 'Restoring...';
+      }
+
+      try {
+        const res = await fetch('/api/recovery/restore', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ recoveryKey: key })
+        });
+        const data = await res.json();
+        if (data.success && data.address) {
+          currentEmail = data.address;
+          currentRecoveryKey = key;
+          localStorage.setItem('snapinbox_email', data.address);
+          localStorage.setItem('snapinbox_rec_' + data.address.toLowerCase().trim(), key);
+          closeRecoveryModal();
+          await updateEmailUI();
+          if (data.emails) {
+            currentEmails = data.emails;
+            renderMainView();
+          }
+          showToast('Inbox restored successfully!', '🎉');
+        } else {
+          if (err) {
+            err.innerText = data.error || 'Recovery Key not found or expired.';
+            err.classList.remove('hidden');
+          }
+        }
+      } catch (e) {
+        if (err) {
+          err.innerText = 'Failed to connect. Please check internet connection.';
+          err.classList.remove('hidden');
+        }
+      } finally {
+        if (btn) {
+          btn.disabled = false;
+          btn.innerText = 'Restore Inbox';
+        }
+      }
+    }
+
     // --- EMAIL ADDRESS GENERATOR ---
     function generateRandomEmail() {
       const prefixes = ['swift', 'hyper', 'cyber', 'nova', 'echo', 'frost', 'pixel', 'sonic', 'alpha', 'quiet', 'brave', 'zen'];
