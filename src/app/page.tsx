@@ -29,6 +29,7 @@ export default function Home() {
   useEffect(() => { selectedEmailRef.current = selectedEmail; }, [selectedEmail]);
   useEffect(() => { emailAddressRef.current = emailAddress; }, [emailAddress]);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [countdown, setCountdown] = useState<number>(10);
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [copiedRowOtpId, setCopiedRowOtpId] = useState<string | null>(null);
 
@@ -165,6 +166,7 @@ export default function Home() {
         console.error('Failed to fetch emails:', err);
       } finally {
         if (isManual) {
+          setCountdown(10);
           setTimeout(() => setIsRefreshing(false), 500);
         }
       }
@@ -174,16 +176,26 @@ export default function Home() {
     [emailAddress, playChime]
   );
 
-  // Polling loop: fetch emails every 4 seconds + instant tab return listener
+  // Live 1-second countdown timer for auto-refresh + instant tab return listener
   useEffect(() => {
     if (!emailAddress) return;
     fetchEmails();
-    const interval = setInterval(() => fetchEmails(), 4000);
+
+    const interval = setInterval(() => {
+      setCountdown((prev) => {
+        if (prev <= 1) {
+          fetchEmails();
+          return 10;
+        }
+        return prev - 1;
+      });
+    }, 1000);
 
     // Instant refresh when user returns to this browser tab from another app/service
     const handleVisibilityChange = () => {
       if (typeof document !== 'undefined' && document.visibilityState === 'visible') {
         fetchEmails(true);
+        setCountdown(10);
       }
     };
     document.addEventListener('visibilitychange', handleVisibilityChange);
@@ -348,6 +360,7 @@ export default function Home() {
           onOpenRecoveryModal={() => setIsRecoveryModalOpen(true)}
           onDeleteAll={handleDeleteAll}
           isRefreshing={isRefreshing}
+          countdown={countdown}
           recoveryKeyPreview={recoveryKey ? recoveryKey.substring(0, 9) + '••••' : 'SNAP-••••'}
         />
 

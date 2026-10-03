@@ -21,6 +21,7 @@ interface EmailControlBarProps {
   onDeleteAll: () => void;
   isRefreshing: boolean;
   recoveryKeyPreview?: string;
+  countdown?: number;
 }
 
 export const EmailControlBar: React.FC<EmailControlBarProps> = ({
@@ -30,6 +31,7 @@ export const EmailControlBar: React.FC<EmailControlBarProps> = ({
   onOpenRecoveryModal,
   onDeleteAll,
   isRefreshing,
+  countdown = 10,
 }) => {
   const [copied, setCopied] = useState(false);
 
@@ -101,7 +103,7 @@ export const EmailControlBar: React.FC<EmailControlBarProps> = ({
             </div>
           </div>
           <span className="text-[10px] sm:text-[11px] font-mono font-medium text-indigo-400 bg-indigo-500/10 px-1.5 sm:px-2 py-0.5 rounded-full border border-indigo-500/20 shrink-0">
-            10s
+            {countdown}s
           </span>
         </button>
 

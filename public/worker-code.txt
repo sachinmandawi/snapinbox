@@ -1439,6 +1439,8 @@ function getProAppHtml() {
         console.error('Fetch error:', err);
       }
       refreshCountdown = 10;
+      const badge = document.getElementById('refreshTimerBadge');
+      if (badge) badge.innerText = '10s';
     }
 
     // Helper to inject clean typography and responsive styling into email HTML
@@ -1870,13 +1872,12 @@ function getProAppHtml() {
       if (refreshTimerInterval) clearInterval(refreshTimerInterval);
       refreshTimerInterval = setInterval(() => {
         refreshCountdown--;
-        const badge = document.getElementById('refreshTimerBadge');
-        if (badge) badge.innerText = refreshCountdown + 's';
-
         if (refreshCountdown <= 0) {
           fetchEmails();
           refreshCountdown = 10;
         }
+        const badge = document.getElementById('refreshTimerBadge');
+        if (badge) badge.innerText = refreshCountdown + 's';
       }, 1000);
     }
 
