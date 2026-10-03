@@ -439,17 +439,9 @@ function getProAppHtml() {
       </a>
 
       <!-- Navigation & Action Controls -->
-      <div class="flex items-center gap-2 sm:gap-3">
+      <div class="flex items-center gap-3 text-xs font-medium text-zinc-400">
         <button onclick="openRecoveryModal()" class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-amber-300 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/25 rounded-xl transition shadow-sm">
-          <span>🔑 Restore</span>
-        </button>
-
-        <button onclick="toggleHistoryModal()" class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-zinc-300 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl transition">
-          <span>🕒 History</span>
-        </button>
-
-        <button onclick="toggleSound()" id="soundToggle" class="p-2 text-zinc-400 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl transition" title="Toggle Sound">
-          🔊
+          <span>🔑 Restore Inbox</span>
         </button>
       </div>
     </div>
