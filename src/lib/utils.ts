@@ -145,3 +145,24 @@ export function formatBytes(bytes?: number): string {
   const i = Math.floor(Math.log(bytes) / Math.log(k));
   return `${parseFloat((bytes / Math.pow(k, i)).toFixed(1))} ${sizes[i]}`;
 }
+
+// Clean and sanitize email text, stripping raw MIME boundary lines and decoding QP entities
+export function cleanEmailContent(content?: string): string {
+  if (!content) return '';
+  return content
+    .replace(/^--[a-zA-Z0-9_.=+-]+[^\r\n]*\r?\n/gm, '')
+    .replace(/^(?:content-type|content-transfer-encoding|content-disposition):[^\r\n]*\r?\n/gim, '')
+    .replace(/^=+[^\r\n]*\r?\n/gm, '')
+    .replace(/=(?:\r\n|\n|\r)/g, '')
+    .replace(/=2[eE]/g, '.')
+    .replace(/=C2=A0/gi, ' ')
+    .replace(/=([0-9A-Fa-f]{2})/g, (match, hex) => {
+      try {
+        const code = parseInt(hex, 16);
+        return code === 160 ? ' ' : String.fromCharCode(code);
+      } catch (e) {
+        return match;
+      }
+    })
+    .trim();
+}

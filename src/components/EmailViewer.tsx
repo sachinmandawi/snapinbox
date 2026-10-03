@@ -14,7 +14,7 @@ import {
   Paperclip,
 } from 'lucide-react';
 import { EmailMessage } from '@/types/email';
-import { formatBytes } from '@/lib/utils';
+import { formatBytes, cleanEmailContent } from '@/lib/utils';
 
 interface EmailViewerProps {
   email: EmailMessage | null;
@@ -61,7 +61,8 @@ ${email.html || email.text || ''}`;
   };
 
   const getRenderHtml = () => {
-    const raw = email.html || `<div style="white-space: pre-wrap; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">${(email.text || 'No message content.').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>`;
+    const cleanText = cleanEmailContent(email.text || 'No message content.');
+    const raw = email.html || `<div style="white-space: pre-wrap; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; padding: 24px; line-height: 1.6; font-size: 15px; color: #1f2937;">${cleanText.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>`;
     const resetStyles = `
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <style>
@@ -91,7 +92,13 @@ ${email.html || email.text || ''}`;
     }
   };
 
-  const senderName = email.from.name || email.from.address || 'Unknown Sender';
+  let senderName = email.from.name || email.from.address || 'Unknown Sender';
+  if (senderName.includes('@')) {
+    const brandMatch = senderName.match(/@(?:.*[.])?([a-z0-9-]+)\.([a-z]{2,})$/i);
+    if (brandMatch && brandMatch[1] && !['gmail', 'yahoo', 'hotmail', 'outlook', 'mail'].includes(brandMatch[1].toLowerCase())) {
+      senderName = brandMatch[1].charAt(0).toUpperCase() + brandMatch[1].slice(1);
+    }
+  }
   const senderInitial = senderName.charAt(0).toUpperCase();
 
   return (

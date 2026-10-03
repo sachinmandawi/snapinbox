@@ -48,12 +48,31 @@ function decodeQuotedPrintable(input) {
   if (!input) return "";
   let clean = input.replace(/=(?:\r\n|\n|\r)/g, '');
   try {
-    clean = clean.replace(/=([A-Fa-f0-9]{2})/g, (_, hex) => {
-      const code = parseInt(hex, 16);
-      return String.fromCharCode(code);
-    });
-  } catch (e) {}
-  return clean;
+    return decodeURIComponent(clean.replace(/=([A-Fa-f0-9]{2})/g, '%$1'));
+  } catch (e) {
+    try {
+      clean = clean.replace(/=2[eE]/g, '.').replace(/=C2=A0/gi, ' ');
+      return clean.replace(/=([A-Fa-f0-9]{2})/g, (_, hex) => {
+        const code = parseInt(hex, 16);
+        return code === 160 ? ' ' : String.fromCharCode(code);
+      });
+    } catch (err) {
+      return clean;
+    }
+  }
+}
+
+// Clean and sanitize email text, stripping raw MIME boundary lines and leftover headers
+function cleanEmailContent(content) {
+  if (!content) return '';
+  return content
+    .replace(/^--[a-zA-Z0-9_.=+-]+[^\r\n]*\r?\n/gm, '')
+    .replace(/^(?:content-type|content-transfer-encoding|content-disposition):[^\r\n]*\r?\n/gim, '')
+    .replace(/^=+[^\r\n]*\r?\n/gm, '')
+    .replace(/=(?:\r\n|\n|\r)/g, '')
+    .replace(/=2[eE]/g, '.')
+    .replace(/=C2=A0/gi, ' ')
+    .trim();
 }
 
 // Decode Base64 text/html
@@ -190,60 +209,111 @@ export default {
       let bodyHtml = "";
 
       const contentType = message.headers.get("content-type") || "";
-      const boundaryMatch = contentType.match(/boundary=["']?([^"';]+)["']?/i);
 
-      if (boundaryMatch) {
-        const boundary = boundaryMatch[1];
-        const parts = rawText.split(new RegExp(`--${boundary.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&')}`));
+      // 1. Collect all boundary delimiters from header and raw text (handles nested multiparts)
+      const boundaries = new Set();
+      const topMatch = contentType.match(/boundary=["']?([^"';\r\n]+)/i);
+      if (topMatch && topMatch[1]) boundaries.add(topMatch[1].trim().replace(/^["']|["']$/g, ''));
 
-        for (const part of parts) {
-          const lowerPart = part.toLowerCase();
-          const isHtml = lowerPart.includes("text/html");
-          const isPlain = lowerPart.includes("text/plain");
+      const innerMatches = rawText.matchAll(/boundary=["']?([^"';\r\n]+)/gi);
+      for (const m of innerMatches) {
+        if (m && m[1]) {
+          const b = m[1].trim().replace(/^["']|["']$/g, '');
+          if (b) boundaries.add(b);
+        }
+      }
 
-          if (isHtml || isPlain) {
-            const split = part.split(/\r?\n\r?\n/);
-            const headers = split[0] || "";
-            let body = split.slice(1).join("\n\n").trim();
+      // Also detect boundary delimiter lines directly in rawText if none declared in headers
+      if (boundaries.size === 0) {
+        const lineMatches = rawText.matchAll(/^--([a-zA-Z0-9_.=+-]{8,})/gm);
+        for (const m of lineMatches) {
+          if (m && m[1]) boundaries.add(m[1].trim().replace(/--$/, ''));
+        }
+      }
 
-            if (/content-transfer-encoding:\s*quoted-printable/i.test(headers)) {
-              body = decodeQuotedPrintable(body);
-            } else if (/content-transfer-encoding:\s*base64/i.test(headers)) {
-              body = decodeBase64(body);
+      // 2. Split candidate parts using exact literal delimiters (no regex escaping bugs)
+      if (boundaries.size > 0) {
+        let candidateParts = [rawText];
+        for (const b of boundaries) {
+          const delimiter = '--' + b;
+          const nextParts = [];
+          for (const p of candidateParts) {
+            if (p.includes(delimiter)) {
+              const split = p.split(delimiter);
+              for (const s of split) {
+                const tr = s.trim();
+                if (tr && tr !== '--') nextParts.push(tr);
+              }
+            } else {
+              nextParts.push(p);
             }
+          }
+          candidateParts = nextParts;
+        }
 
-            if (isHtml && !bodyHtml) {
-              bodyHtml = body;
-            } else if (isPlain && !bodyText) {
-              bodyText = body;
-            }
+        for (const part of candidateParts) {
+          const headerEnd = part.search(/\r?\n\r?\n/);
+          let headers = "";
+          let body = "";
+          if (headerEnd !== -1) {
+            headers = part.substring(0, headerEnd);
+            body = part.substring(headerEnd).trim();
+          } else {
+            body = part.trim();
+          }
+
+          const encoding = headers.match(/content-transfer-encoding:\s*([^\s;]+)/i)?.[1] || "";
+          if (/quoted-printable/i.test(encoding)) {
+            body = decodeQuotedPrintable(body);
+          } else if (/base64/i.test(encoding)) {
+            body = decodeBase64(body);
+          }
+
+          body = cleanEmailContent(body);
+
+          const isHtml = /text\/html/i.test(headers) || /<html|<body|<div|<p|<table/i.test(body);
+          const isPlain = /text\/plain/i.test(headers);
+
+          if (isHtml && !bodyHtml) {
+            bodyHtml = body;
+          } else if (isPlain && !bodyText) {
+            bodyText = body;
           }
         }
       }
 
+      // 3. Fallback for non-multipart or unparsed emails
       if (!bodyText && !bodyHtml) {
-        const split = rawText.split(/\r?\n\r?\n/);
-        let rawBody = split.slice(1).join("\n\n").trim() || rawText.substring(0, 10000);
+        const headerEnd = rawText.search(/\r?\n\r?\n/);
+        let rawBody = headerEnd !== -1 ? rawText.substring(headerEnd).trim() : rawText.substring(0, 10000);
         const topEncoding = message.headers.get("content-transfer-encoding") || "";
         if (/quoted-printable/i.test(topEncoding)) {
           rawBody = decodeQuotedPrintable(rawBody);
         } else if (/base64/i.test(topEncoding)) {
           rawBody = decodeBase64(rawBody);
         }
-        if (contentType.toLowerCase().includes("text/html")) {
+        rawBody = cleanEmailContent(rawBody);
+
+        if (contentType.toLowerCase().includes("text/html") || /<[a-z][\s\S]*>/i.test(rawBody)) {
           bodyHtml = rawBody;
         } else {
           bodyText = rawBody;
         }
       }
 
-      // Parse sender name & address
+      // Parse sender name & address (with smart brand fallback e.g. Canva)
       let senderName = "";
       let senderAddress = rawSender;
       const match = rawSender.match(/(.*)<(.+)>/);
       if (match) {
         senderName = decodeMimeHeader(match[1].trim().replace(/^["']|["']$/g, ""));
         senderAddress = match[2].trim();
+      }
+      if (!senderName || senderName === senderAddress || senderName.includes('@')) {
+        const brandMatch = senderAddress.match(/@(?:.*[.])?([a-z0-9-]+)\.([a-z]{2,})$/i);
+        if (brandMatch && brandMatch[1] && !['gmail', 'yahoo', 'hotmail', 'outlook', 'mail'].includes(brandMatch[1].toLowerCase())) {
+          senderName = brandMatch[1].charAt(0).toUpperCase() + brandMatch[1].slice(1);
+        }
       }
 
       const emailObj = {
@@ -1482,10 +1552,6 @@ function getProAppHtml() {
 
           if (newEmails.length > currentEmails.length) {
             playChime();
-            // Auto-open newest email only when inbox list is showing (no email open)
-            if (!selectedEmail && newEmails.length > 0) {
-              selectedEmail = newEmails[0];
-            }
           }
 
           currentEmails = newEmails;
@@ -1653,7 +1719,8 @@ function getProAppHtml() {
         setTimeout(() => {
           const ifr = document.getElementById('readerIframe');
           if (ifr) {
-            const raw = eml.html || ('<div style="white-space: pre-wrap; font-family: sans-serif; padding: 20px; line-height: 1.6; color: #1f2937;">' + (eml.text || 'No message content.').replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</div>');
+            const cleanText = cleanEmailContent(eml.text || 'No message content.');
+            const raw = eml.html || ('<div style="white-space: pre-wrap; font-family: sans-serif; padding: 24px; line-height: 1.6; font-size: 15px; color: #1f2937;">' + cleanText.replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</div>');
             const resetStyles = '<meta name="viewport" content="width=device-width, initial-scale=1.0"><style>body{margin:0;padding:24px;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;font-size:15px;line-height:1.6;color:#1f2937;background-color:#ffffff;word-break:break-word;}img{max-width:100%!important;height:auto!important;}table{max-width:100%!important;}a{color:#0284c7;text-decoration:underline;}</style>';
             let finalDoc = '';
             if (raw.indexOf('<head') !== -1) {

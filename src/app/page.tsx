@@ -172,10 +172,6 @@ export default function Home() {
           setEmails((prev) => {
             if (newEmails.length > prev.length) {
               playChime();
-              // Only auto-open newest if NO email is currently being viewed
-              if (!currentSelected && newEmails.length > 0) {
-                setSelectedEmail(newEmails[0]);
-              }
             }
             return newEmails;
           });
