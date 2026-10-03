@@ -20,7 +20,8 @@ import {
   RefreshCw,
 } from 'lucide-react';
 
-const DOMAIN = process.env.NEXT_PUBLIC_APP_DOMAIN || 'mendoneet.me';
+const AVAILABLE_DOMAINS = ['snapinbox.tech', 'mendoneet.me'];
+const DEFAULT_DOMAIN = process.env.NEXT_PUBLIC_APP_DOMAIN || 'snapinbox.tech';
 
 export default function Home() {
   const [emailAddress, setEmailAddress] = useState<string>('');
@@ -92,10 +93,10 @@ export default function Home() {
   useEffect(() => {
     const saved = localStorage.getItem('mendoneet_temp_email');
     let activeEmail = '';
-    if (saved && saved.endsWith(`@${DOMAIN}`)) {
+    if (saved && AVAILABLE_DOMAINS.some(d => saved.endsWith(`@${d}`))) {
       activeEmail = saved;
     } else {
-      activeEmail = `${generateRandomUsername()}@${DOMAIN}`;
+      activeEmail = `${generateRandomUsername()}@${DEFAULT_DOMAIN}`;
       localStorage.setItem('mendoneet_temp_email', activeEmail);
     }
     setEmailAddress(activeEmail);
@@ -148,9 +149,9 @@ export default function Home() {
     return () => clearInterval(interval);
   }, [emailAddress, fetchEmails]);
 
-  // Handlers
   const handleRandomize = () => {
-    const newAddress = `${generateRandomUsername()}@${DOMAIN}`;
+    const currentDomain = (emailAddress && emailAddress.includes('@')) ? emailAddress.split('@')[1] : DEFAULT_DOMAIN;
+    const newAddress = `${generateRandomUsername()}@${currentDomain}`;
     setEmailAddress(newAddress);
     localStorage.setItem('mendoneet_temp_email', newAddress);
     syncRecoveryKey(newAddress);
@@ -252,7 +253,7 @@ export default function Home() {
 
         {/* TempMailLab Pill Address Control Bar */}
         <EmailControlBar
-          currentEmail={emailAddress || `loading@${DOMAIN}`}
+          currentEmail={emailAddress || `loading@${DEFAULT_DOMAIN}`}
           onRefresh={() => fetchEmails(true)}
           onRandomize={handleRandomize}
           onOpenCustomModal={() => setIsCustomModalOpen(true)}
@@ -498,7 +499,7 @@ export default function Home() {
               </summary>
               <p className="mt-3 text-sm text-zinc-400 leading-relaxed">
                 Yes, simply click the <strong>Change</strong> button under the address bar to create any
-                custom username you prefer (e.g. <code>myname@mendoneet.me</code>).
+                custom username and select between <code>@snapinbox.tech</code> and <code>@mendoneet.me</code>.
               </p>
             </details>
 
@@ -533,7 +534,9 @@ export default function Home() {
       <CustomEmailModal
         isOpen={isCustomModalOpen}
         onClose={() => setIsCustomModalOpen(false)}
-        domain={DOMAIN}
+        domain={DEFAULT_DOMAIN}
+        domains={AVAILABLE_DOMAINS}
+        currentEmail={emailAddress}
         onSelectCustom={handleSelectCustom}
       />
 

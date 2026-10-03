@@ -480,7 +480,7 @@ function getProAppHtml() {
             </svg>
           </div>
           <span id="emailDisplay" class="font-mono text-xs sm:text-base md:text-lg font-bold tracking-wide text-white select-all truncate hover:text-indigo-300 transition">
-            loading@mendoneet.me
+            loading@snapinbox.tech
           </span>
         </div>
 
@@ -657,7 +657,7 @@ function getProAppHtml() {
             <svg class="chevron-icon w-4 h-4 text-zinc-400 group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
           </summary>
           <p class="mt-3 text-sm text-zinc-400 leading-relaxed">
-            Yes, simply click the <strong>Change</strong> button under the address bar to create any custom username you prefer (e.g. <code>myname@mendoneet.me</code>).
+            Yes, simply click the <strong>Change</strong> button under the address bar to create any custom username and select between <code>@snapinbox.tech</code> and <code>@mendoneet.me</code>.
           </p>
         </details>
 
@@ -752,12 +752,17 @@ function getProAppHtml() {
 
       <form onsubmit="handleCustomSubmit(event)" class="space-y-4">
         <div>
-          <label class="block text-xs font-semibold text-zinc-300 mb-1.5">Username</label>
-          <div class="flex items-center bg-[#0a0a0c] border border-white/15 focus-within:border-indigo-500 rounded-xl overflow-hidden px-4 py-1 transition">
-            <input type="text" id="customInput" placeholder="yourname" class="flex-1 bg-transparent py-2.5 text-sm text-white focus:outline-none font-mono">
-            <span class="text-xs text-zinc-400 font-mono">@mendoneet.me</span>
+          <label class="block text-xs font-semibold text-zinc-300 mb-1.5">Username &amp; Domain</label>
+          <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+            <div class="flex-1 bg-[#0a0a0c] border border-white/15 focus-within:border-indigo-500 rounded-xl px-3.5 py-2.5 transition">
+              <input type="text" id="customInput" placeholder="yourname" class="w-full bg-transparent text-sm text-white focus:outline-none font-mono placeholder:text-zinc-600">
+            </div>
+            <select id="customDomainSelect" class="bg-[#0a0a0c] border border-white/15 focus:border-indigo-500 rounded-xl px-3 py-2.5 text-xs sm:text-sm text-indigo-300 font-mono font-semibold focus:outline-none shrink-0 cursor-pointer">
+              <option value="snapinbox.tech" selected>@snapinbox.tech</option>
+              <option value="mendoneet.me">@mendoneet.me</option>
+            </select>
           </div>
-          <p id="customError" class="text-xs text-rose-400 mt-1 hidden"></p>
+          <p id="customError" class="text-xs text-rose-400 mt-1.5 hidden"></p>
         </div>
 
         <div class="flex items-center gap-2 pt-2">
@@ -794,8 +799,20 @@ function getProAppHtml() {
 
   <!-- ================= CLIENT JAVASCRIPT ================= -->
   <script>
-    const DOMAIN = 'mendoneet.me';
-    let currentEmail = localStorage.getItem('snapinbox_email') || generateRandomEmail();
+    const AVAILABLE_DOMAINS = ['snapinbox.tech', 'mendoneet.me'];
+    const DEFAULT_DOMAIN = 'snapinbox.tech';
+    let selectedDomain = DEFAULT_DOMAIN;
+
+    let currentEmail = (() => {
+      try {
+        const saved = localStorage.getItem('snapinbox_email');
+        if (saved && AVAILABLE_DOMAINS.some(d => saved.endsWith('@' + d))) {
+          selectedDomain = saved.split('@')[1];
+          return saved;
+        }
+      } catch (e) {}
+      return generateRandomEmail(DEFAULT_DOMAIN);
+    })();
     let currentRecoveryKey = '';
     let currentEmails = [];
     let selectedEmail = null;
@@ -872,7 +889,8 @@ function getProAppHtml() {
 
     // --- RANDOMIZE EMAIL ---
     function randomizeEmail() {
-      currentEmail = generateRandomEmail();
+      const activeDom = (currentEmail && currentEmail.includes('@')) ? currentEmail.split('@')[1] : DEFAULT_DOMAIN;
+      currentEmail = generateRandomEmail(activeDom);
       updateEmailUI();
       showToast('New random address generated!', '🎲');
     }
@@ -881,9 +899,14 @@ function getProAppHtml() {
     function openCustomModal() {
       const modal = document.getElementById('customModal');
       const input = document.getElementById('customInput');
+      const domainSelect = document.getElementById('customDomainSelect');
       const err = document.getElementById('customError');
       if (err) err.classList.add('hidden');
       if (input) input.value = (currentEmail || '').split('@')[0];
+      if (domainSelect) {
+        const activeDom = (currentEmail && currentEmail.includes('@')) ? currentEmail.split('@')[1] : DEFAULT_DOMAIN;
+        domainSelect.value = activeDom;
+      }
       if (modal) modal.classList.remove('hidden');
       if (input) setTimeout(() => input.focus(), 60);
     }
@@ -898,8 +921,10 @@ function getProAppHtml() {
     function handleCustomSubmit(e) {
       if (e) e.preventDefault();
       const input = document.getElementById('customInput');
+      const domainSelect = document.getElementById('customDomainSelect');
       const err = document.getElementById('customError');
       const val = (input?.value || '').trim().toLowerCase().replace(/[^a-z0-9._-]/g, '');
+      const dom = domainSelect?.value || DEFAULT_DOMAIN;
       if (!val || val.length < 3) {
         if (err) {
           err.innerText = 'Username must be at least 3 characters.';
@@ -907,7 +932,8 @@ function getProAppHtml() {
         }
         return;
       }
-      currentEmail = val + '@' + DOMAIN;
+      selectedDomain = dom;
+      currentEmail = val + '@' + dom;
       closeCustomModal();
       updateEmailUI();
       showToast('Custom address set: ' + currentEmail, '✏️');
@@ -991,12 +1017,15 @@ function getProAppHtml() {
     }
 
     // --- EMAIL ADDRESS GENERATOR ---
-    function generateRandomEmail() {
+    function generateRandomEmail(domain = selectedDomain) {
       const prefixes = ['swift', 'hyper', 'cyber', 'nova', 'echo', 'frost', 'pixel', 'sonic', 'alpha', 'quiet', 'brave', 'zen'];
       const nouns = ['fox', 'rider', 'falcon', 'ghost', 'tiger', 'ninja', 'comet', 'wolf', 'hawk', 'storm', 'spark', 'orbit'];
       const num = Math.floor(100 + Math.random() * 900);
-      const email = prefixes[Math.floor(Math.random() * prefixes.length)] + '.' + nouns[Math.floor(Math.random() * nouns.length)] + num + '@' + DOMAIN;
-      localStorage.setItem('snapinbox_email', email);
+      const chosenDom = domain || selectedDomain || DEFAULT_DOMAIN;
+      const email = prefixes[Math.floor(Math.random() * prefixes.length)] + '.' + nouns[Math.floor(Math.random() * nouns.length)] + num + '@' + chosenDom;
+      try {
+        localStorage.setItem('snapinbox_email', email);
+      } catch (e) {}
       saveToHistory(email);
       return email;
     }
