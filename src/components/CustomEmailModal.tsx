@@ -62,7 +62,12 @@ export const CustomEmailModal: React.FC<CustomEmailModalProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const cleanPrefix = prefix.trim().toLowerCase().replace(/[^a-z0-9._-]/g, '');
+    const cleanPrefix = prefix
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9._-]/g, '')
+      .replace(/^\.+|\.+$/g, '')
+      .replace(/\.{2,}/g, '.');
 
     if (!cleanPrefix) {
       setError('Please enter a valid mailbox name');
@@ -71,6 +76,11 @@ export const CustomEmailModal: React.FC<CustomEmailModalProps> = ({
 
     if (cleanPrefix.length < 3) {
       setError('Mailbox name must be at least 3 characters long');
+      return;
+    }
+
+    if (cleanPrefix.length > 40) {
+      setError('Mailbox name cannot exceed 40 characters');
       return;
     }
 

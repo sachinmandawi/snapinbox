@@ -22,9 +22,11 @@ export default function Home() {
   const [recoveryKey, setRecoveryKey] = useState<string>('');
   const [emails, setEmails] = useState<EmailMessage[]>([]);
   const [selectedEmail, setSelectedEmail] = useState<EmailMessage | null>(null);
-  // Ref always holds the LATEST selectedEmail — safe to read inside async callbacks
+  // Refs always hold the LATEST values — safe to read inside async polling callbacks
   const selectedEmailRef = useRef<EmailMessage | null>(null);
+  const emailAddressRef = useRef<string>('');
   useEffect(() => { selectedEmailRef.current = selectedEmail; }, [selectedEmail]);
+  useEffect(() => { emailAddressRef.current = emailAddress; }, [emailAddress]);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [copiedRowOtpId, setCopiedRowOtpId] = useState<string | null>(null);
@@ -108,11 +110,15 @@ export default function Home() {
     async (isManual = false) => {
       if (!emailAddress) return;
       if (isManual) setIsRefreshing(true);
+      const targetAddress = emailAddress;
 
       try {
-        const res = await fetch(`/api/emails?address=${encodeURIComponent(emailAddress)}`);
+        const res = await fetch(`/api/emails?address=${encodeURIComponent(targetAddress)}`);
         if (res.ok) {
           const data = await res.json();
+          // Race condition guard: ignore response if active address changed in the meantime
+          if (emailAddressRef.current !== targetAddress) return;
+
           const newEmails: EmailMessage[] = data.emails || [];
           // Read the CURRENT selected email via ref (never stale)
           const currentSelected = selectedEmailRef.current;
@@ -156,12 +162,24 @@ export default function Home() {
     [emailAddress, playChime]
   );
 
-  // Polling loop: fetch emails every 4 seconds
+  // Polling loop: fetch emails every 4 seconds + instant tab return listener
   useEffect(() => {
     if (!emailAddress) return;
     fetchEmails();
     const interval = setInterval(() => fetchEmails(), 4000);
-    return () => clearInterval(interval);
+
+    // Instant refresh when user returns to this browser tab from another app/service
+    const handleVisibilityChange = () => {
+      if (typeof document !== 'undefined' && document.visibilityState === 'visible') {
+        fetchEmails(true);
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
   }, [emailAddress, fetchEmails]);
 
   const handleRandomize = () => {

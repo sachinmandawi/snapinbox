@@ -33,9 +33,15 @@ export const RecoveryKeyModal: React.FC<RecoveryKeyModalProps> = ({
 
   const handleRestoreSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const val = inputKey.trim().toUpperCase();
+    let val = inputKey.trim().toUpperCase();
+    // Auto-extract SNAP-XXXX-XXXX even if user pasted extra text (e.g. "Key: SNAP-ABCD-1234")
+    const match = val.match(/SNAP-[A-Z0-9]{4}-[A-Z0-9]{4}/);
+    if (match) {
+      val = match[0];
+    }
+
     if (!val) {
-      setErrorMsg('Please enter a valid Recovery Key');
+      setErrorMsg('Please enter a valid Recovery Key (e.g. SNAP-XXXX-XXXX)');
       return;
     }
 

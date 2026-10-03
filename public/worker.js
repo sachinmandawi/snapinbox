@@ -88,20 +88,39 @@ function extractOtp(subject, body, html) {
 
   const fullText = `${subject || ''} \n ${cleanBody} \n ${cleanHtml}`;
   const patterns = [
-    /(?:code|otp|pin|token|verification|password|login|secret)\s*(?:is|:|-|=)?\s*([0-9]{4,8})\b/i,
-    /(?:enter|use)\s*([0-9]{4,8})\b/i,
+    // 1. Google official format (e.g. "G-847291 is your verification code")
+    /\bG-([0-9]{4,8})\b/i,
+
+    // 2. Number BEFORE keyword (e.g. "849201 is your verification code", "74910 is your security code")
+    /\b([0-9]{4,8})\s*(?:is|as)?\s*(?:your|the)?\s*(?:one-time|verification|confirmation|login|security|access)?\s*(?:code|otp|pin|password)\b/i,
+
+    // 3. Keyword followed by hyphenated/spaced code (e.g. "code: 123-456" or "code is: 849 201")
+    /(?:code|otp|pin|token|verification|password|login|secret)[\s:=_-]*(?:is|as)?[\s:=_-]*([0-9]{3}[-\s][0-9]{3})\b/i,
+
+    // 4. Keyword followed by 4-8 digit standard code (e.g. "code: 123456", "code is: 849201")
+    /(?:code|otp|pin|token|verification|password|login|secret)[\s:=_-]*(?:is|as)?[\s:=_-]*([0-9]{4,8})\b/i,
+
+    // 5. Action verb followed by code (e.g. "enter 123456", "use code 849201")
+    /(?:enter|use)\s*(?:code)?\s*([0-9]{4,8})\b/i,
+
+    // 6. Standalone 6-digit code
     /\b([0-9]{6})\b/,
+
+    // 7. Standalone 5-digit code
+    /\b([0-9]{5})\b/,
+
+    // 8. Standalone 4-digit code (excluding years 1950-2050)
     /\b([0-9]{4})\b/
   ];
   for (let i = 0; i < patterns.length; i++) {
     const match = fullText.match(patterns[i]);
     if (match && match[1]) {
-      // Avoid false positive years (1950-2050) on standalone 4-digit pattern
-      if (i === 3) {
-        const num = parseInt(match[1], 10);
-        if (num >= 1950 && num <= 2050) continue;
+      const code = match[1].replace(/[-\s]/g, '');
+      if (code.length === 4) {
+        const num = parseInt(code, 10);
+        if (num >= 1950 && num <= 2050 && i >= 5) continue;
       }
-      return match[1];
+      return code;
     }
   }
   return null;
@@ -1075,11 +1094,23 @@ function getProAppHtml() {
       const input = document.getElementById('customInput');
       const hiddenInput = document.getElementById('customDomainSelect');
       const err = document.getElementById('customError');
-      const val = (input?.value || '').trim().toLowerCase().replace(/[^a-z0-9._-]/g, '');
+      const val = (input?.value || '')
+        .trim()
+        .toLowerCase()
+        .replace(/[^a-z0-9._-]/g, '')
+        .replace(/^\.+|\.+$/g, '')
+        .replace(/\.{2,}/g, '.');
       const dom = hiddenInput?.value || selectedDomain || DEFAULT_DOMAIN;
       if (!val || val.length < 3) {
         if (err) {
           err.innerText = 'Username must be at least 3 characters.';
+          err.classList.remove('hidden');
+        }
+        return;
+      }
+      if (val.length > 40) {
+        if (err) {
+          err.innerText = 'Username cannot exceed 40 characters.';
           err.classList.remove('hidden');
         }
         return;
@@ -1115,7 +1146,9 @@ function getProAppHtml() {
       const input = document.getElementById('restoreKeyInput');
       const err = document.getElementById('restoreError');
       const btn = document.getElementById('restoreSubmitBtn');
-      const key = (input?.value || '').trim().toUpperCase();
+      let key = (input?.value || '').trim().toUpperCase();
+      const match = key.match(/SNAP-[A-Z0-9]{4}-[A-Z0-9]{4}/);
+      if (match) key = match[0];
 
       if (!key) {
         if (err) {
@@ -1288,10 +1321,14 @@ function getProAppHtml() {
         setTimeout(() => icon && icon.classList.remove('rotate-180'), 500);
       }
 
+      const targetEmail = currentEmail;
       try {
-        const res = await fetch('/api/emails?address=' + encodeURIComponent(currentEmail));
+        const res = await fetch('/api/emails?address=' + encodeURIComponent(targetEmail));
         if (res.ok) {
           const data = await res.json();
+          // Race condition guard: ignore stale response if address changed
+          if (currentEmail !== targetEmail) return;
+
           const newEmails = data.emails || [];
 
           if (newEmails.length > currentEmails.length) {
@@ -1760,6 +1797,11 @@ function getProAppHtml() {
     window.addEventListener('DOMContentLoaded', () => {
       updateEmailUI();
       startRefreshLoop();
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') {
+          fetchEmails(true);
+        }
+      });
     });
   </script>
 
