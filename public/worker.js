@@ -1430,7 +1430,7 @@ function getProAppHtml() {
       activeTab = 'html';
       renderMainView();
       const el = document.getElementById('mainContainer');
-      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      if (el && typeof el.scrollIntoView === 'function') el.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 
     function closeEmailReader() {
@@ -1462,7 +1462,6 @@ function getProAppHtml() {
           }
         }, 2000);
       }
-    }
     }
 
     function downloadCurrentEml() {
