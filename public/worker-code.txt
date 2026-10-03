@@ -300,6 +300,8 @@ export default {
       } catch (e) {
         return new Response(JSON.stringify({ success: false, error: e.message }), { status: 500 });
       }
+    }
+
     // Serve HTML Dashboard
     return new Response(getProAppHtml(), {
       headers: { "Content-Type": "text/html; charset=utf-8" }
@@ -967,7 +969,7 @@ function getProAppHtml() {
         const senderAddr = eml.from?.address || '';
         const dateStr = new Date(eml.receivedAt).toLocaleString();
 
-        container.innerHTML = `
+        container.innerHTML = \`
           <div class="bg-[#0d0d0f] border border-sky-500/40 shadow-[0_0_40px_-10px_rgba(56,189,248,0.2)] rounded-2xl sm:rounded-[1.75rem] overflow-hidden flex flex-col min-h-[500px] sm:min-h-[580px] transition-all duration-300">
             
             <!-- Top Navigation Row: Back to Inbox & Actions -->
@@ -995,100 +997,100 @@ function getProAppHtml() {
                   <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
                   <span>SPF: PASS &bull; DKIM: PASS</span>
                 </span>
-                <span class="text-xs text-zinc-500 font-mono">${dateStr}</span>
+                <span class="text-xs text-zinc-500 font-mono">\${dateStr}</span>
               </div>
 
               <h1 class="text-lg sm:text-2xl font-bold text-white tracking-tight break-words">
-                ${eml.subject || '(No Subject)'}
+                \${eml.subject || '(No Subject)'}
               </h1>
 
               <div class="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-4 text-xs text-zinc-400">
                 <div class="flex items-center gap-1.5 flex-wrap min-w-0">
                   <span class="text-zinc-300 font-medium shrink-0">From:</span>
-                  <span class="text-white font-medium truncate">${sender} <span class="text-zinc-500 font-mono">&lt;${senderAddr}&gt;</span></span>
+                  <span class="text-white font-medium truncate">\${sender} <span class="text-zinc-500 font-mono">&lt;\${senderAddr}&gt;</span></span>
                 </div>
                 <div class="flex items-center gap-1.5 min-w-0">
                   <span class="text-zinc-300 font-medium shrink-0">To:</span>
-                  <span class="font-mono text-indigo-300 truncate">${eml.recipient}</span>
+                  <span class="font-mono text-indigo-300 truncate">\${eml.recipient}</span>
                 </div>
               </div>
 
               <!-- Detected Verification OTP Banner -->
-              ${eml.extractedOtp ? `
+              \${eml.extractedOtp ? \`
                 <div class="p-3.5 sm:p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
                   <div class="flex items-center gap-3">
                     <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-amber-500/20 border border-amber-500/30 flex items-center justify-center text-amber-400 shrink-0 text-base">🔑</div>
                     <div>
                       <span class="text-[10px] uppercase tracking-wider text-amber-400 font-bold block">Detected Verification OTP</span>
-                      <span class="font-mono text-xl sm:text-2xl font-extrabold tracking-widest text-white">${eml.extractedOtp}</span>
+                      <span class="font-mono text-xl sm:text-2xl font-extrabold tracking-widest text-white">\${eml.extractedOtp}</span>
                     </div>
                   </div>
                   <button onclick="copyViewerOtp()" class="flex items-center justify-center gap-1.5 px-4 py-2 sm:py-2.5 rounded-xl text-xs font-bold bg-amber-500 hover:bg-amber-400 text-black shadow-lg shadow-amber-500/20 transition active:scale-95 shrink-0 w-full sm:w-auto">
                     <span>Copy Code</span>
                   </button>
                 </div>
-              ` : ''}
+              \` : ''}
 
               <!-- Detected Primary Link Banner -->
-              ${eml.extractedLink ? `
+              \${eml.extractedLink ? \`
                 <div class="p-3 sm:p-3.5 rounded-2xl bg-indigo-500/10 border border-indigo-500/25 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-4 text-xs">
                   <span class="text-indigo-300 font-medium truncate">Primary verification link detected</span>
-                  <a href="${eml.extractedLink}" target="_blank" rel="noopener noreferrer" class="px-3.5 py-1.5 sm:py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold flex items-center justify-center gap-1.5 shrink-0 transition">
+                  <a href="\${eml.extractedLink}" target="_blank" rel="noopener noreferrer" class="px-3.5 py-1.5 sm:py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold flex items-center justify-center gap-1.5 shrink-0 transition">
                     <span>Open Link</span>
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
                   </a>
                 </div>
-              ` : ''}
+              \` : ''}
             </div>
 
             <!-- Tab Headers -->
             <div class="px-4 sm:px-5 pt-3.5 flex items-center gap-3 border-b border-white/[0.08] text-xs">
-              <button onclick="switchViewerTab('html')" class="pb-2.5 font-bold transition ${activeTab === 'html' ? 'text-indigo-400 border-b-2 border-indigo-500' : 'text-zinc-400 hover:text-zinc-200'}">HTML Body</button>
-              <button onclick="switchViewerTab('text')" class="pb-2.5 font-bold transition ${activeTab === 'text' ? 'text-indigo-400 border-b-2 border-indigo-500' : 'text-zinc-400 hover:text-zinc-200'}">Plain Text</button>
-              <button onclick="switchViewerTab('raw')" class="pb-2.5 font-bold transition ${activeTab === 'raw' ? 'text-indigo-400 border-b-2 border-indigo-500' : 'text-zinc-400 hover:text-zinc-200'}">Raw MIME</button>
+              <button onclick="switchViewerTab('html')" class="pb-2.5 font-bold transition \${activeTab === 'html' ? 'text-indigo-400 border-b-2 border-indigo-500' : 'text-zinc-400 hover:text-zinc-200'}">HTML Body</button>
+              <button onclick="switchViewerTab('text')" class="pb-2.5 font-bold transition \${activeTab === 'text' ? 'text-indigo-400 border-b-2 border-indigo-500' : 'text-zinc-400 hover:text-zinc-200'}">Plain Text</button>
+              <button onclick="switchViewerTab('raw')" class="pb-2.5 font-bold transition \${activeTab === 'raw' ? 'text-indigo-400 border-b-2 border-indigo-500' : 'text-zinc-400 hover:text-zinc-200'}">Raw MIME</button>
             </div>
 
             <!-- Tab Content Area -->
             <div class="flex-1 p-3 sm:p-6 bg-[#08080a] overflow-auto">
-              ${activeTab === 'html' ? `
+              \${activeTab === 'html' ? \`
                 <div class="w-full min-h-[360px] sm:min-h-[500px] bg-white rounded-xl sm:rounded-2xl overflow-hidden shadow-inner">
                   <iframe id="readerIframe" class="w-full min-h-[360px] sm:min-h-[500px] border-none" sandbox="allow-popups allow-popups-to-escape-sandbox"></iframe>
                 </div>
-              ` : ''}
+              \` : ''}
 
-              ${activeTab === 'text' ? `
-                <pre class="p-3.5 sm:p-4 bg-zinc-900/60 rounded-xl sm:rounded-2xl border border-white/5 text-zinc-300 font-mono text-xs sm:text-sm whitespace-pre-wrap leading-relaxed break-words">${eml.text || 'No plain text content available.'}</pre>
-              ` : ''}
+              \${activeTab === 'text' ? \`
+                <pre class="p-3.5 sm:p-4 bg-zinc-900/60 rounded-xl sm:rounded-2xl border border-white/5 text-zinc-300 font-mono text-xs sm:text-sm whitespace-pre-wrap leading-relaxed break-words">\${eml.text || 'No plain text content available.'}</pre>
+              \` : ''}
 
-              ${activeTab === 'raw' ? `
-                <pre class="p-3.5 sm:p-4 bg-zinc-900/60 rounded-xl sm:rounded-2xl border border-white/5 text-zinc-400 font-mono text-xs whitespace-pre-wrap leading-tight overflow-x-auto">${eml.rawMime || JSON.stringify(eml, null, 2)}</pre>
-              ` : ''}
+              \${activeTab === 'raw' ? \`
+                <pre class="p-3.5 sm:p-4 bg-zinc-900/60 rounded-xl sm:rounded-2xl border border-white/5 text-zinc-400 font-mono text-xs whitespace-pre-wrap leading-tight overflow-x-auto">\${eml.rawMime || JSON.stringify(eml, null, 2)}</pre>
+              \` : ''}
             </div>
 
           </div>
-        `;
+        \`;
 
         if (activeTab === 'html') {
           setTimeout(() => {
             const ifr = document.getElementById('readerIframe');
-            if (ifr) ifr.srcdoc = eml.html || `<p style="padding:20px;font-family:sans-serif;">${eml.text || ''}</p>`;
+            if (ifr) ifr.srcdoc = eml.html || \`<p style="padding:20px;font-family:sans-serif;">\${eml.text || ''}</p>\`;
           }, 10);
         }
 
       } else {
         // --- STATE A: INBOX VIEW (TEMPMAILLAB EXACT MIRROR) ---
-        container.innerHTML = `
+        container.innerHTML = \`
           <div class="rounded-2xl sm:rounded-[1.75rem] bg-[#0d0d0f] border border-sky-500/40 shadow-[0_0_40px_-10px_rgba(56,189,248,0.2)] overflow-hidden transition-all duration-300">
             
             <!-- Header: Inbox on left, Refresh on right -->
             <div class="px-4 sm:px-6 py-3.5 sm:py-4 border-b border-white/10 flex items-center justify-between">
               <div class="flex items-center gap-2.5">
                 <h2 class="text-lg sm:text-xl font-bold text-white tracking-tight">Inbox</h2>
-                ${currentEmails.length > 0 ? `
+                \${currentEmails.length > 0 ? \`
                   <span class="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
-                    ${currentEmails.length}
+                    \${currentEmails.length}
                   </span>
-                ` : ''}
+                \` : ''}
               </div>
 
               <div class="flex items-center gap-2">
@@ -1100,7 +1102,7 @@ function getProAppHtml() {
             </div>
 
             <!-- Body: Empty State OR Email List -->
-            ${currentEmails.length === 0 ? `
+            \${currentEmails.length === 0 ? \`
               <div class="py-16 sm:py-28 px-4 flex flex-col items-center justify-center text-center">
                 <!-- Rotating circular arrows with envelope in center -->
                 <div class="relative w-16 h-16 sm:w-20 sm:h-20 mb-4 sm:mb-5 flex items-center justify-center">
@@ -1120,48 +1122,48 @@ function getProAppHtml() {
                 <h3 class="text-lg sm:text-2xl font-bold text-white mb-1 sm:mb-1.5">No emails yet</h3>
                 <p class="text-xs sm:text-sm text-zinc-400 max-w-sm mx-auto">Waiting for incoming emails</p>
               </div>
-            ` : `
+            \` : \`
               <div class="divide-y divide-white/[0.08] max-h-[650px] overflow-y-auto">
-                ${currentEmails.map(eml => {
+                \${currentEmails.map(eml => {
                   const sender = eml.from?.name || eml.from?.address || 'Unknown Sender';
                   const initial = sender.charAt(0).toUpperCase();
                   const dateStr = new Date(eml.receivedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-                  return `
-                    <div onclick="openEmailReader('${eml.id}')" class="p-3.5 sm:p-5 hover:bg-white/[0.04] flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 cursor-pointer transition group">
+                  return \`
+                    <div onclick="openEmailReader('\${eml.id}')" class="p-3.5 sm:p-5 hover:bg-white/[0.04] flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 cursor-pointer transition group">
                       <div class="flex items-start gap-3 sm:gap-3.5 min-w-0 flex-1">
                         <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/25 flex items-center justify-center font-bold text-indigo-400 text-sm shrink-0 mt-0.5">
-                          ${initial}
+                          \${initial}
                         </div>
                         <div class="min-w-0 flex-1">
                           <div class="flex items-center gap-2">
-                            <span class="font-bold text-sm text-white group-hover:text-indigo-300 transition truncate">${sender}</span>
-                            <span class="text-[11px] text-zinc-500 font-mono truncate hidden sm:inline">&lt;${eml.from?.address || ''}&gt;</span>
+                            <span class="font-bold text-sm text-white group-hover:text-indigo-300 transition truncate">\${sender}</span>
+                            <span class="text-[11px] text-zinc-500 font-mono truncate hidden sm:inline">&lt;\${eml.from?.address || ''}&gt;</span>
                           </div>
-                          <div class="text-xs sm:text-sm text-zinc-200 font-medium truncate mt-0.5">${eml.subject || '(No Subject)'}</div>
-                          <div class="text-xs text-zinc-500 truncate mt-0.5">${(eml.text || '').substring(0, 95)}...</div>
+                          <div class="text-xs sm:text-sm text-zinc-200 font-medium truncate mt-0.5">\${eml.subject || '(No Subject)'}</div>
+                          <div class="text-xs text-zinc-500 truncate mt-0.5">\${(eml.text || '').substring(0, 95)}...</div>
                         </div>
                       </div>
 
                       <div class="flex items-center justify-between sm:justify-end gap-3 shrink-0">
-                        ${eml.extractedOtp ? `
-                          <div onclick="event.stopPropagation(); copyText('${eml.extractedOtp}')" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-300 font-mono text-xs font-bold transition active:scale-95" title="Click to copy OTP">
-                            <span>🔑 ${eml.extractedOtp}</span>
+                        \${eml.extractedOtp ? \`
+                          <div onclick="event.stopPropagation(); copyText('\${eml.extractedOtp}')" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-300 font-mono text-xs font-bold transition active:scale-95" title="Click to copy OTP">
+                            <span>🔑 \${eml.extractedOtp}</span>
                             <span class="text-[10px] underline ml-0.5">Copy</span>
                           </div>
-                        ` : ''}
+                        \` : ''}
                         <div class="flex items-center gap-2 text-xs text-zinc-500 font-mono">
-                          <span>${dateStr}</span>
+                          <span>\${dateStr}</span>
                           <span class="text-zinc-500 group-hover:text-white transition">&rarr;</span>
                         </div>
                       </div>
                     </div>
-                  `;
+                  \`;
                 }).join('')}
               </div>
-            `}
+            \`}
           </div>
-        `;
+        \`;
       }
     }
 
@@ -1193,7 +1195,7 @@ function getProAppHtml() {
 
     function downloadCurrentEml() {
       if (!selectedEmail) return;
-      const emlContent = `From: ${selectedEmail.from?.name ? selectedEmail.from.name + ' ' : ''}<${selectedEmail.from?.address || ''}>\\nTo: ${selectedEmail.recipient}\\nSubject: ${selectedEmail.subject}\\nDate: ${new Date(selectedEmail.receivedAt).toUTCString()}\\nMIME-Version: 1.0\\nContent-Type: text/html; charset=utf-8\\n\\n${selectedEmail.html || selectedEmail.text || ''}`;
+      const emlContent = \`From: \${selectedEmail.from?.name ? selectedEmail.from.name + ' ' : ''}<\${selectedEmail.from?.address || ''}>\\nTo: \${selectedEmail.recipient}\\nSubject: \${selectedEmail.subject}\\nDate: \${new Date(selectedEmail.receivedAt).toUTCString()}\\nMIME-Version: 1.0\\nContent-Type: text/html; charset=utf-8\\n\\n\${selectedEmail.html || selectedEmail.text || ''}\`;
       const blob = new Blob([emlContent], { type: 'message/rfc822' });
       const a = document.createElement('a');
       a.href = URL.createObjectURL(blob);
