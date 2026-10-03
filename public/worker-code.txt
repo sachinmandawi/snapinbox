@@ -1332,7 +1332,12 @@ function getProAppHtml() {
       const a = document.createElement('a');
       a.href = URL.createObjectURL(blob);
       a.download = (selectedEmail.subject || 'message').replace(/[^a-z0-9_-]/gi, '_') + '.eml';
+      document.body.appendChild(a);
       a.click();
+      setTimeout(() => {
+        if (a.parentNode) a.parentNode.removeChild(a);
+        URL.revokeObjectURL(a.href);
+      }, 200);
     }
 
     async function deleteCurrentEmail() {
