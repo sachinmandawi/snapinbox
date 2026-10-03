@@ -7,8 +7,6 @@ import {
   Download,
   Key,
   ExternalLink,
-  Code,
-  FileText,
   Check,
   Calendar,
   User,
@@ -29,7 +27,6 @@ export const EmailViewer: React.FC<EmailViewerProps> = ({
   onClose,
   onDelete,
 }) => {
-  const [activeTab, setActiveTab] = useState<'html' | 'text' | 'raw'>('html');
   const [copiedOtp, setCopiedOtp] = useState(false);
 
   if (!email) return null;
@@ -248,63 +245,16 @@ ${email.html || email.text || ''}`;
         )}
       </div>
 
-      {/* Modern Pill Tabs */}
-      <div className="px-4 sm:px-6 pt-3 pb-3 flex items-center gap-2 border-b border-white/[0.08] text-xs bg-white/[0.01]">
-        <button
-          onClick={() => setActiveTab('html')}
-          className={`px-3.5 py-1.5 rounded-xl font-semibold transition ${
-            activeTab === 'html'
-              ? 'bg-[#0284c7] text-white shadow-md shadow-sky-600/30'
-              : 'text-zinc-400 hover:text-white hover:bg-white/5'
-          }`}
-        >
-          HTML Body
-        </button>
-        <button
-          onClick={() => setActiveTab('text')}
-          className={`px-3.5 py-1.5 rounded-xl font-semibold transition ${
-            activeTab === 'text'
-              ? 'bg-[#0284c7] text-white shadow-md shadow-sky-600/30'
-              : 'text-zinc-400 hover:text-white hover:bg-white/5'
-          }`}
-        >
-          Plain Text
-        </button>
-        <button
-          onClick={() => setActiveTab('raw')}
-          className={`px-3.5 py-1.5 rounded-xl font-semibold transition ${
-            activeTab === 'raw'
-              ? 'bg-[#0284c7] text-white shadow-md shadow-sky-600/30'
-              : 'text-zinc-400 hover:text-white hover:bg-white/5'
-          }`}
-        >
-          Raw MIME
-        </button>
-      </div>
-
-      {/* Tab Content Area */}
+      {/* Email Body: Clean, full-bleed styled viewer */}
       <div className="flex-1 p-3 sm:p-6 bg-[#08080a] overflow-auto">
-        {activeTab === 'html' && (
-          <div className="w-full min-h-[400px] sm:min-h-[520px] bg-white rounded-2xl overflow-hidden shadow-2xl border border-white/10">
-            <iframe
-              srcDoc={getRenderHtml()}
-              className="w-full min-h-[400px] sm:min-h-[520px] border-none block"
-              sandbox="allow-popups allow-popups-to-escape-sandbox"
-            />
-          </div>
-        )}
-
-        {activeTab === 'text' && (
-          <pre className="p-4 sm:p-5 bg-zinc-900/70 rounded-2xl border border-white/10 text-zinc-300 font-mono text-xs sm:text-sm whitespace-pre-wrap leading-relaxed break-words">
-            {email.text || 'No plain text content available.'}
-          </pre>
-        )}
-
-        {activeTab === 'raw' && (
-          <pre className="p-4 sm:p-5 bg-zinc-900/70 rounded-2xl border border-white/10 text-zinc-400 font-mono text-xs whitespace-pre-wrap leading-tight overflow-x-auto">
-            {email.rawMime || JSON.stringify(email, null, 2)}
-          </pre>
-        )}
+        <div className="w-full min-h-[420px] sm:min-h-[540px] bg-white rounded-2xl overflow-hidden shadow-2xl border border-white/10">
+          <iframe
+            srcDoc={getRenderHtml()}
+            title="Email Content"
+            className="w-full min-h-[420px] sm:min-h-[540px] border-none block"
+            sandbox="allow-popups allow-popups-to-escape-sandbox"
+          />
+        </div>
       </div>
 
     </div>

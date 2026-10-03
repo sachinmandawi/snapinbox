@@ -1462,8 +1462,6 @@ function getProAppHtml() {
       showToast('Recovery Key copied to clipboard! ✨', '🔑');
     }
 
-    let activeTab = 'html';
-
     // --- FETCH EMAILS FROM BACKEND ---
     async function fetchEmails(isManual = false) {
       if (isManual) {
@@ -1642,51 +1640,32 @@ function getProAppHtml() {
               \${renderAttachmentsHtml(eml.attachments)}
             </div>
 
-            <!-- Tab Headers -->
-            <div class="px-4 sm:px-5 pt-3.5 flex items-center gap-3 border-b border-white/[0.08] text-xs">
-              <button onclick="switchViewerTab('html')" class="pb-2.5 font-bold transition \${activeTab === 'html' ? 'text-indigo-400 border-b-2 border-indigo-500' : 'text-zinc-400 hover:text-zinc-200'}">HTML Body</button>
-              <button onclick="switchViewerTab('text')" class="pb-2.5 font-bold transition \${activeTab === 'text' ? 'text-indigo-400 border-b-2 border-indigo-500' : 'text-zinc-400 hover:text-zinc-200'}">Plain Text</button>
-              <button onclick="switchViewerTab('raw')" class="pb-2.5 font-bold transition \${activeTab === 'raw' ? 'text-indigo-400 border-b-2 border-indigo-500' : 'text-zinc-400 hover:text-zinc-200'}">Raw MIME</button>
-            </div>
-
-            <!-- Tab Content Area -->
+            <!-- Email Body Area: Clean Direct Viewer -->
             <div class="flex-1 p-3 sm:p-6 bg-[#08080a] overflow-auto">
-              \${activeTab === 'html' ? \`
-                <div class="w-full min-h-[360px] sm:min-h-[500px] bg-white rounded-xl sm:rounded-2xl overflow-hidden shadow-inner">
-                  <iframe id="readerIframe" class="w-full min-h-[360px] sm:min-h-[500px] border-none" sandbox="allow-popups allow-popups-to-escape-sandbox"></iframe>
-                </div>
-              \` : ''}
-
-              \${activeTab === 'text' ? \`
-                <pre class="p-3.5 sm:p-4 bg-zinc-900/60 rounded-xl sm:rounded-2xl border border-white/5 text-zinc-300 font-mono text-xs sm:text-sm whitespace-pre-wrap leading-relaxed break-words">\${eml.text || 'No plain text content available.'}</pre>
-              \` : ''}
-
-              \${activeTab === 'raw' ? \`
-                <pre class="p-3.5 sm:p-4 bg-zinc-900/60 rounded-xl sm:rounded-2xl border border-white/5 text-zinc-400 font-mono text-xs whitespace-pre-wrap leading-tight overflow-x-auto">\${eml.rawMime || JSON.stringify(eml, null, 2)}</pre>
-              \` : ''}
+              <div class="w-full min-h-[400px] sm:min-h-[520px] bg-white rounded-2xl overflow-hidden shadow-2xl border border-white/10">
+                <iframe id="readerIframe" class="w-full min-h-[400px] sm:min-h-[520px] border-none block" sandbox="allow-popups allow-popups-to-escape-sandbox"></iframe>
+              </div>
             </div>
 
           </div>
         \`;
 
-        if (activeTab === 'html') {
-          setTimeout(() => {
-            const ifr = document.getElementById('readerIframe');
-            if (ifr) {
-              const raw = eml.html || ('<div style="white-space: pre-wrap; font-family: sans-serif; padding: 20px;">' + (eml.text || 'No message content.').replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</div>');
-              const resetStyles = '<meta name="viewport" content="width=device-width, initial-scale=1.0"><style>body{margin:0;padding:24px;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;font-size:15px;line-height:1.6;color:#1f2937;background-color:#ffffff;word-break:break-word;}img{max-width:100%!important;height:auto!important;}table{max-width:100%!important;}a{color:#0284c7;text-decoration:underline;}</style>';
-              let finalDoc = '';
-              if (raw.indexOf('<head') !== -1) {
-                finalDoc = raw.replace(/<head[^>]*>/i, '$&' + resetStyles);
-              } else if (raw.indexOf('<html') !== -1) {
-                finalDoc = raw.replace(/<html[^>]*>/i, '$&<head>' + resetStyles + '</head>');
-              } else {
-                finalDoc = '<!DOCTYPE html><html><head>' + resetStyles + '</head><body>' + raw + '</body></html>';
-              }
-              ifr.srcdoc = finalDoc;
+        setTimeout(() => {
+          const ifr = document.getElementById('readerIframe');
+          if (ifr) {
+            const raw = eml.html || ('<div style="white-space: pre-wrap; font-family: sans-serif; padding: 20px; line-height: 1.6; color: #1f2937;">' + (eml.text || 'No message content.').replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</div>');
+            const resetStyles = '<meta name="viewport" content="width=device-width, initial-scale=1.0"><style>body{margin:0;padding:24px;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;font-size:15px;line-height:1.6;color:#1f2937;background-color:#ffffff;word-break:break-word;}img{max-width:100%!important;height:auto!important;}table{max-width:100%!important;}a{color:#0284c7;text-decoration:underline;}</style>';
+            let finalDoc = '';
+            if (raw.indexOf('<head') !== -1) {
+              finalDoc = raw.replace(/<head[^>]*>/i, '$&' + resetStyles);
+            } else if (raw.indexOf('<html') !== -1) {
+              finalDoc = raw.replace(/<html[^>]*>/i, '$&<head>' + resetStyles + '</head>');
+            } else {
+              finalDoc = '<!DOCTYPE html><html><head>' + resetStyles + '</head><body>' + raw + '</body></html>';
             }
-          }, 10);
-        }
+            ifr.srcdoc = finalDoc;
+          }
+        }, 10);
 
       } else {
         // --- STATE A: INBOX VIEW (TEMPMAILLAB EXACT MIRROR) ---
@@ -1801,7 +1780,6 @@ function getProAppHtml() {
       const eml = currentEmails.find(e => e.id === id);
       if (!eml) return;
       selectedEmail = eml;
-      activeTab = 'html';
       renderMainView();
       const el = document.getElementById('mainContainer');
       if (el && typeof el.scrollIntoView === 'function') el.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -1809,11 +1787,6 @@ function getProAppHtml() {
 
     function closeEmailReader() {
       selectedEmail = null;
-      renderMainView();
-    }
-
-    function switchViewerTab(tab) {
-      activeTab = tab;
       renderMainView();
     }
 
