@@ -75,7 +75,7 @@ export const EmailControlBar: React.FC<EmailControlBarProps> = ({
           className={`flex items-center gap-1.5 sm:gap-2 px-4 sm:px-7 py-2 sm:py-3 rounded-full font-semibold text-xs sm:text-sm transition-all duration-200 shadow-lg shrink-0 active:scale-95 ${
             copied
               ? 'bg-emerald-600 text-white shadow-emerald-500/30'
-              : 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-indigo-600/30'
+              : 'bg-[#0284c7] hover:bg-[#0369a1] text-white shadow-sky-600/30'
           }`}
         >
           {copied ? <Check className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> : <Copy className="w-3.5 h-3.5 sm:w-4 sm:h-4" />}

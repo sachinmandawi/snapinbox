@@ -546,8 +546,11 @@ function getProAppHtml() {
       </a>
 
       <!-- Navigation & Action Controls -->
-      <div class="flex items-center gap-3 text-xs font-medium text-zinc-400">
-        <button onclick="openRecoveryModal()" class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-amber-300 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/25 rounded-xl transition shadow-sm">
+      <div class="flex items-center gap-2 sm:gap-3 text-xs font-medium text-zinc-400">
+        <button onclick="toggleHistoryModal()" class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-zinc-300 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl transition shadow-sm active:scale-95">
+          <span>🕒 History</span>
+        </button>
+        <button onclick="openRecoveryModal()" class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-amber-300 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/25 rounded-xl transition shadow-sm active:scale-95">
           <span>🔑 Restore Inbox</span>
         </button>
       </div>
@@ -587,7 +590,7 @@ function getProAppHtml() {
         </div>
 
         <!-- Right: Rounded Pill Copy Button -->
-        <button onclick="copyEmail()" id="copyBtn" class="flex items-center gap-1.5 sm:gap-2 px-4 sm:px-7 py-2 sm:py-3 rounded-full bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs sm:text-sm shadow-lg shadow-indigo-600/30 transition-all active:scale-95 shrink-0">
+        <button onclick="copyEmail()" id="copyBtn" class="flex items-center gap-1.5 sm:gap-2 px-4 sm:px-7 py-2 sm:py-3 rounded-full bg-[#0284c7] hover:bg-[#0369a1] text-white font-semibold text-xs sm:text-sm shadow-lg shadow-sky-600/30 transition-all active:scale-95 shrink-0">
           <svg id="copyIcon" class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
           </svg>
@@ -871,7 +874,7 @@ function getProAppHtml() {
             EMAIL NAME
           </label>
           <div class="flex items-center gap-2 sm:gap-2.5">
-            <input type="text" id="customInput" placeholder="yourname" class="flex-1 min-w-0 bg-[#070709] border border-white/15 focus:border-[#0284c7] focus:ring-1 focus:ring-[#0284c7] rounded-xl px-3.5 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm text-white font-mono placeholder:text-zinc-600 focus:outline-none transition">
+            <input type="text" id="customInput" placeholder="yourname" oninput="const err=document.getElementById('customError');if(err){err.classList.add('hidden');err.innerText='';}" class="flex-1 min-w-0 bg-[#070709] border border-white/15 focus:border-[#0284c7] focus:ring-1 focus:ring-[#0284c7] rounded-xl px-3.5 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm text-white font-mono placeholder:text-zinc-600 focus:outline-none transition">
             <button type="button" onclick="randomizeCustomInput()" class="px-3.5 sm:px-5 py-2.5 sm:py-3 rounded-xl bg-transparent hover:bg-white/5 border border-white/20 hover:border-white/30 text-xs font-bold text-white transition active:scale-95 shrink-0">
               Random
             </button>
@@ -951,13 +954,29 @@ function getProAppHtml() {
 
 
   <!-- 4. ADDRESS HISTORY MODAL -->
-  <div id="historyModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
-    <div class="glass-card bg-[#141416] max-w-md w-full rounded-3xl p-6 sm:p-7 relative border border-white/10 shadow-2xl space-y-4">
-      <button onclick="toggleHistoryModal()" class="absolute top-5 right-5 text-zinc-400 hover:text-white text-lg">✕</button>
-      <h3 class="text-lg font-bold text-white">Recent Mailboxes</h3>
-      <p class="text-xs text-zinc-400">Switch between your recently active temporary addresses.</p>
-      <div id="historyList" class="space-y-2 max-h-60 overflow-y-auto pt-2">
+  <div id="historyModal" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-[#0e0f12] border border-white/10 rounded-[28px] max-w-[480px] w-full max-h-[90vh] overflow-y-auto p-5 sm:p-7 shadow-2xl relative space-y-5 transition-all">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-xl bg-sky-500/10 border border-sky-500/20 flex items-center justify-center text-sky-400">
+            🕒
+          </div>
+          <h2 class="text-lg sm:text-xl font-bold text-white tracking-tight">Recent Mailboxes</h2>
+        </div>
+        <button type="button" onclick="toggleHistoryModal()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-semibold text-zinc-300 hover:text-white transition active:scale-95">
+          <span>✕</span>
+          <span>Close</span>
+        </button>
+      </div>
+      <p class="text-xs sm:text-sm text-zinc-400 leading-relaxed -mt-2">Switch back to any of your recently generated temporary email addresses.</p>
+      <div id="historyList" class="space-y-2 max-h-[260px] overflow-y-auto pt-1">
         <!-- Rendered by JS -->
+      </div>
+      <div id="historyFooter" class="pt-2 border-t border-white/10 flex items-center justify-between">
+        <button type="button" onclick="clearHistory()" class="flex items-center gap-1.5 text-xs text-rose-400 hover:text-rose-300 transition">
+          <span>Clear History</span>
+        </button>
+        <span id="historyCount" class="text-[11px] text-zinc-500 font-mono"></span>
       </div>
     </div>
   </div>
@@ -1066,12 +1085,18 @@ function getProAppHtml() {
       showToast('New random address generated!', '🎲');
     }
 
-    // --- CUSTOM ADDRESS MODAL & DOMAIN DROPDOWN (TEMPMAILLAB STYLE) ---
     function randomizeCustomInput() {
       const input = document.getElementById('customInput');
       const err = document.getElementById('customError');
-      if (input) input.value = Math.random().toString(36).substring(2, 10);
-      if (err) err.classList.add('hidden');
+      const randStr = Math.random().toString(36).substring(2, 6) + Math.random().toString(36).substring(2, 6);
+      if (input) {
+        input.value = randStr;
+        input.focus();
+      }
+      if (err) {
+        err.classList.add('hidden');
+        err.innerText = '';
+      }
     }
 
     function toggleDomainDropdown() {
@@ -1163,12 +1188,11 @@ function getProAppHtml() {
       const input = document.getElementById('customInput');
       const hiddenInput = document.getElementById('customDomainSelect');
       const err = document.getElementById('customError');
-      const val = (input?.value || '')
-        .trim()
-        .toLowerCase()
+      const rawVal = (input?.value || '').trim().toLowerCase();
+      const val = rawVal
         .replace(/[^a-z0-9._-]/g, '')
-        .replace(/^\.+|\.+$/g, '')
-        .replace(/\.{2,}/g, '.');
+        .replace(/^[.]+|[.]+$/g, '')
+        .replace(/[.]{2,}/g, '.');
       const dom = hiddenInput?.value || selectedDomain || DEFAULT_DOMAIN;
       if (!val || val.length < 3) {
         if (err) {
@@ -1183,6 +1207,10 @@ function getProAppHtml() {
           err.classList.remove('hidden');
         }
         return;
+      }
+      if (err) {
+        err.classList.add('hidden');
+        err.innerText = '';
       }
       selectedDomain = dom;
       currentEmail = val + '@' + dom;
@@ -1383,16 +1411,27 @@ function getProAppHtml() {
 
     async function copyEmail() {
       await safeCopy(currentEmail);
+      const btn = document.getElementById('copyBtn');
       const btnText = document.getElementById('copyBtnText');
       if (btnText) btnText.innerText = 'Copied! ✨';
+      if (btn) {
+        btn.classList.add('bg-emerald-600', 'shadow-emerald-500/30');
+        btn.classList.remove('bg-[#0284c7]', 'shadow-sky-600/30');
+      }
       showToast('Email address copied to clipboard!', '📋');
       fireConfetti({
         particleCount: 45,
         spread: 60,
         origin: { y: 0.35 },
-        colors: ['#6366f1', '#a855f7', '#38bdf8']
+        colors: ['#0284c7', '#38bdf8', '#0ea5e9']
       });
-      setTimeout(() => { if (btnText) btnText.innerText = 'Copy'; }, 2000);
+      setTimeout(() => {
+        if (btnText) btnText.innerText = 'Copy';
+        if (btn) {
+          btn.classList.remove('bg-emerald-600', 'shadow-emerald-500/30');
+          btn.classList.add('bg-[#0284c7]', 'shadow-sky-600/30');
+        }
+      }, 2000);
     }
 
     async function copyText(str) {
@@ -1618,7 +1657,19 @@ function getProAppHtml() {
         if (activeTab === 'html') {
           setTimeout(() => {
             const ifr = document.getElementById('readerIframe');
-            if (ifr) ifr.srcdoc = eml.html || \`<p style="padding:20px;font-family:sans-serif;">\${eml.text || ''}</p>\`;
+            if (ifr) {
+              const raw = eml.html || ('<div style="white-space: pre-wrap; font-family: sans-serif; padding: 20px;">' + (eml.text || 'No message content.').replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</div>');
+              const resetStyles = '<meta name="viewport" content="width=device-width, initial-scale=1.0"><style>body{margin:0;padding:24px;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;font-size:15px;line-height:1.6;color:#1f2937;background-color:#ffffff;word-break:break-word;}img{max-width:100%!important;height:auto!important;}table{max-width:100%!important;}a{color:#0284c7;text-decoration:underline;}</style>';
+              let finalDoc = '';
+              if (raw.indexOf('<head') !== -1) {
+                finalDoc = raw.replace(/<head[^>]*>/i, '$&' + resetStyles);
+              } else if (raw.indexOf('<html') !== -1) {
+                finalDoc = raw.replace(/<html[^>]*>/i, '$&<head>' + resetStyles + '</head>');
+              } else {
+                finalDoc = '<!DOCTYPE html><html><head>' + resetStyles + '</head><body>' + raw + '</body></html>';
+              }
+              ifr.srcdoc = finalDoc;
+            }
           }, 10);
         }
 

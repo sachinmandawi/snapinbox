@@ -8,9 +8,10 @@ interface HeaderProps {
   domain?: string;
   onOpenSetupGuide?: () => void;
   onOpenRecoveryModal?: () => void;
+  onOpenHistoryModal?: () => void;
 }
 
-export const Header: React.FC<HeaderProps> = ({ onOpenRecoveryModal }) => {
+export const Header: React.FC<HeaderProps> = ({ onOpenRecoveryModal, onOpenHistoryModal }) => {
   return (
     <header className="border-b border-white/[0.08] bg-[#050505]/80 backdrop-blur-md sticky top-0 z-30 transition-all">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
@@ -20,7 +21,15 @@ export const Header: React.FC<HeaderProps> = ({ onOpenRecoveryModal }) => {
         </Link>
 
         {/* Right side navigation links */}
-        <div className="flex items-center gap-3 text-xs font-medium text-zinc-400">
+        <div className="flex items-center gap-2 sm:gap-3 text-xs font-medium text-zinc-400">
+          {onOpenHistoryModal && (
+            <button
+              onClick={onOpenHistoryModal}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-zinc-300 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl transition shadow-sm active:scale-95"
+            >
+              <span>🕒 History</span>
+            </button>
+          )}
           {onOpenRecoveryModal && (
             <button
               onClick={onOpenRecoveryModal}

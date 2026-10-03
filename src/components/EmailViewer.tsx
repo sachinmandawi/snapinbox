@@ -201,15 +201,15 @@ ${email.html || email.text || ''}`;
 
         {/* Smart Action Link Banner */}
         {email.extractedLink && (
-          <div className="p-3 sm:p-3.5 rounded-2xl bg-indigo-500/10 border border-indigo-500/25 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-4 text-xs">
-            <span className="text-indigo-300 font-medium truncate">
+          <div className="p-3 sm:p-3.5 rounded-2xl bg-sky-500/10 border border-sky-500/25 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-4 text-xs">
+            <span className="text-sky-300 font-medium truncate">
               Primary verification link detected
             </span>
             <a
               href={email.extractedLink}
               target="_blank"
               rel="noopener noreferrer"
-              className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold flex items-center justify-center gap-1.5 shrink-0 transition shadow-md shadow-indigo-600/20"
+              className="px-4 py-2 rounded-xl bg-[#0284c7] hover:bg-[#0369a1] text-white font-semibold flex items-center justify-center gap-1.5 shrink-0 transition shadow-md shadow-sky-600/20 active:scale-95"
             >
               <span>Open Link</span>
               <ExternalLink className="w-3.5 h-3.5" />
@@ -221,7 +221,7 @@ ${email.html || email.text || ''}`;
         {email.attachments && email.attachments.length > 0 && (
           <div className="p-3.5 sm:p-4 rounded-2xl bg-white/[0.03] border border-white/[0.08] space-y-2">
             <span className="text-[11px] uppercase font-bold tracking-wider text-zinc-400 flex items-center gap-1.5">
-              <Paperclip className="w-3.5 h-3.5 text-indigo-400" />
+              <Paperclip className="w-3.5 h-3.5 text-sky-400" />
               <span>Attachments ({email.attachments.length})</span>
             </span>
             <div className="flex flex-wrap gap-2">
@@ -236,7 +236,7 @@ ${email.html || email.text || ''}`;
                     <a
                       href={att.contentUrl}
                       download={att.filename}
-                      className="text-indigo-400 hover:text-indigo-300 font-semibold text-[11px] underline"
+                      className="text-sky-400 hover:text-sky-300 font-semibold text-[11px] underline"
                     >
                       Download
                     </a>
@@ -254,7 +254,7 @@ ${email.html || email.text || ''}`;
           onClick={() => setActiveTab('html')}
           className={`px-3.5 py-1.5 rounded-xl font-semibold transition ${
             activeTab === 'html'
-              ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30'
+              ? 'bg-[#0284c7] text-white shadow-md shadow-sky-600/30'
               : 'text-zinc-400 hover:text-white hover:bg-white/5'
           }`}
         >
@@ -264,7 +264,7 @@ ${email.html || email.text || ''}`;
           onClick={() => setActiveTab('text')}
           className={`px-3.5 py-1.5 rounded-xl font-semibold transition ${
             activeTab === 'text'
-              ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30'
+              ? 'bg-[#0284c7] text-white shadow-md shadow-sky-600/30'
               : 'text-zinc-400 hover:text-white hover:bg-white/5'
           }`}
         >
@@ -274,7 +274,7 @@ ${email.html || email.text || ''}`;
           onClick={() => setActiveTab('raw')}
           className={`px-3.5 py-1.5 rounded-xl font-semibold transition ${
             activeTab === 'raw'
-              ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30'
+              ? 'bg-[#0284c7] text-white shadow-md shadow-sky-600/30'
               : 'text-zinc-400 hover:text-white hover:bg-white/5'
           }`}
         >

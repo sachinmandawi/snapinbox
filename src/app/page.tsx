@@ -9,6 +9,7 @@ import { QrModal } from '@/components/QrModal';
 import { RecoveryKeyModal } from '@/components/RecoveryKeyModal';
 import { SetupGuideModal } from '@/components/SetupGuideModal';
 import { DeleteConfirmModal } from '@/components/DeleteConfirmModal';
+import { HistoryModal } from '@/components/HistoryModal';
 import { EmailMessage } from '@/types/email';
 import { generateRandomUsername } from '@/lib/utils';
 import confetti from 'canvas-confetti';
@@ -32,6 +33,8 @@ export default function Home() {
   const [countdown, setCountdown] = useState<number>(10);
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [copiedRowOtpId, setCopiedRowOtpId] = useState<string | null>(null);
+  const [history, setHistory] = useState<string[]>([]);
+  const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
 
   // Modals
   const [isCustomModalOpen, setIsCustomModalOpen] = useState(false);
@@ -93,6 +96,35 @@ export default function Home() {
     } catch (e) {}
   }, []);
 
+  // Save an address to recent history in localStorage
+  const saveToHistory = useCallback((address: string) => {
+    if (!address || !address.includes('@')) return;
+    try {
+      const stored = localStorage.getItem('snapinbox_history');
+      let list: string[] = stored ? JSON.parse(stored) : [];
+      list = [address, ...list.filter((a) => a !== address)].slice(0, 10);
+      localStorage.setItem('snapinbox_history', JSON.stringify(list));
+      setHistory(list);
+    } catch (e) {}
+  }, []);
+
+  const handleClearHistory = () => {
+    try {
+      localStorage.removeItem('snapinbox_history');
+      setHistory(emailAddress ? [emailAddress] : []);
+    } catch (e) {}
+  };
+
+  const handleSelectHistoryAddress = (address: string) => {
+    setEmailAddress(address);
+    localStorage.setItem('snapinbox_email', address);
+    localStorage.setItem('mendoneet_temp_email', address);
+    syncRecoveryKey(address);
+    saveToHistory(address);
+    setEmails([]);
+    setSelectedEmail(null);
+  };
+
   // Update browser tab title with email count so user sees incoming OTP from other tabs
   useEffect(() => {
     if (typeof document !== 'undefined') {
@@ -116,7 +148,8 @@ export default function Home() {
     localStorage.setItem('mendoneet_temp_email', activeEmail);
     setEmailAddress(activeEmail);
     syncRecoveryKey(activeEmail);
-  }, [syncRecoveryKey]);
+    saveToHistory(activeEmail);
+  }, [syncRecoveryKey, saveToHistory]);
 
   // Fetch emails for the active email address
   const fetchEmails = useCallback(
@@ -182,6 +215,8 @@ export default function Home() {
     fetchEmails();
 
     const interval = setInterval(() => {
+      // Pause countdown when tab is inactive/hidden to save battery, CPU, and network
+      if (typeof document !== 'undefined' && document.hidden) return;
       setCountdown((prev) => {
         if (prev <= 1) {
           fetchEmails();
@@ -218,6 +253,7 @@ export default function Home() {
         if (selectedEmailRef.current) setSelectedEmail(null);
         setIsCustomModalOpen(false);
         setIsRecoveryModalOpen(false);
+        setIsHistoryModalOpen(false);
         setIsQrModalOpen(false);
         setIsSetupGuideOpen(false);
         setIsDeleteAllModalOpen(false);
@@ -236,6 +272,7 @@ export default function Home() {
     localStorage.setItem('snapinbox_email', newAddress);
     localStorage.setItem('mendoneet_temp_email', newAddress);
     syncRecoveryKey(newAddress);
+    saveToHistory(newAddress);
     setEmails([]);
     setSelectedEmail(null);
   };
@@ -245,6 +282,7 @@ export default function Home() {
     localStorage.setItem('snapinbox_email', newEmail);
     localStorage.setItem('mendoneet_temp_email', newEmail);
     syncRecoveryKey(newEmail);
+    saveToHistory(newEmail);
     setEmails([]);
     setSelectedEmail(null);
   };
@@ -328,7 +366,10 @@ export default function Home() {
       <div className="fixed top-0 left-1/2 -translate-x-1/2 w-[850px] h-[360px] bg-gradient-to-b from-indigo-600/12 via-indigo-900/5 to-transparent blur-[120px] pointer-events-none -z-10" />
 
       {/* Top Navigation */}
-      <Header onOpenRecoveryModal={() => setIsRecoveryModalOpen(true)} />
+      <Header
+        onOpenRecoveryModal={() => setIsRecoveryModalOpen(true)}
+        onOpenHistoryModal={() => setIsHistoryModalOpen(true)}
+      />
 
       {/* Main Content Area */}
       <main className="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 pt-8 sm:pt-14 pb-16 space-y-8 sm:space-y-10">
@@ -752,6 +793,16 @@ export default function Home() {
           if (emailToDeleteId) executeDeleteSingle(emailToDeleteId);
         }}
         isSingle={true}
+      />
+
+      {/* Address History Modal */}
+      <HistoryModal
+        isOpen={isHistoryModalOpen}
+        onClose={() => setIsHistoryModalOpen(false)}
+        currentEmail={emailAddress}
+        history={history}
+        onSelectAddress={handleSelectHistoryAddress}
+        onClearHistory={handleClearHistory}
       />
     </div>
   );
