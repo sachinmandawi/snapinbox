@@ -1,6 +1,6 @@
-# 🚀 Mendoneet Mail - Disposable Temp Mail Service
+# 🚀 SnapInbox - Free Disposable Temporary Email Service
 
-Temporary disposable email service built for **`mendoneet.me`**.
+Modern, privacy-focused temporary disposable email service powered by **`mendoneet.me`**.
 
 ---
 
@@ -20,7 +20,7 @@ Temporary disposable email service built for **`mendoneet.me`**.
 ## 🛠️ Quick Start (Local Development)
 
 ```bash
-# 1. Install dependencies (already installed)
+# 1. Install dependencies
 npm install
 
 # 2. Run local development server
@@ -29,50 +29,18 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-Click **"Simulate Test Email"** in the UI to instantly verify that emails, OTP codes, and HTML formatting work seamlessly!
-
 ---
 
-## 🌐 Namecheap & Cloudflare Setup (Step-by-Step)
+## 🌐 Live Deployment
 
-### Step 1: Connect Namecheap to Cloudflare (Free DNS)
-1. Go to [Cloudflare.com](https://dash.cloudflare.com) and log in.
-2. Click **"Add a Site"** &rarr; enter `mendoneet.me` &rarr; choose the **Free** tier.
-3. Cloudflare will give you **2 Nameservers** (e.g. `alex.ns.cloudflare.com` and `beth.ns.cloudflare.com`).
-4. Now open [Namecheap Dashboard](https://ap.www.namecheap.com):
-   - Go to **Domain List** &rarr; Click **Manage** next to `mendoneet.me`.
-   - In the **Nameservers** section, change the dropdown from **Namecheap BasicDNS** to **Custom DNS**.
-   - Paste Cloudflare's two nameservers into the boxes and click the green checkmark (✔) to save.
+### Deploy to Vercel (Recommended - 1 Click)
+1. Go to [vercel.com/new](https://vercel.com/new).
+2. Import repository **`sachinmandawi/snapinbox`**.
+3. In Environment Variables, set:
+   - `NEXT_PUBLIC_APP_DOMAIN` = `mendoneet.me`
+   - `WEBHOOK_SECRET` = `mendoneet_secret_key_change_me_123`
+4. Click **Deploy**.
+5. In Project Settings &rarr; Domains &rarr; Add **`mendoneet.me`**.
+6. In Cloudflare DNS, add an `A` record pointing `@` to `76.76.21.21` (DNS only).
 
----
-
-### Step 2: Enable Free Email Routing on Cloudflare
-1. In the Cloudflare dashboard, select `mendoneet.me`.
-2. On the left sidebar, navigate to **Email** &rarr; **Email Routing**.
-3. Click **"Get Started"** / **"Enable Email Routing"**.
-4. Cloudflare will automatically display the required **MX records** and **TXT (SPF) record**. Click **"Add records automatically"** to let Cloudflare configure them instantly.
-
----
-
-### Step 3: Deploy Website & Create Cloudflare Worker
-1. Deploy this website to **Vercel** (or Render / Railway / your VPS):
-   - Push this repo to GitHub.
-   - Import to Vercel (Free plan).
-   - Set environment variable:
-     - `NEXT_PUBLIC_APP_DOMAIN`: `mendoneet.me`
-     - `WEBHOOK_SECRET`: `your_custom_secret_key`
-2. In Cloudflare, go to **Workers & Pages** &rarr; **Create application** &rarr; **Create Worker**.
-3. Name it `mendoneet-email-worker` and click **Deploy**.
-4. Click **Quick Edit** and paste the code from [`cloudflare-worker/worker.js`](./cloudflare-worker/worker.js).
-5. Update `WEBHOOK_URL` in the worker to:
-   ```
-   https://your-site.vercel.app/api/webhook/incoming
-   ```
-6. Save and deploy.
-7. Return to `mendoneet.me` &rarr; **Email** &rarr; **Email Routing** &rarr; **Routing Rules**.
-8. In the **Catch-all rule** section:
-   - Action: **Send to Worker**
-   - Destination: Select `mendoneet-email-worker`.
-   - Save.
-
-🎉 **All emails sent to `*@mendoneet.me` will now automatically appear in real-time on your Temp Mail website!**
+🎉 Your disposable email website is now fully live on **`https://mendoneet.me`**!
