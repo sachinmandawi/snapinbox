@@ -20,7 +20,7 @@ export const Header: React.FC<HeaderProps> = ({ domain, onOpenSetupGuide }) => {
           <div>
             <div className="flex items-center gap-2">
               <span className="font-extrabold text-xl tracking-tight bg-gradient-to-r from-white via-slate-200 to-indigo-300 bg-clip-text text-transparent">
-                Mendoneet<span className="text-indigo-400">Mail</span>
+                Snap<span className="text-indigo-400">Inbox</span>
               </span>
               <span className="hidden sm:inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
                 @{domain}

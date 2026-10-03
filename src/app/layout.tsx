@@ -2,10 +2,11 @@ import type { Metadata, Viewport } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'Mendoneet Mail - Free Temporary Disposable Email',
+  title: 'SnapInbox - Free Disposable Temporary Email',
   description:
-    'Secure, instant, anonymous temporary disposable email service powered by mendoneet.me. Protect your personal inbox from spam, bot crawlers, and newsletters.',
+    'Instant, anonymous temporary disposable email service powered by SnapInbox on mendoneet.me. Protect your personal inbox from spam, bot crawlers, and newsletters.',
   keywords: [
+    'snapinbox',
     'temp mail',
     'disposable email',
     'mendoneet',

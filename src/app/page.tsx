@@ -308,7 +308,7 @@ export default function Home() {
       <footer className="border-t border-slate-800/80 bg-[#070b13] py-6 text-center text-xs text-slate-500">
         <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
           <p>
-            &copy; {new Date().getFullYear()} <strong className="text-slate-400">MendoneetMail</strong>. Powered by <code className="text-indigo-400 font-mono">@{DOMAIN}</code>
+            &copy; {new Date().getFullYear()} <strong className="text-slate-400">SnapInbox</strong>. Powered by <code className="text-indigo-400 font-mono">@{DOMAIN}</code>
           </p>
           <div className="flex items-center gap-4">
             <button
