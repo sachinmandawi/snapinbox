@@ -93,7 +93,7 @@ export const CustomEmailModal: React.FC<CustomEmailModalProps> = ({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-sm animate-fade-in">
       {/* Modal Card - Exact TempMailLab Style */}
-      <div className="bg-[#0e0f12] border border-white/10 rounded-[28px] w-full max-w-[480px] p-5 sm:p-7 shadow-2xl relative space-y-5 sm:space-y-6">
+      <div className="bg-[#0e0f12] border border-white/10 rounded-[28px] w-full max-w-[480px] max-h-[90vh] overflow-y-auto p-5 sm:p-7 shadow-2xl relative space-y-5 sm:space-y-6 transition-all">
         
         {/* Top Header: Title & Pill Close Button */}
         <div className="flex items-center justify-between">
@@ -148,7 +148,7 @@ export const CustomEmailModal: React.FC<CustomEmailModalProps> = ({
               DOMAIN
             </label>
             
-            <div className="relative">
+            <div>
               <button
                 type="button"
                 onClick={() => setIsDropdownOpen((prev) => !prev)}
@@ -166,9 +166,9 @@ export const CustomEmailModal: React.FC<CustomEmailModalProps> = ({
                 />
               </button>
 
-              {/* Floating Dropdown Options */}
+              {/* Flexible Scrollable Dropdown Options (Inside Card Flow) */}
               {isDropdownOpen && (
-                <div className="absolute left-0 right-0 top-full mt-2 bg-[#121318] border border-white/15 rounded-xl p-1.5 shadow-2xl z-50 backdrop-blur-2xl animate-in fade-in zoom-in-95 duration-100">
+                <div className="mt-2 bg-[#121318] border border-white/15 rounded-xl p-1.5 max-h-[160px] overflow-y-auto space-y-1 animate-in fade-in slide-in-from-top-2 duration-150">
                   {domains.map((dom) => {
                     const isSelected = selectedDomain === dom;
                     const isPrimary = dom === 'snapinbox.tech';

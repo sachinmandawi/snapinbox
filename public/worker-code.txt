@@ -848,7 +848,7 @@ function getProAppHtml() {
 
   <!-- 2. CHANGE EMAIL MODAL (EXACT TEMPMAILLAB STYLE) -->
   <div id="customModal" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-[#0e0f12] border border-white/10 rounded-[28px] max-w-[480px] w-full p-5 sm:p-7 shadow-2xl relative space-y-5 sm:space-y-6">
+    <div class="bg-[#0e0f12] border border-white/10 rounded-[28px] max-w-[480px] w-full max-h-[90vh] overflow-y-auto p-5 sm:p-7 shadow-2xl relative space-y-5 sm:space-y-6 transition-all">
       
       <!-- Top Header: Title & Pill Close Button -->
       <div class="flex items-center justify-between">
@@ -880,12 +880,12 @@ function getProAppHtml() {
         </div>
 
         <!-- DOMAIN SECTION -->
-        <div class="space-y-2 relative" id="domainDropdownContainer">
+        <div class="space-y-2" id="domainDropdownContainer">
           <label class="block text-[11px] font-bold text-zinc-400 uppercase tracking-wider">
             DOMAIN
           </label>
           
-          <div class="relative">
+          <div>
             <button type="button" onclick="toggleDomainDropdown()" id="domainDropdownBtn" class="w-full flex items-center justify-between bg-[#070709] border border-white/15 hover:border-white/30 rounded-xl px-4 py-3 text-sm font-mono text-white transition cursor-pointer">
               <span id="selectedDomainLabel" class="font-semibold text-zinc-100">snapinbox.tech</span>
               <svg id="domainChevron" class="w-4 h-4 text-zinc-400 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -893,16 +893,16 @@ function getProAppHtml() {
               </svg>
             </button>
 
-            <!-- Floating Dropdown Options -->
-            <div id="domainDropdownMenu" class="hidden absolute left-0 right-0 top-full mt-2 bg-[#121318] border border-white/15 rounded-xl p-1.5 shadow-2xl z-50 backdrop-blur-2xl">
-              <div onclick="selectDomainOption('snapinbox.tech')" class="flex items-center justify-between px-3.5 py-2.5 rounded-lg cursor-pointer text-xs font-mono text-zinc-300 hover:bg-white/5 hover:text-white transition">
+            <!-- Flexible Scrollable Dropdown Options (Inside Card Flow) -->
+            <div id="domainDropdownMenu" class="hidden mt-2 bg-[#121318] border border-white/15 rounded-xl p-1.5 max-h-[160px] overflow-y-auto space-y-1">
+              <div id="domainOpt-snapinbox" onclick="selectDomainOption('snapinbox.tech')" class="flex items-center justify-between px-3.5 py-2.5 rounded-lg cursor-pointer text-xs font-mono bg-[#0284c7]/20 text-[#38bdf8] font-bold border border-[#0284c7]/30 transition">
                 <div class="flex items-center gap-2.5">
                   <span>snapinbox.tech</span>
                   <span class="text-[9px] px-1.5 py-0.5 rounded uppercase font-sans font-bold tracking-wider bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">Primary</span>
                 </div>
                 <span id="domainCheck-snapinbox" class="text-[#38bdf8] font-bold">✓</span>
               </div>
-              <div onclick="selectDomainOption('mendoneet.me')" class="flex items-center justify-between px-3.5 py-2.5 rounded-lg cursor-pointer text-xs font-mono text-zinc-300 hover:bg-white/5 hover:text-white transition">
+              <div id="domainOpt-mendoneet" onclick="selectDomainOption('mendoneet.me')" class="flex items-center justify-between px-3.5 py-2.5 rounded-lg cursor-pointer text-xs font-mono text-zinc-300 hover:bg-white/5 hover:text-white transition">
                 <div class="flex items-center gap-2.5">
                   <span>mendoneet.me</span>
                   <span class="text-[9px] px-1.5 py-0.5 rounded uppercase font-sans font-bold tracking-wider bg-zinc-500/15 text-zinc-400 border border-white/10">Alias</span>
@@ -1077,14 +1077,17 @@ function getProAppHtml() {
     function toggleDomainDropdown() {
       const menu = document.getElementById('domainDropdownMenu');
       const chevron = document.getElementById('domainChevron');
+      const btn = document.getElementById('domainDropdownBtn');
       if (!menu) return;
       const isHidden = menu.classList.contains('hidden');
       if (isHidden) {
         menu.classList.remove('hidden');
         if (chevron) chevron.classList.add('rotate-180', 'text-[#0284c7]');
+        if (btn) btn.classList.add('border-[#0284c7]', 'ring-1', 'ring-[#0284c7]');
       } else {
         menu.classList.add('hidden');
         if (chevron) chevron.classList.remove('rotate-180', 'text-[#0284c7]');
+        if (btn) btn.classList.remove('border-[#0284c7]', 'ring-1', 'ring-[#0284c7]');
       }
     }
 
@@ -1093,24 +1096,38 @@ function getProAppHtml() {
       const hiddenInput = document.getElementById('customDomainSelect');
       const checkSnap = document.getElementById('domainCheck-snapinbox');
       const checkMendo = document.getElementById('domainCheck-mendoneet');
+      const optSnap = document.getElementById('domainOpt-snapinbox');
+      const optMendo = document.getElementById('domainOpt-mendoneet');
       
       if (label) label.innerText = dom;
       if (hiddenInput) hiddenInput.value = dom;
       selectedDomain = dom;
 
       if (checkSnap) {
-        if (dom === 'snapinbox.tech') checkSnap.classList.remove('hidden');
-        else checkSnap.classList.add('hidden');
+        if (dom === 'snapinbox.tech') {
+          checkSnap.classList.remove('hidden');
+          if (optSnap) optSnap.className = 'flex items-center justify-between px-3.5 py-2.5 rounded-lg cursor-pointer text-xs font-mono bg-[#0284c7]/20 text-[#38bdf8] font-bold border border-[#0284c7]/30 transition';
+        } else {
+          checkSnap.classList.add('hidden');
+          if (optSnap) optSnap.className = 'flex items-center justify-between px-3.5 py-2.5 rounded-lg cursor-pointer text-xs font-mono text-zinc-300 hover:bg-white/5 hover:text-white transition';
+        }
       }
       if (checkMendo) {
-        if (dom === 'mendoneet.me') checkMendo.classList.remove('hidden');
-        else checkMendo.classList.add('hidden');
+        if (dom === 'mendoneet.me') {
+          checkMendo.classList.remove('hidden');
+          if (optMendo) optMendo.className = 'flex items-center justify-between px-3.5 py-2.5 rounded-lg cursor-pointer text-xs font-mono bg-[#0284c7]/20 text-[#38bdf8] font-bold border border-[#0284c7]/30 transition';
+        } else {
+          checkMendo.classList.add('hidden');
+          if (optMendo) optMendo.className = 'flex items-center justify-between px-3.5 py-2.5 rounded-lg cursor-pointer text-xs font-mono text-zinc-300 hover:bg-white/5 hover:text-white transition';
+        }
       }
 
       const menu = document.getElementById('domainDropdownMenu');
       const chevron = document.getElementById('domainChevron');
+      const btn = document.getElementById('domainDropdownBtn');
       if (menu) menu.classList.add('hidden');
       if (chevron) chevron.classList.remove('rotate-180', 'text-[#0284c7]');
+      if (btn) btn.classList.remove('border-[#0284c7]', 'ring-1', 'ring-[#0284c7]');
     }
 
     function openCustomModal() {
@@ -1134,7 +1151,11 @@ function getProAppHtml() {
       const err = document.getElementById('customError');
       if (err) err.classList.add('hidden');
       const menu = document.getElementById('domainDropdownMenu');
+      const chevron = document.getElementById('domainChevron');
+      const btn = document.getElementById('domainDropdownBtn');
       if (menu) menu.classList.add('hidden');
+      if (chevron) chevron.classList.remove('rotate-180', 'text-[#0284c7]');
+      if (btn) btn.classList.remove('border-[#0284c7]', 'ring-1', 'ring-[#0284c7]');
     }
 
     function handleCustomSubmit(e) {
