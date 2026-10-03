@@ -483,7 +483,7 @@ function getProAppHtml() {
     </div>
 
     <!-- Centerpiece: Pill Address Bar -->
-    <div class="w-full max-w-2xl mx-auto space-y-3 sm:space-y-3.5">
+    <div class="w-full max-w-4xl mx-auto space-y-3 sm:space-y-3.5">
       <div class="glass-pill rounded-full p-1.5 sm:p-2.5 pl-3.5 sm:pl-6 flex items-center justify-between shadow-2xl relative group">
         <!-- Left: Envelope Icon + Address -->
         <div class="flex items-center gap-2 sm:gap-3 overflow-hidden flex-1 min-w-0 pr-2 cursor-pointer" onclick="copyEmail()" title="Click to copy address">
@@ -506,71 +506,71 @@ function getProAppHtml() {
         </button>
       </div>
 
-      <!-- The 4 Signature Action Cards (Exact Identical Proportion - Refresh, Change, Delete, Recovery Key) -->
-      <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3">
+      <!-- The 4 Signature Action Cards Grid - Zero Text Truncation -->
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3.5">
         
         <!-- 1. Refresh Button Card -->
-        <button onclick="fetchEmails(true)" class="h-[68px] sm:h-[72px] action-card rounded-2xl px-3 sm:px-3.5 flex items-center justify-between text-left group min-w-0">
-          <div class="flex items-center gap-2 sm:gap-2.5 min-w-0 flex-1 mr-1">
+        <button onclick="fetchEmails(true)" class="h-[74px] sm:h-[76px] action-card rounded-2xl px-3 sm:px-4 flex items-center justify-between text-left group overflow-hidden">
+          <div class="flex items-center gap-2.5 sm:gap-3">
             <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-zinc-300 group-hover:text-indigo-400 group-hover:border-indigo-500/40 shrink-0 transition">
               <svg id="refreshIcon" class="w-3.5 h-3.5 sm:w-4 sm:h-4 transition duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
               </svg>
             </div>
-            <div class="min-w-0 flex-1">
-              <div class="font-semibold text-xs sm:text-sm text-zinc-100 truncate">Refresh</div>
-              <div class="text-[10px] sm:text-[11px] text-zinc-400 truncate">Sync inbox</div>
+            <div>
+              <div class="font-bold text-xs sm:text-sm text-zinc-100 whitespace-nowrap">Refresh</div>
+              <div class="text-[10px] sm:text-[11px] text-zinc-400 whitespace-nowrap">Sync inbox</div>
             </div>
           </div>
-          <span id="refreshTimerBadge" class="text-[10px] sm:text-[11px] font-mono font-medium text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded-full border border-indigo-500/20 shrink-0">10s</span>
+          <span id="refreshTimerBadge" class="text-[10px] sm:text-[11px] font-mono font-medium text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded-full border border-indigo-500/20 shrink-0 ml-1">10s</span>
         </button>
 
         <!-- 2. Change / Custom Email Card -->
-        <button onclick="openCustomModal()" class="h-[68px] sm:h-[72px] action-card rounded-2xl px-3 sm:px-3.5 flex items-center justify-between text-left group min-w-0">
-          <div class="flex items-center gap-2 sm:gap-2.5 min-w-0 flex-1 mr-1">
+        <button onclick="openCustomModal()" class="h-[74px] sm:h-[76px] action-card rounded-2xl px-3 sm:px-4 flex items-center justify-between text-left group overflow-hidden">
+          <div class="flex items-center gap-2.5 sm:gap-3">
             <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-violet-500/10 border border-violet-500/20 flex items-center justify-center text-zinc-300 group-hover:text-violet-400 group-hover:border-violet-500/40 shrink-0 transition">
               <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
               </svg>
             </div>
-            <div class="min-w-0 flex-1">
-              <div class="font-semibold text-xs sm:text-sm text-zinc-100 truncate">Change</div>
-              <div class="text-[10px] sm:text-[11px] text-zinc-400 truncate">Custom name</div>
+            <div>
+              <div class="font-bold text-xs sm:text-sm text-zinc-100 whitespace-nowrap">Change</div>
+              <div class="text-[10px] sm:text-[11px] text-zinc-400 whitespace-nowrap">Custom alias</div>
             </div>
           </div>
-          <span class="text-[10px] sm:text-[11px] font-semibold text-zinc-300 bg-white/5 group-hover:bg-white/10 px-2 py-0.5 rounded-full border border-white/10 shrink-0 transition">Edit</span>
+          <span class="text-[10px] sm:text-[11px] font-semibold text-zinc-300 bg-white/5 group-hover:bg-white/10 px-2 py-0.5 rounded-full border border-white/10 shrink-0 ml-1 transition">Edit</span>
         </button>
 
         <!-- 3. Delete / Wipe Mailbox Card -->
-        <button onclick="openDeleteModal()" class="h-[68px] sm:h-[72px] action-card rounded-2xl px-3 sm:px-3.5 flex items-center justify-between text-left group border-rose-500/20 bg-rose-500/[0.03] hover:bg-rose-500/[0.08] min-w-0">
-          <div class="flex items-center gap-2 sm:gap-2.5 min-w-0 flex-1 mr-1">
+        <button onclick="openDeleteModal()" class="h-[74px] sm:h-[76px] action-card rounded-2xl px-3 sm:px-4 flex items-center justify-between text-left group border-rose-500/20 bg-rose-500/[0.03] hover:bg-rose-500/[0.08] overflow-hidden">
+          <div class="flex items-center gap-2.5 sm:gap-3">
             <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-rose-500/10 border border-rose-500/25 flex items-center justify-center text-rose-400 shrink-0 group-hover:border-rose-400/50 group-hover:scale-105 transition">
               <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
               </svg>
             </div>
-            <div class="min-w-0 flex-1">
-              <div class="font-semibold text-xs sm:text-sm text-zinc-100 group-hover:text-rose-200 truncate transition">Delete</div>
-              <div class="text-[10px] sm:text-[11px] text-rose-400/80 truncate">Wipe inbox</div>
+            <div>
+              <div class="font-bold text-xs sm:text-sm text-zinc-100 group-hover:text-rose-200 whitespace-nowrap transition">Delete</div>
+              <div class="text-[10px] sm:text-[11px] text-rose-400/80 whitespace-nowrap">Wipe inbox</div>
             </div>
           </div>
-          <span class="text-[10px] sm:text-[11px] font-semibold text-rose-400 bg-rose-500/10 px-2 py-0.5 rounded-full border border-rose-500/20 shrink-0">Wipe</span>
+          <span class="text-[10px] sm:text-[11px] font-semibold text-rose-400 bg-rose-500/10 px-2 py-0.5 rounded-full border border-rose-500/20 shrink-0 ml-1">Wipe</span>
         </button>
 
         <!-- 4. Recovery Key Card -->
-        <button onclick="openRecoveryModal()" class="h-[68px] sm:h-[72px] action-card rounded-2xl px-3 sm:px-3.5 flex items-center justify-between text-left group border-amber-500/20 bg-amber-500/[0.04] hover:bg-amber-500/[0.08] min-w-0">
-          <div class="flex items-center gap-2 sm:gap-2.5 min-w-0 flex-1 mr-1">
+        <button onclick="openRecoveryModal()" class="h-[74px] sm:h-[76px] action-card rounded-2xl px-3 sm:px-4 flex items-center justify-between text-left group border-amber-500/20 bg-amber-500/[0.04] hover:bg-amber-500/[0.08] overflow-hidden">
+          <div class="flex items-center gap-2.5 sm:gap-3">
             <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-amber-500/10 border border-amber-500/25 flex items-center justify-center text-amber-400 shrink-0 group-hover:border-amber-400/40 group-hover:scale-105 transition">
               <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path>
               </svg>
             </div>
-            <div class="min-w-0 flex-1">
-              <div class="font-semibold text-xs sm:text-sm text-zinc-100 truncate">Recovery Key</div>
-              <div class="text-[10px] sm:text-[11px] text-amber-400/80 truncate font-mono">30d restore</div>
+            <div>
+              <div class="font-bold text-xs sm:text-sm text-zinc-100 group-hover:text-amber-200 whitespace-nowrap transition">Recovery Key</div>
+              <div class="text-[10px] sm:text-[11px] text-amber-400/80 whitespace-nowrap font-mono">30d restore</div>
             </div>
           </div>
-          <span class="text-[10px] sm:text-[11px] font-semibold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/20 shrink-0">30d</span>
+          <span class="text-[10px] sm:text-[11px] font-semibold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/20 shrink-0 ml-1">30d</span>
         </button>
 
       </div>
