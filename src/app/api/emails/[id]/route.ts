@@ -50,7 +50,7 @@ export async function DELETE(
   } catch (err: any) {
     console.error('Error deleting email:', err);
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: 'Internal server error', details: err?.message },
       { status: 500 }
     );
   }

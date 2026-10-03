@@ -36,6 +36,7 @@ export async function DELETE(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const address = searchParams.get('address');
+    const id = searchParams.get('id');
 
     if (!address) {
       return NextResponse.json(
@@ -44,6 +45,18 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
+    // If specific email id provided, delete just that email (matching Worker API)
+    if (id) {
+      const { deleteEmail } = await import('@/lib/store');
+      const deleted = await deleteEmail(id);
+      return NextResponse.json({
+        success: true,
+        deleted,
+        message: deleted ? `Email ${id} deleted` : `Email ${id} not found`,
+      });
+    }
+
+    // Otherwise clear all emails for this address
     const deletedCount = await clearAllForRecipient(address);
     return NextResponse.json({
       success: true,
@@ -51,9 +64,9 @@ export async function DELETE(request: NextRequest) {
       message: `Cleared ${deletedCount} emails for ${address}`,
     });
   } catch (err: any) {
-    console.error('Error clearing emails:', err);
+    console.error('Error clearing/deleting emails:', err);
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: 'Internal server error', details: err?.message },
       { status: 500 }
     );
   }
