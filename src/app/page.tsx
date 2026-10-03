@@ -17,6 +17,7 @@ import {
   Lock,
   Globe,
   ChevronDown,
+  RefreshCw,
 } from 'lucide-react';
 
 const DOMAIN = process.env.NEXT_PUBLIC_APP_DOMAIN || 'mendoneet.me';
@@ -190,25 +191,6 @@ export default function Home() {
     }
   };
 
-  const handleTriggerTestSend = async () => {
-    if (!emailAddress) return;
-    try {
-      setIsRefreshing(true);
-      const res = await fetch('/api/emails/test-send', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ recipient: emailAddress, preset: 'netflix' }),
-      });
-      if (res.ok) {
-        await fetchEmails(false);
-      }
-    } catch (e) {
-      console.error('Test send error:', e);
-    } finally {
-      setIsRefreshing(false);
-    }
-  };
-
   const handleDeleteEmail = async (id: string, e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
     try {
@@ -240,7 +222,7 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#050505] text-[#f5f5f5] selection:bg-indigo-500/30 selection:text-indigo-200">
+    <div className="min-h-screen flex flex-col bg-[#050505] text-[#f5f5f5] selection:bg-indigo-500/30 selection:text-indigo-200 overflow-x-hidden">
       {/* Ambient Top Glow */}
       <div className="fixed top-0 left-1/2 -translate-x-1/2 w-[850px] h-[360px] bg-gradient-to-b from-indigo-600/12 via-indigo-900/5 to-transparent blur-[120px] pointer-events-none -z-10" />
 
@@ -248,7 +230,7 @@ export default function Home() {
       <Header onOpenRecoveryModal={() => setIsRecoveryModalOpen(true)} />
 
       {/* Main Content Area */}
-      <main className="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 pt-10 sm:pt-14 pb-16 space-y-10">
+      <main className="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 pt-8 sm:pt-14 pb-16 space-y-8 sm:space-y-10">
         
         {/* Hero Headline & Subtitle */}
         <div className="text-center max-w-2xl mx-auto space-y-3">
@@ -256,13 +238,13 @@ export default function Home() {
             <span className="w-1.5 h-1.5 rounded-full bg-indigo-400" />
             <span>Free Temp Mail with Password &amp; Recovery Key</span>
           </div>
-          <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-white leading-tight">
+          <h1 className="text-2xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-white leading-tight">
             Free Temp Mail with{' '}
             <span className="bg-gradient-to-r from-indigo-400 via-indigo-300 to-cyan-300 bg-clip-text text-transparent">
               Recovery Key
             </span>
           </h1>
-          <p className="text-sm sm:text-base text-zinc-400 leading-relaxed">
+          <p className="text-xs sm:text-base text-zinc-400 leading-relaxed max-w-xl mx-auto">
             Create free temp mail with a password-style Recovery Key, additional custom options, and
             support for OTP and verification emails. Restore your temporary inbox for up to 30 days.
           </p>
@@ -275,31 +257,133 @@ export default function Home() {
           onRandomize={handleRandomize}
           onOpenCustomModal={() => setIsCustomModalOpen(true)}
           onOpenRecoveryModal={() => setIsRecoveryModalOpen(true)}
-          onTriggerTestSend={handleTriggerTestSend}
           onDeleteAll={handleDeleteAll}
           isRefreshing={isRefreshing}
           recoveryKeyPreview={recoveryKey ? recoveryKey.substring(0, 9) + '••••' : 'SNAP-••••'}
         />
 
-        {/* Inbox Grid: List & Detail View */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-          <div className="lg:col-span-5 space-y-4">
-            <EmailList
-              emails={emails}
-              selectedEmailId={selectedEmail?.id || null}
-              onSelectEmail={(e) => setSelectedEmail(e)}
-              onDeleteEmail={handleDeleteEmail}
-              currentEmail={emailAddress}
-            />
-          </div>
-
-          <div className="lg:col-span-7">
+        {/* Inbox / Full Message Viewer Container (Exact TempMailLab Full View) */}
+        <div className="max-w-4xl w-full mx-auto">
+          {selectedEmail ? (
             <EmailViewer
               email={selectedEmail}
               onClose={() => setSelectedEmail(null)}
-              onDelete={(id) => handleDeleteEmail(id)}
+              onDelete={(id) => {
+                handleDeleteEmail(id);
+                setSelectedEmail(null);
+              }}
             />
-          </div>
+          ) : (
+            <div className="rounded-2xl sm:rounded-[1.75rem] bg-[#0d0d0f] border border-sky-500/40 shadow-[0_0_40px_-10px_rgba(56,189,248,0.2)] overflow-hidden transition-all duration-300">
+              
+              {/* Header: Inbox on left, Refresh on right */}
+              <div className="px-4 sm:px-6 py-3.5 sm:py-4 border-b border-white/10 flex items-center justify-between">
+                <div className="flex items-center gap-2.5">
+                  <h2 className="text-lg sm:text-xl font-bold text-white tracking-tight">Inbox</h2>
+                  {emails.length > 0 && (
+                    <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+                      {emails.length}
+                    </span>
+                  )}
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => fetchEmails(true)}
+                    disabled={isRefreshing}
+                    className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-semibold text-zinc-200 hover:text-white transition active:scale-95 disabled:opacity-50"
+                  >
+                    <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin text-indigo-400' : ''}`} />
+                    <span>Refresh</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Body: No emails yet (Exact TempMailLab Circular Icon) OR Email list */}
+              {emails.length === 0 ? (
+                <div className="py-16 sm:py-28 px-4 flex flex-col items-center justify-center text-center">
+                  {/* Rotating circular arrows with envelope in center */}
+                  <div className="relative w-16 h-16 sm:w-20 sm:h-20 mb-4 sm:mb-5 flex items-center justify-center">
+                    <svg className="w-16 h-16 sm:w-20 sm:h-20 text-zinc-400 animate-[spin_10s_linear_infinite]" viewBox="0 0 64 64" fill="none" stroke="currentColor" strokeWidth="2.5">
+                      <path d="M52 32a20 20 0 0 1-34.14 14.14L14 42" strokeLinecap="round" strokeLinejoin="round"/>
+                      <path d="M14 52v-10h10" strokeLinecap="round" strokeLinejoin="round"/>
+                      <path d="M12 32A20 20 0 0 1 46.14 17.86L50 22" strokeLinecap="round" strokeLinejoin="round"/>
+                      <path d="M50 12v10h-10" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                    <div className="absolute w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center text-zinc-300">
+                      <svg className="w-7 h-7 sm:w-8 sm:h-8" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M2.25 4.5A2.25 2.25 0 0 1 4.5 2.25h15A2.25 2.25 0 0 1 21.75 4.5v15A2.25 2.25 0 0 1 19.5 21.75h-15A2.25 2.25 0 0 1 2.25 19.5v-15zm3.15 1.5l6.6 4.4 6.6-4.4H5.4zm14.1 2.45l-7.05 4.7a.75.75 0 0 1-.9 0L4.5 8.45V18a.75.75 0 0 0 .75.75h13.5a.75.75 0 0 0 .75-.75V8.45z"/>
+                      </svg>
+                    </div>
+                  </div>
+
+                  <h3 className="text-lg sm:text-2xl font-bold text-white mb-1 sm:mb-1.5">No emails yet</h3>
+                  <p className="text-xs sm:text-sm text-zinc-400 max-w-sm mx-auto">
+                    Waiting for incoming emails
+                  </p>
+                </div>
+              ) : (
+                <div className="divide-y divide-white/[0.08] max-h-[650px] overflow-y-auto">
+                  {emails.map((email) => {
+                    const senderInitial = (email.from.name || email.from.address || '?').charAt(0).toUpperCase();
+                    return (
+                      <div
+                        key={email.id}
+                        onClick={() => setSelectedEmail(email)}
+                        className="p-3.5 sm:p-5 hover:bg-white/[0.04] flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 cursor-pointer transition group"
+                      >
+                        <div className="flex items-start gap-3 sm:gap-3.5 min-w-0 flex-1">
+                          <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/25 flex items-center justify-center font-bold text-indigo-400 text-sm shrink-0 mt-0.5">
+                            {senderInitial}
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center gap-2">
+                              <span className="font-bold text-sm text-white group-hover:text-indigo-300 transition truncate">
+                                {email.from.name || email.from.address}
+                              </span>
+                              <span className="text-[11px] text-zinc-500 font-mono truncate hidden sm:inline">
+                                &lt;{email.from.address}&gt;
+                              </span>
+                            </div>
+                            <div className="text-xs sm:text-sm text-zinc-200 font-medium truncate mt-0.5">
+                              {email.subject || '(No Subject)'}
+                            </div>
+                            <div className="text-xs text-zinc-500 truncate mt-0.5">
+                              {(email.text || '').substring(0, 95)}...
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center justify-between sm:justify-end gap-3 shrink-0">
+                          {email.extractedOtp && (
+                            <div
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                if (email.extractedOtp) {
+                                  navigator.clipboard.writeText(email.extractedOtp);
+                                }
+                              }}
+                              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-300 font-mono text-xs font-bold transition active:scale-95"
+                              title="Click to copy OTP"
+                            >
+                              <span>🔑 {email.extractedOtp}</span>
+                              <span className="text-[10px] underline ml-0.5">Copy</span>
+                            </div>
+                          )}
+                          <div className="flex items-center gap-2 text-xs text-zinc-500 font-mono">
+                            <span>
+                              {new Date(email.receivedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                            </span>
+                            <span className="text-zinc-500 group-hover:text-white transition">→</span>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Below-The-Fold: Feature Showcase Section (Mirrored from TempMailLab) */}

@@ -300,90 +300,6 @@ export default {
       } catch (e) {
         return new Response(JSON.stringify({ success: false, error: e.message }), { status: 500 });
       }
-    }
-
-    // API: TEST SENDER SIMULATOR (Presets & Custom)
-    if (url.pathname === "/api/emails/test-send" && request.method === "POST") {
-      try {
-        const body = await request.json();
-        const recipient = (body.recipient || "").toLowerCase().trim();
-        if (!recipient) return new Response(JSON.stringify({ error: "Missing recipient" }), { status: 400 });
-
-        const otp = Math.floor(100000 + Math.random() * 900000).toString();
-        const presetType = body.preset || "netflix";
-
-        const templates = {
-          netflix: {
-            from: { name: "Netflix Security", address: "security@netflix.com" },
-            subject: `Your Netflix temporary access code is ${otp}`,
-            html: `<div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 580px; margin: 0 auto; padding: 32px; background-color: #141414; color: #ffffff; border-radius: 12px; border: 1px solid #2a2a2a;">
-              <h1 style="color: #e50914; font-size: 28px; font-weight: 800; margin: 0 0 20px 0; letter-spacing: 1px;">NETFLIX</h1>
-              <h2 style="font-size: 20px; font-weight: 600; margin-bottom: 16px;">Your temporary sign-in code</h2>
-              <p style="color: #cccccc; font-size: 15px; line-height: 1.5;">Please use the following 6-digit code to complete your login to Netflix:</p>
-              <div style="background-color: #222222; border: 1px solid #383838; border-radius: 8px; padding: 22px; text-align: center; margin: 24px 0;">
-                <span style="font-size: 38px; font-weight: bold; letter-spacing: 10px; color: #ffffff;">${otp}</span>
-              </div>
-              <p style="color: #888888; font-size: 13px;">This code is valid for 15 minutes. If you did not make this request, you can safely ignore this email.</p>
-              <hr style="border: none; border-top: 1px solid #2d2d2d; margin: 24px 0;" />
-              <p style="color: #555555; font-size: 11px;">Netflix International B.V. &bull; Stadhouderskade 55, Amsterdam</p>
-            </div>`,
-            text: `Hi there,\n\nYour Netflix temporary access code is: ${otp}\n\nThis code expires in 15 minutes.\n\nHappy watching,\nThe Netflix Team`
-          },
-          google: {
-            from: { name: "Google Accounts", address: "no-reply@accounts.google.com" },
-            subject: `Google Verification Code: G-${otp}`,
-            html: `<div style="font-family: 'Google Sans', Roboto, sans-serif; max-width: 580px; margin: 0 auto; padding: 28px; border: 1px solid #2a2a2a; border-radius: 12px; background: #16181c; color: #e8eaed;">
-              <h2 style="font-size: 22px; color: #ffffff; margin-bottom: 16px;">Verify your Google Account</h2>
-              <p style="font-size: 14px; color: #bdc1c6; line-height: 1.5;">Use the following verification code to confirm your identity:</p>
-              <div style="font-size: 36px; font-weight: bold; letter-spacing: 6px; color: #8ab4f8; margin: 24px 0; background: #20242a; padding: 18px; border-radius: 8px; text-align: center;">G-${otp}</div>
-              <p style="font-size: 12px; color: #9aa0a6;">This code expires in 10 minutes. Google will never call or message you asking for this code.</p>
-            </div>`,
-            text: `G-${otp} is your Google verification code. Do not share it with anyone.`
-          },
-          discord: {
-            from: { name: "Discord", address: "noreply@discord.com" },
-            subject: "Verify your Discord email address",
-            html: `<div style="font-family: 'gg sans', sans-serif; max-width: 580px; margin: 0 auto; padding: 32px; background-color: #2b2d31; color: #dbdee1; border-radius: 12px; border: 1px solid #383a40;">
-              <h2 style="font-size: 24px; font-weight: bold; color: #ffffff; margin-bottom: 16px;">Hey there!</h2>
-              <p style="font-size: 15px; line-height: 1.6; color: #dbdee1;">Thanks for registering an account with Discord! You're almost ready to start communicating with your friends and communities.</p>
-              <div style="text-align: center; margin: 28px 0;">
-                <a href="https://discord.com/verify?token=dsc_${otp}&code=${otp}" style="background-color: #5865F2; color: #ffffff; padding: 14px 32px; border-radius: 6px; text-decoration: none; font-weight: 600; display: inline-block;">Verify Email Address</a>
-              </div>
-              <p style="font-size: 13px; color: #949ba4;">Your security OTP token: <strong>${otp}</strong></p>
-            </div>`,
-            text: `Hey there!\n\nPlease verify your email for Discord: https://discord.com/verify?token=dsc_${otp}&code=${otp}\n\nSecurity token: ${otp}`
-          }
-        };
-
-        const t = templates[presetType] || templates.netflix;
-        const testEmail = {
-          id: "test_" + Date.now().toString(36),
-          recipient,
-          from: t.from,
-          subject: t.subject,
-          text: t.text,
-          html: t.html,
-          rawMime: `From: ${t.from.name} <${t.from.address}>\nTo: ${recipient}\nSubject: ${t.subject}\nDate: ${new Date().toUTCString()}\n\n${t.text}`,
-          receivedAt: new Date().toISOString(),
-          read: false,
-          size: t.html.length,
-          extractedOtp: otp,
-          extractedLink: extractActionLink(t.text, t.html),
-          security: { spf: true, dkim: true }
-        };
-
-        const existing = await getEmails(recipient, env);
-        existing.unshift(testEmail);
-        await saveEmails(recipient, existing.slice(0, 50), env);
-
-        return new Response(JSON.stringify({ success: true, email: testEmail }), {
-          headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" }
-        });
-      } catch (e) {
-        return new Response(JSON.stringify({ error: e.message }), { status: 500 });
-      }
-    }
-
     // Serve HTML Dashboard
     return new Response(getProAppHtml(), {
       headers: { "Content-Type": "text/html; charset=utf-8" }
@@ -501,7 +417,7 @@ function getProAppHtml() {
     }
   </style>
 </head>
-<body class="min-h-screen flex flex-col bg-[#050505] text-[#f5f5f5] selection:bg-indigo-500/30 selection:text-indigo-200">
+<body class="min-h-screen flex flex-col bg-[#050505] text-[#f5f5f5] selection:bg-indigo-500/30 selection:text-indigo-200 overflow-x-hidden">
 
   <!-- Ambient Top Glow (Exact TempMailLab Aesthetic) -->
   <div class="fixed top-0 left-1/2 -translate-x-1/2 w-[850px] h-[360px] bg-gradient-to-b from-indigo-600/12 via-indigo-900/5 to-transparent blur-[120px] pointer-events-none -z-10"></div>
@@ -538,7 +454,7 @@ function getProAppHtml() {
   </header>
 
   <!-- Main Hero & Temp Mail Section -->
-  <main class="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 pt-10 sm:pt-14 pb-16 space-y-10">
+  <main class="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 pt-8 sm:pt-14 pb-16 space-y-8 sm:space-y-10">
 
     <!-- Hero Title & Subtitle -->
     <div class="text-center max-w-2xl mx-auto space-y-3">
@@ -546,45 +462,45 @@ function getProAppHtml() {
         <span class="w-1.5 h-1.5 rounded-full bg-indigo-400"></span>
         <span>Free Temp Mail with Password &amp; Recovery Key</span>
       </div>
-      <h1 class="text-3xl sm:text-5xl font-extrabold tracking-tight text-white leading-tight">
+      <h1 class="text-2xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-white leading-tight">
         Free Temp Mail with <span class="bg-gradient-to-r from-indigo-400 via-indigo-300 to-cyan-300 bg-clip-text text-transparent">Recovery Key</span>
       </h1>
-      <p class="text-sm sm:text-base text-zinc-400 leading-relaxed">
+      <p class="text-xs sm:text-base text-zinc-400 leading-relaxed max-w-xl mx-auto">
         Create free temp mail with a password-style Recovery Key, additional custom options, and instant OTP verification support. Restore your temporary inbox for up to 30 days.
       </p>
     </div>
 
     <!-- Centerpiece: Pill Address Bar -->
-    <div class="max-w-2xl mx-auto">
-      <div class="glass-pill rounded-full p-2 sm:p-2.5 pl-4 sm:pl-6 flex items-center justify-between shadow-2xl relative group">
+    <div class="w-full max-w-2xl mx-auto space-y-3 sm:space-y-3.5">
+      <div class="glass-pill rounded-full p-1.5 sm:p-2.5 pl-3.5 sm:pl-6 flex items-center justify-between shadow-2xl relative group">
         <!-- Left: Envelope Icon + Address -->
-        <div class="flex items-center gap-3 overflow-hidden flex-1 min-w-0 pr-2">
-          <div class="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center shrink-0 text-indigo-400">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div class="flex items-center gap-2 sm:gap-3 overflow-hidden flex-1 min-w-0 pr-2 cursor-pointer" onclick="copyEmail()" title="Click to copy address">
+          <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center shrink-0 text-indigo-400">
+            <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207"></path>
             </svg>
           </div>
-          <span id="emailDisplay" onclick="copyEmail()" class="font-mono text-base sm:text-lg font-bold tracking-wide text-white select-all truncate cursor-pointer hover:text-indigo-300 transition" title="Click to copy address">
+          <span id="emailDisplay" class="font-mono text-xs sm:text-base md:text-lg font-bold tracking-wide text-white select-all truncate hover:text-indigo-300 transition">
             loading@mendoneet.me
           </span>
         </div>
 
         <!-- Right: Rounded Pill Copy Button -->
-        <button onclick="copyEmail()" id="copyBtn" class="flex items-center gap-2 px-6 sm:px-7 py-3 rounded-full bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs sm:text-sm shadow-lg shadow-indigo-600/30 transition-all active:scale-95 shrink-0">
-          <svg id="copyIcon" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <button onclick="copyEmail()" id="copyBtn" class="flex items-center gap-1.5 sm:gap-2 px-4 sm:px-7 py-2 sm:py-3 rounded-full bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs sm:text-sm shadow-lg shadow-indigo-600/30 transition-all active:scale-95 shrink-0">
+          <svg id="copyIcon" class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
           </svg>
           <span id="copyBtnText">Copy</span>
         </button>
       </div>
 
-      <!-- The 3 Signature Action Cards (Exact Identical Size h-[70px] - Zero Overlap) -->
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-4">
+      <!-- The 3 Signature Action Cards (Exact Identical Size h-[68px] sm:h-[70px] - Zero Overlap) -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-3">
         
         <!-- 1. Refresh Button Card -->
-        <button onclick="fetchEmails(true)" class="h-[70px] action-card rounded-2xl px-3.5 flex items-center justify-between text-left group min-w-0">
-          <div class="flex items-center gap-3 min-w-0 flex-1 mr-2">
-            <div class="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-zinc-300 group-hover:text-indigo-400 group-hover:border-indigo-500/30 shrink-0 transition">
+        <button onclick="fetchEmails(true)" class="h-[68px] sm:h-[70px] action-card rounded-2xl px-3 sm:px-3.5 flex items-center justify-between text-left group min-w-0">
+          <div class="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1 mr-1.5 sm:mr-2">
+            <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-zinc-300 group-hover:text-indigo-400 group-hover:border-indigo-500/30 shrink-0 transition">
               <svg id="refreshIcon" class="w-4 h-4 transition duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
               </svg>
@@ -594,13 +510,13 @@ function getProAppHtml() {
               <div class="text-[10px] sm:text-[11px] text-zinc-400 truncate">Sync inbox</div>
             </div>
           </div>
-          <span id="refreshTimerBadge" class="text-[11px] font-mono font-medium text-indigo-400 bg-indigo-500/10 px-2.5 py-1 rounded-full border border-indigo-500/20 shrink-0">10s</span>
+          <span id="refreshTimerBadge" class="text-[10px] sm:text-[11px] font-mono font-medium text-indigo-400 bg-indigo-500/10 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full border border-indigo-500/20 shrink-0">10s</span>
         </button>
 
         <!-- 2. Change / Custom Email Card -->
-        <button onclick="openCustomModal()" class="h-[70px] action-card rounded-2xl px-3.5 flex items-center justify-between text-left group min-w-0">
-          <div class="flex items-center gap-3 min-w-0 flex-1 mr-2">
-            <div class="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-zinc-300 group-hover:text-indigo-400 group-hover:border-indigo-500/30 shrink-0 transition">
+        <button onclick="openCustomModal()" class="h-[68px] sm:h-[70px] action-card rounded-2xl px-3 sm:px-3.5 flex items-center justify-between text-left group min-w-0">
+          <div class="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1 mr-1.5 sm:mr-2">
+            <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-zinc-300 group-hover:text-indigo-400 group-hover:border-indigo-500/30 shrink-0 transition">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
               </svg>
@@ -610,13 +526,13 @@ function getProAppHtml() {
               <div class="text-[10px] sm:text-[11px] text-zinc-400 truncate">Custom username</div>
             </div>
           </div>
-          <span class="text-[11px] font-semibold text-zinc-300 bg-white/5 group-hover:bg-white/10 px-2.5 py-1 rounded-full border border-white/10 shrink-0 transition">Edit</span>
+          <span class="text-[10px] sm:text-[11px] font-semibold text-zinc-300 bg-white/5 group-hover:bg-white/10 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full border border-white/10 shrink-0 transition">Edit</span>
         </button>
 
         <!-- 3. Recovery Key Card (Exact Identical Size) -->
-        <button onclick="openRecoveryModal()" class="h-[70px] action-card rounded-2xl px-3.5 flex items-center justify-between text-left group border-amber-500/20 bg-amber-500/[0.04] hover:bg-amber-500/[0.08] min-w-0">
-          <div class="flex items-center gap-3 min-w-0 flex-1 mr-2">
-            <div class="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/25 flex items-center justify-center text-amber-400 shrink-0 group-hover:border-amber-400/40 transition">
+        <button onclick="openRecoveryModal()" class="h-[68px] sm:h-[70px] action-card rounded-2xl px-3 sm:px-3.5 flex items-center justify-between text-left group border-amber-500/20 bg-amber-500/[0.04] hover:bg-amber-500/[0.08] min-w-0">
+          <div class="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1 mr-1.5 sm:mr-2">
+            <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-amber-500/10 border border-amber-500/25 flex items-center justify-center text-amber-400 shrink-0 group-hover:border-amber-400/40 transition">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path>
               </svg>
@@ -630,63 +546,15 @@ function getProAppHtml() {
               </div>
             </div>
           </div>
-          <span class="text-[11px] font-semibold text-amber-400 bg-amber-500/10 px-2.5 py-1 rounded-full border border-amber-500/20 shrink-0">30d</span>
+          <span class="text-[10px] sm:text-[11px] font-semibold text-amber-400 bg-amber-500/10 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full border border-amber-500/20 shrink-0">30d</span>
         </button>
 
       </div>
     </div>
 
-    <!-- Live Inbox Container -->
-    <div class="max-w-4xl mx-auto rounded-[1.75rem] glass-card p-5 sm:p-7 shadow-2xl relative">
-      
-      <!-- Inbox Header -->
-      <div class="flex flex-wrap items-center justify-between gap-4 pb-5 border-b border-white/[0.08]">
-        <div>
-          <div class="flex items-center gap-3">
-            <h2 class="text-xl sm:text-2xl font-bold text-white tracking-tight">Inbox</h2>
-            <span id="inboxCountBadge" class="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">0</span>
-          </div>
-          <div class="flex items-center gap-2 mt-1 text-xs text-zinc-400">
-            <span class="relative flex h-2 w-2">
-              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-              <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-            </span>
-            <span>Real-time listener active on Cloudflare Edge</span>
-          </div>
-        </div>
-
-        <!-- Quick Inbox Tools -->
-        <div class="flex items-center gap-2">
-          <!-- Simulate Test Email Preset Dropdown -->
-          <div class="relative group">
-            <button class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-xs font-semibold text-zinc-200 hover:text-white border border-white/10 transition shadow-sm">
-              <span>⚡ Send Test OTP</span>
-              <svg class="w-3.5 h-3.5 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-            </button>
-            <div class="hidden group-hover:block absolute right-0 mt-1 w-44 bg-[#141416] border border-white/10 rounded-xl shadow-2xl py-1 z-30 text-xs">
-              <button onclick="sendTestSimulator('netflix')" class="w-full text-left px-3 py-2 text-zinc-300 hover:text-white hover:bg-white/5 flex items-center gap-2">
-                <span>🔴 Netflix (OTP)</span>
-              </button>
-              <button onclick="sendTestSimulator('google')" class="w-full text-left px-3 py-2 text-zinc-300 hover:text-white hover:bg-white/5 flex items-center gap-2">
-                <span>🔵 Google (G-Code)</span>
-              </button>
-              <button onclick="sendTestSimulator('discord')" class="w-full text-left px-3 py-2 text-zinc-300 hover:text-white hover:bg-white/5 flex items-center gap-2">
-                <span>🟣 Discord (Link)</span>
-              </button>
-            </div>
-          </div>
-
-          <button onclick="clearAllEmails()" title="Clear all emails in this inbox" class="p-2 rounded-xl bg-white/5 hover:bg-red-500/20 text-zinc-400 hover:text-red-300 border border-white/10 hover:border-red-500/30 transition">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-          </button>
-        </div>
-      </div>
-
-      <!-- Inbox Body (Empty Radar vs Populated List) -->
-      <div id="inboxContent" class="pt-6">
-        <!-- Rendered by JavaScript -->
-      </div>
-
+    <!-- Single Full-Width Container (Exact TempMailLab: Inbox <-> Full Email Reader) -->
+    <div id="mainContainer" class="max-w-4xl w-full mx-auto">
+      <!-- Rendered dynamically by JavaScript -->
     </div>
 
     <!-- Below-The-Fold: Feature Showcase Section (Mirrored from TempMailLab) -->
@@ -905,76 +773,7 @@ function getProAppHtml() {
     </div>
   </div>
 
-  <!-- 3. EMAIL VIEWER MODAL / DRAWER -->
-  <div id="emailViewerModal" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-5">
-    <div class="glass-card bg-[#111113] max-w-3xl w-full max-h-[90vh] rounded-3xl border border-white/15 shadow-2xl flex flex-col overflow-hidden">
-      
-      <!-- Modal Top Bar -->
-      <div class="p-5 sm:p-6 border-b border-white/[0.08] flex items-center justify-between gap-4 shrink-0 bg-[#161618]">
-        <div class="min-w-0 flex-1">
-          <div class="flex items-center gap-2 mb-1">
-            <span id="viewerSecurityBadge" class="text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded-full">SPF: PASS &bull; DKIM: PASS</span>
-            <span id="viewerTime" class="text-xs text-zinc-400">Just now</span>
-          </div>
-          <h3 id="viewerSubject" class="text-lg sm:text-xl font-bold text-white truncate">Email Subject</h3>
-          <p id="viewerFrom" class="text-xs text-zinc-400 mt-0.5 truncate">From: sender@example.com</p>
-        </div>
-        <button onclick="closeEmailViewer()" class="w-9 h-9 rounded-full bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white flex items-center justify-center text-base transition">✕</button>
-      </div>
 
-      <!-- Highlight Banner: OTP Code (If available) -->
-      <div id="viewerOtpBanner" class="hidden mx-5 mt-4 p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-between gap-4">
-        <div class="flex items-center gap-3">
-          <span class="text-2xl">🔑</span>
-          <div>
-            <div class="text-[11px] uppercase tracking-wider font-bold text-amber-400">Detected Verification OTP</div>
-            <div id="viewerOtpValue" class="text-2xl font-mono font-extrabold text-white tracking-widest">849201</div>
-          </div>
-        </div>
-        <button onclick="copyViewerOtp()" class="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-bold text-xs shadow-lg transition active:scale-95">
-          Copy Code
-        </button>
-      </div>
-
-      <!-- Highlight Banner: Action Link (If available) -->
-      <div id="viewerLinkBanner" class="hidden mx-5 mt-3 p-3.5 rounded-2xl bg-indigo-500/10 border border-indigo-500/25 flex items-center justify-between gap-4">
-        <div class="flex items-center gap-2.5 truncate">
-          <span class="text-lg">🔗</span>
-          <span class="text-xs text-indigo-300 font-medium truncate">Primary verification link detected</span>
-        </div>
-        <a id="viewerActionLink" href="#" target="_blank" rel="noopener noreferrer" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs transition shrink-0">
-          Open Link &rarr;
-        </a>
-      </div>
-
-      <!-- View Tabs -->
-      <div class="px-5 pt-4 flex items-center justify-between border-b border-white/[0.08] text-xs">
-        <div class="flex items-center gap-4">
-          <button onclick="switchViewerTab('html')" id="tabHtml" class="pb-2 font-bold text-indigo-400 border-b-2 border-indigo-500">HTML Preview</button>
-          <button onclick="switchViewerTab('text')" id="tabText" class="pb-2 font-medium text-zinc-400 hover:text-zinc-200">Plain Text</button>
-          <button onclick="switchViewerTab('raw')" id="tabRaw" class="pb-2 font-medium text-zinc-400 hover:text-zinc-200">Raw MIME</button>
-        </div>
-        <div class="flex items-center gap-2 pb-2">
-          <button onclick="downloadCurrentEml()" title="Download .eml" class="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white transition">
-            ⬇️ EML
-          </button>
-          <button onclick="deleteCurrentEmail()" title="Delete Email" class="p-1.5 rounded-lg bg-white/5 hover:bg-rose-500/20 text-zinc-300 hover:text-rose-300 transition">
-            🗑️
-          </button>
-        </div>
-      </div>
-
-      <!-- Email Content Body -->
-      <div class="flex-1 overflow-y-auto p-5 sm:p-6 bg-[#0c0c0e]">
-        <div id="viewerHtmlContainer" class="w-full bg-white rounded-xl overflow-hidden min-h-[300px]">
-          <iframe id="viewerIframe" class="w-full min-h-[350px] border-none" sandbox="allow-popups allow-popups-to-escape-sandbox"></iframe>
-        </div>
-        <pre id="viewerTextContainer" class="hidden font-mono text-xs sm:text-sm text-zinc-300 whitespace-pre-wrap leading-relaxed p-4 bg-zinc-900 rounded-xl border border-white/5"></pre>
-        <pre id="viewerRawContainer" class="hidden font-mono text-[11px] text-zinc-400 whitespace-pre-wrap leading-tight p-4 bg-zinc-900 rounded-xl border border-white/5 overflow-x-auto"></pre>
-      </div>
-
-    </div>
-  </div>
 
   <!-- 4. ADDRESS HISTORY MODAL -->
   <div id="historyModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
@@ -1127,6 +926,8 @@ function getProAppHtml() {
       showToast('Recovery Key copied to clipboard! ✨', '🔑');
     }
 
+    let activeTab = 'html';
+
     // --- FETCH EMAILS FROM BACKEND ---
     async function fetchEmails(isManual = false) {
       if (isManual) {
@@ -1146,7 +947,7 @@ function getProAppHtml() {
           }
 
           currentEmails = newEmails;
-          renderInbox();
+          renderMainView();
         }
       } catch (err) {
         console.error('Fetch error:', err);
@@ -1154,211 +955,234 @@ function getProAppHtml() {
       refreshCountdown = 10;
     }
 
-    // --- RENDER INBOX (EMPTY VS LIST) ---
-    function renderInbox() {
-      const container = document.getElementById('inboxContent');
-      const badge = document.getElementById('inboxCountBadge');
-      if (badge) badge.innerText = currentEmails.length;
+    // --- RENDER MAIN VIEW: INBOX OR FULL READER ---
+    function renderMainView() {
+      const container = document.getElementById('mainContainer');
+      if (!container) return;
 
-      if (!currentEmails || currentEmails.length === 0) {
-        container.innerHTML = \`
-          <div class="py-12 sm:py-16 flex flex-col items-center justify-center text-center">
-            <!-- Pulsing Concentric Radar Graphic -->
-            <div class="relative w-20 h-20 mb-6 flex items-center justify-center">
-              <div class="absolute inset-0 rounded-full bg-indigo-500/20 radar-pulse"></div>
-              <div class="relative w-16 h-16 rounded-2xl bg-gradient-to-tr from-indigo-600 to-indigo-400 flex items-center justify-center shadow-lg shadow-indigo-600/30">
-                <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
-                </svg>
+      if (selectedEmail) {
+        // --- STATE B: FULL EMAIL READER VIEW ---
+        const eml = selectedEmail;
+        const sender = eml.from?.name || eml.from?.address || 'Unknown Sender';
+        const senderAddr = eml.from?.address || '';
+        const dateStr = new Date(eml.receivedAt).toLocaleString();
+
+        container.innerHTML = `
+          <div class="bg-[#0d0d0f] border border-sky-500/40 shadow-[0_0_40px_-10px_rgba(56,189,248,0.2)] rounded-2xl sm:rounded-[1.75rem] overflow-hidden flex flex-col min-h-[500px] sm:min-h-[580px] transition-all duration-300">
+            
+            <!-- Top Navigation Row: Back to Inbox & Actions -->
+            <div class="px-4 sm:px-5 py-3 sm:py-4 border-b border-white/[0.08] flex items-center justify-between gap-3 bg-white/[0.02]">
+              <button onclick="closeEmailReader()" class="flex items-center gap-1.5 sm:gap-2 text-xs font-semibold text-zinc-300 hover:text-white bg-white/5 hover:bg-white/10 px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-xl border border-white/10 transition active:scale-95 shrink-0">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                <span>Back to Inbox</span>
+              </button>
+
+              <div class="flex items-center gap-1.5 sm:gap-2 shrink-0">
+                <button onclick="downloadCurrentEml()" title="Download as .eml" class="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-medium text-zinc-300 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10 transition">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                  <span class="hidden sm:inline">EML</span>
+                </button>
+                <button onclick="deleteCurrentEmail()" title="Delete this message" class="p-1.5 sm:p-2 rounded-xl text-zinc-400 hover:text-rose-400 hover:bg-rose-500/10 border border-white/10 hover:border-rose-500/30 transition">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                </button>
               </div>
             </div>
 
-            <h3 class="text-lg font-bold text-white mb-1.5">Waiting for incoming messages...</h3>
-            <p class="text-xs sm:text-sm text-zinc-400 max-w-md mx-auto mb-6 leading-relaxed">
-              Send an email to <span class="font-mono text-indigo-300 font-semibold">\${currentEmail}</span>. Verification OTP codes and magic links will appear automatically.
-            </p>
+            <!-- Email Header Meta -->
+            <div class="p-4 sm:p-7 border-b border-white/[0.08] bg-[#121215]/50 space-y-3 sm:space-y-4">
+              <div class="flex flex-wrap items-center justify-between gap-2">
+                <span class="text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded-full flex items-center gap-1">
+                  <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                  <span>SPF: PASS &bull; DKIM: PASS</span>
+                </span>
+                <span class="text-xs text-zinc-500 font-mono">${dateStr}</span>
+              </div>
 
-            <button onclick="sendTestSimulator('netflix')" class="px-5 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-semibold text-zinc-200 hover:text-white transition flex items-center gap-2 shadow-sm active:scale-95">
-              <span>⚡ Send Sample Verification OTP</span>
-            </button>
-          </div>
-        \`;
-      } else {
-        container.innerHTML = \`
-          <div class="space-y-3">
-            \${currentEmails.map(eml => {
-              const sender = eml.from?.name || eml.from?.address || 'Unknown Sender';
-              const initial = sender.charAt(0).toUpperCase();
-              const dateStr = new Date(eml.receivedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+              <h1 class="text-lg sm:text-2xl font-bold text-white tracking-tight break-words">
+                ${eml.subject || '(No Subject)'}
+              </h1>
 
-              return \`
-                <div onclick="openEmailViewer('\${eml.id}')" class="p-4 sm:p-5 rounded-2xl bg-white/[0.03] hover:bg-white/[0.07] border border-white/[0.08] hover:border-white/20 flex flex-col sm:flex-row sm:items-center justify-between gap-4 cursor-pointer transition-all duration-200 group">
-                  
-                  <div class="flex items-start gap-3.5 min-w-0">
-                    <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600/30 to-indigo-400/20 border border-indigo-500/30 flex items-center justify-center font-bold text-indigo-300 text-sm shrink-0">
-                      \${initial}
-                    </div>
-
-                    <div class="min-w-0 flex-1">
-                      <div class="flex items-center gap-2">
-                        <span class="font-bold text-sm text-white group-hover:text-indigo-300 transition truncate">\${sender}</span>
-                        <span class="text-[11px] text-zinc-500 font-mono truncate">&lt;\${eml.from?.address || ''}&gt;</span>
-                      </div>
-                      <div class="text-xs sm:text-sm text-zinc-300 font-medium truncate mt-0.5">\${eml.subject || '(No Subject)'}</div>
-                      <div class="text-xs text-zinc-500 truncate mt-0.5 max-w-xl">\${(eml.text || '').substring(0, 95)}...</div>
-                    </div>
-                  </div>
-
-                  <div class="flex items-center gap-3 shrink-0 self-end sm:self-center">
-                    \${eml.extractedOtp ? \`
-                      <div onclick="event.stopPropagation(); copyText('\${eml.extractedOtp}')" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-300 font-mono text-xs font-bold transition" title="Click to copy OTP">
-                        <span>🔑 \${eml.extractedOtp}</span>
-                        <span class="text-[10px] underline ml-1">Copy</span>
-                      </div>
-                    \` : ''}
-                    <span class="text-xs text-zinc-500 font-mono">\${dateStr}</span>
-                    <span class="text-zinc-500 group-hover:text-white transition">&rarr;</span>
-                  </div>
-
+              <div class="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-4 text-xs text-zinc-400">
+                <div class="flex items-center gap-1.5 flex-wrap min-w-0">
+                  <span class="text-zinc-300 font-medium shrink-0">From:</span>
+                  <span class="text-white font-medium truncate">${sender} <span class="text-zinc-500 font-mono">&lt;${senderAddr}&gt;</span></span>
                 </div>
-              \`;
-            }).join('')}
+                <div class="flex items-center gap-1.5 min-w-0">
+                  <span class="text-zinc-300 font-medium shrink-0">To:</span>
+                  <span class="font-mono text-indigo-300 truncate">${eml.recipient}</span>
+                </div>
+              </div>
+
+              <!-- Detected Verification OTP Banner -->
+              ${eml.extractedOtp ? `
+                <div class="p-3.5 sm:p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
+                  <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-amber-500/20 border border-amber-500/30 flex items-center justify-center text-amber-400 shrink-0 text-base">🔑</div>
+                    <div>
+                      <span class="text-[10px] uppercase tracking-wider text-amber-400 font-bold block">Detected Verification OTP</span>
+                      <span class="font-mono text-xl sm:text-2xl font-extrabold tracking-widest text-white">${eml.extractedOtp}</span>
+                    </div>
+                  </div>
+                  <button onclick="copyViewerOtp()" class="flex items-center justify-center gap-1.5 px-4 py-2 sm:py-2.5 rounded-xl text-xs font-bold bg-amber-500 hover:bg-amber-400 text-black shadow-lg shadow-amber-500/20 transition active:scale-95 shrink-0 w-full sm:w-auto">
+                    <span>Copy Code</span>
+                  </button>
+                </div>
+              ` : ''}
+
+              <!-- Detected Primary Link Banner -->
+              ${eml.extractedLink ? `
+                <div class="p-3 sm:p-3.5 rounded-2xl bg-indigo-500/10 border border-indigo-500/25 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-4 text-xs">
+                  <span class="text-indigo-300 font-medium truncate">Primary verification link detected</span>
+                  <a href="${eml.extractedLink}" target="_blank" rel="noopener noreferrer" class="px-3.5 py-1.5 sm:py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold flex items-center justify-center gap-1.5 shrink-0 transition">
+                    <span>Open Link</span>
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                  </a>
+                </div>
+              ` : ''}
+            </div>
+
+            <!-- Tab Headers -->
+            <div class="px-4 sm:px-5 pt-3.5 flex items-center gap-3 border-b border-white/[0.08] text-xs">
+              <button onclick="switchViewerTab('html')" class="pb-2.5 font-bold transition ${activeTab === 'html' ? 'text-indigo-400 border-b-2 border-indigo-500' : 'text-zinc-400 hover:text-zinc-200'}">HTML Body</button>
+              <button onclick="switchViewerTab('text')" class="pb-2.5 font-bold transition ${activeTab === 'text' ? 'text-indigo-400 border-b-2 border-indigo-500' : 'text-zinc-400 hover:text-zinc-200'}">Plain Text</button>
+              <button onclick="switchViewerTab('raw')" class="pb-2.5 font-bold transition ${activeTab === 'raw' ? 'text-indigo-400 border-b-2 border-indigo-500' : 'text-zinc-400 hover:text-zinc-200'}">Raw MIME</button>
+            </div>
+
+            <!-- Tab Content Area -->
+            <div class="flex-1 p-3 sm:p-6 bg-[#08080a] overflow-auto">
+              ${activeTab === 'html' ? `
+                <div class="w-full min-h-[360px] sm:min-h-[500px] bg-white rounded-xl sm:rounded-2xl overflow-hidden shadow-inner">
+                  <iframe id="readerIframe" class="w-full min-h-[360px] sm:min-h-[500px] border-none" sandbox="allow-popups allow-popups-to-escape-sandbox"></iframe>
+                </div>
+              ` : ''}
+
+              ${activeTab === 'text' ? `
+                <pre class="p-3.5 sm:p-4 bg-zinc-900/60 rounded-xl sm:rounded-2xl border border-white/5 text-zinc-300 font-mono text-xs sm:text-sm whitespace-pre-wrap leading-relaxed break-words">${eml.text || 'No plain text content available.'}</pre>
+              ` : ''}
+
+              ${activeTab === 'raw' ? `
+                <pre class="p-3.5 sm:p-4 bg-zinc-900/60 rounded-xl sm:rounded-2xl border border-white/5 text-zinc-400 font-mono text-xs whitespace-pre-wrap leading-tight overflow-x-auto">${eml.rawMime || JSON.stringify(eml, null, 2)}</pre>
+              ` : ''}
+            </div>
+
           </div>
-        \`;
-      }
-    }
+        `;
 
-    // --- RECOVERY MODAL HANDLERS ---
-    function openRecoveryModal() {
-      document.getElementById('recoveryModal').classList.remove('hidden');
-    }
-    function closeRecoveryModal() {
-      document.getElementById('recoveryModal').classList.add('hidden');
-      document.getElementById('restoreError').classList.add('hidden');
-    }
-
-    async function handleRestoreSubmit() {
-      const input = document.getElementById('restoreKeyInput');
-      const errEl = document.getElementById('restoreError');
-      const btn = document.getElementById('restoreSubmitBtn');
-      const keyVal = input.value.trim().toUpperCase();
-
-      if (!keyVal) {
-        errEl.innerText = 'Please enter a Recovery Key.';
-        errEl.classList.remove('hidden');
-        return;
-      }
-
-      btn.innerText = 'Restoring...';
-      btn.disabled = true;
-      errEl.classList.add('hidden');
-
-      try {
-        const res = await fetch('/api/recovery/restore', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ recoveryKey: keyVal })
-        });
-        const data = await res.json();
-
-        if (data.success && data.address) {
-          currentEmail = data.address;
-          currentRecoveryKey = keyVal;
-          localStorage.setItem('snapinbox_email', currentEmail);
-          localStorage.setItem('snapinbox_rec_' + currentEmail, currentRecoveryKey);
-          saveToHistory(currentEmail);
-          
-          updateEmailUI();
-          closeRecoveryModal();
-          confetti({ particleCount: 50, spread: 70, origin: { y: 0.3 } });
-          showToast('Inbox restored: ' + currentEmail, '🎉');
-        } else {
-          errEl.innerText = data.error || 'Recovery Key not found or expired.';
-          errEl.classList.remove('hidden');
+        if (activeTab === 'html') {
+          setTimeout(() => {
+            const ifr = document.getElementById('readerIframe');
+            if (ifr) ifr.srcdoc = eml.html || `<p style="padding:20px;font-family:sans-serif;">${eml.text || ''}</p>`;
+          }, 10);
         }
-      } catch (err) {
-        errEl.innerText = 'Connection error: ' + err.message;
-        errEl.classList.remove('hidden');
-      } finally {
-        btn.innerText = 'Restore Inbox';
-        btn.disabled = false;
+
+      } else {
+        // --- STATE A: INBOX VIEW (TEMPMAILLAB EXACT MIRROR) ---
+        container.innerHTML = `
+          <div class="rounded-2xl sm:rounded-[1.75rem] bg-[#0d0d0f] border border-sky-500/40 shadow-[0_0_40px_-10px_rgba(56,189,248,0.2)] overflow-hidden transition-all duration-300">
+            
+            <!-- Header: Inbox on left, Refresh on right -->
+            <div class="px-4 sm:px-6 py-3.5 sm:py-4 border-b border-white/10 flex items-center justify-between">
+              <div class="flex items-center gap-2.5">
+                <h2 class="text-lg sm:text-xl font-bold text-white tracking-tight">Inbox</h2>
+                ${currentEmails.length > 0 ? `
+                  <span class="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+                    ${currentEmails.length}
+                  </span>
+                ` : ''}
+              </div>
+
+              <div class="flex items-center gap-2">
+                <button onclick="fetchEmails(true)" class="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-semibold text-zinc-200 hover:text-white transition active:scale-95">
+                  <svg id="inboxRefreshIcon" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                  <span>Refresh</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Body: Empty State OR Email List -->
+            ${currentEmails.length === 0 ? `
+              <div class="py-16 sm:py-28 px-4 flex flex-col items-center justify-center text-center">
+                <!-- Rotating circular arrows with envelope in center -->
+                <div class="relative w-16 h-16 sm:w-20 sm:h-20 mb-4 sm:mb-5 flex items-center justify-center">
+                  <svg class="w-16 h-16 sm:w-20 sm:h-20 text-zinc-400 animate-[spin_10s_linear_infinite]" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <path d="M52 32a20 20 0 0 1-34.14 14.14L14 42" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M14 52v-10h10" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M12 32A20 20 0 0 1 46.14 17.86L50 22" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M50 12v10h-10" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                  <div class="absolute w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center text-zinc-300">
+                    <svg class="w-7 h-7 sm:w-8 sm:h-8" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M2.25 4.5A2.25 2.25 0 0 1 4.5 2.25h15A2.25 2.25 0 0 1 21.75 4.5v15A2.25 2.25 0 0 1 19.5 21.75h-15A2.25 2.25 0 0 1 2.25 19.5v-15zm3.15 1.5l6.6 4.4 6.6-4.4H5.4zm14.1 2.45l-7.05 4.7a.75.75 0 0 1-.9 0L4.5 8.45V18a.75.75 0 0 0 .75.75h13.5a.75.75 0 0 0 .75-.75V8.45z"/>
+                    </svg>
+                  </div>
+                </div>
+
+                <h3 class="text-lg sm:text-2xl font-bold text-white mb-1 sm:mb-1.5">No emails yet</h3>
+                <p class="text-xs sm:text-sm text-zinc-400 max-w-sm mx-auto">Waiting for incoming emails</p>
+              </div>
+            ` : `
+              <div class="divide-y divide-white/[0.08] max-h-[650px] overflow-y-auto">
+                ${currentEmails.map(eml => {
+                  const sender = eml.from?.name || eml.from?.address || 'Unknown Sender';
+                  const initial = sender.charAt(0).toUpperCase();
+                  const dateStr = new Date(eml.receivedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+                  return `
+                    <div onclick="openEmailReader('${eml.id}')" class="p-3.5 sm:p-5 hover:bg-white/[0.04] flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 cursor-pointer transition group">
+                      <div class="flex items-start gap-3 sm:gap-3.5 min-w-0 flex-1">
+                        <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/25 flex items-center justify-center font-bold text-indigo-400 text-sm shrink-0 mt-0.5">
+                          ${initial}
+                        </div>
+                        <div class="min-w-0 flex-1">
+                          <div class="flex items-center gap-2">
+                            <span class="font-bold text-sm text-white group-hover:text-indigo-300 transition truncate">${sender}</span>
+                            <span class="text-[11px] text-zinc-500 font-mono truncate hidden sm:inline">&lt;${eml.from?.address || ''}&gt;</span>
+                          </div>
+                          <div class="text-xs sm:text-sm text-zinc-200 font-medium truncate mt-0.5">${eml.subject || '(No Subject)'}</div>
+                          <div class="text-xs text-zinc-500 truncate mt-0.5">${(eml.text || '').substring(0, 95)}...</div>
+                        </div>
+                      </div>
+
+                      <div class="flex items-center justify-between sm:justify-end gap-3 shrink-0">
+                        ${eml.extractedOtp ? `
+                          <div onclick="event.stopPropagation(); copyText('${eml.extractedOtp}')" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-300 font-mono text-xs font-bold transition active:scale-95" title="Click to copy OTP">
+                            <span>🔑 ${eml.extractedOtp}</span>
+                            <span class="text-[10px] underline ml-0.5">Copy</span>
+                          </div>
+                        ` : ''}
+                        <div class="flex items-center gap-2 text-xs text-zinc-500 font-mono">
+                          <span>${dateStr}</span>
+                          <span class="text-zinc-500 group-hover:text-white transition">&rarr;</span>
+                        </div>
+                      </div>
+                    </div>
+                  `;
+                }).join('')}
+              </div>
+            `}
+          </div>
+        `;
       }
     }
 
-    // --- CUSTOM EMAIL MODAL HANDLERS ---
-    function openCustomModal() { document.getElementById('customModal').classList.remove('hidden'); }
-    function closeCustomModal() { document.getElementById('customModal').classList.add('hidden'); }
-
-    function handleCustomSubmit(e) {
-      e.preventDefault();
-      const val = document.getElementById('customInput').value.trim().toLowerCase().replace(/[^a-z0-9._-]/g, '');
-      const errEl = document.getElementById('customError');
-
-      if (val.length < 3) {
-        errEl.innerText = 'Minimum 3 characters required (letters, numbers, dot, dash)';
-        errEl.classList.remove('hidden');
-        return;
-      }
-
-      currentEmail = val + '@' + DOMAIN;
-      localStorage.setItem('snapinbox_email', currentEmail);
-      saveToHistory(currentEmail);
-      closeCustomModal();
-      updateEmailUI();
-    }
-
-    function randomizeEmail() {
-      currentEmail = generateRandomEmail();
-      updateEmailUI();
-    }
-
-    function updateEmailUI() {
-      document.getElementById('emailDisplay').innerText = currentEmail;
-      ensureRecoveryKeyForEmail(currentEmail);
-      fetchEmails();
-    }
-
-    // --- EMAIL VIEWER MODAL HANDLERS ---
-    function openEmailViewer(id) {
+    function openEmailReader(id) {
       const eml = currentEmails.find(e => e.id === id);
       if (!eml) return;
       selectedEmail = eml;
-
-      document.getElementById('viewerSubject').innerText = eml.subject || '(No Subject)';
-      document.getElementById('viewerFrom').innerText = 'From: ' + (eml.from?.name ? eml.from.name + ' <' + eml.from.address + '>' : eml.from?.address || 'Unknown');
-      document.getElementById('viewerTime').innerText = new Date(eml.receivedAt).toLocaleString();
-
-      // OTP Banner
-      const otpBanner = document.getElementById('viewerOtpBanner');
-      if (eml.extractedOtp) {
-        document.getElementById('viewerOtpValue').innerText = eml.extractedOtp;
-        otpBanner.classList.remove('hidden');
-      } else {
-        otpBanner.classList.add('hidden');
-      }
-
-      // Link Banner
-      const linkBanner = document.getElementById('viewerLinkBanner');
-      if (eml.extractedLink) {
-        document.getElementById('viewerActionLink').href = eml.extractedLink;
-        linkBanner.classList.remove('hidden');
-      } else {
-        linkBanner.classList.add('hidden');
-      }
-
-      // Populate Contents
-      const iframe = document.getElementById('viewerIframe');
-      iframe.srcdoc = eml.html || '<p style="padding:20px;font-family:sans-serif;">' + (eml.text || 'No content') + '</p>';
-      document.getElementById('viewerTextContainer').innerText = eml.text || 'No plain text available.';
-      document.getElementById('viewerRawContainer').innerText = eml.rawMime || 'No raw MIME available.';
-
-      switchViewerTab('html');
-      document.getElementById('emailViewerModal').classList.remove('hidden');
+      activeTab = 'html';
+      renderMainView();
+      const el = document.getElementById('mainContainer');
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 
-    function closeEmailViewer() {
-      document.getElementById('emailViewerModal').classList.add('hidden');
+    function closeEmailReader() {
       selectedEmail = null;
+      renderMainView();
+    }
+
+    function switchViewerTab(tab) {
+      activeTab = tab;
+      renderMainView();
     }
 
     function copyViewerOtp() {
@@ -1367,34 +1191,10 @@ function getProAppHtml() {
       }
     }
 
-    function switchViewerTab(tab) {
-      const tabH = document.getElementById('tabHtml');
-      const tabT = document.getElementById('tabText');
-      const tabR = document.getElementById('tabRaw');
-      const boxH = document.getElementById('viewerHtmlContainer');
-      const boxT = document.getElementById('viewerTextContainer');
-      const boxR = document.getElementById('viewerRawContainer');
-
-      [tabH, tabT, tabR].forEach(t => {
-        t.className = 'pb-2 font-medium text-zinc-400 hover:text-zinc-200';
-      });
-      [boxH, boxT, boxR].forEach(b => b.classList.add('hidden'));
-
-      if (tab === 'html') {
-        tabH.className = 'pb-2 font-bold text-indigo-400 border-b-2 border-indigo-500';
-        boxH.classList.remove('hidden');
-      } else if (tab === 'text') {
-        tabT.className = 'pb-2 font-bold text-indigo-400 border-b-2 border-indigo-500';
-        boxT.classList.remove('hidden');
-      } else if (tab === 'raw') {
-        tabR.className = 'pb-2 font-bold text-indigo-400 border-b-2 border-indigo-500';
-        boxR.classList.remove('hidden');
-      }
-    }
-
     function downloadCurrentEml() {
       if (!selectedEmail) return;
-      const blob = new Blob([selectedEmail.rawMime || selectedEmail.text || ''], { type: 'message/rfc822' });
+      const emlContent = `From: ${selectedEmail.from?.name ? selectedEmail.from.name + ' ' : ''}<${selectedEmail.from?.address || ''}>\\nTo: ${selectedEmail.recipient}\\nSubject: ${selectedEmail.subject}\\nDate: ${new Date(selectedEmail.receivedAt).toUTCString()}\\nMIME-Version: 1.0\\nContent-Type: text/html; charset=utf-8\\n\\n${selectedEmail.html || selectedEmail.text || ''}`;
+      const blob = new Blob([emlContent], { type: 'message/rfc822' });
       const a = document.createElement('a');
       a.href = URL.createObjectURL(blob);
       a.download = (selectedEmail.subject || 'message').replace(/[^a-z0-9_-]/gi, '_') + '.eml';
@@ -1406,7 +1206,7 @@ function getProAppHtml() {
       if (!confirm('Delete this message?')) return;
       try {
         await fetch('/api/emails?address=' + encodeURIComponent(currentEmail) + '&id=' + selectedEmail.id, { method: 'DELETE' });
-        closeEmailViewer();
+        selectedEmail = null;
         fetchEmails();
       } catch (e) {}
     }
@@ -1416,24 +1216,9 @@ function getProAppHtml() {
       if (!confirm('Delete all messages in this inbox?')) return;
       try {
         await fetch('/api/emails?address=' + encodeURIComponent(currentEmail), { method: 'DELETE' });
+        selectedEmail = null;
         fetchEmails();
       } catch (e) {}
-    }
-
-    // --- TEST SIMULATOR SENDER ---
-    async function sendTestSimulator(preset = 'netflix') {
-      try {
-        const res = await fetch('/api/emails/test-send', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ recipient: currentEmail, preset })
-        });
-        if (res.ok) {
-          fetchEmails();
-        }
-      } catch (e) {
-        console.error(e);
-      }
     }
 
     // --- HISTORY MODAL ---
@@ -1473,7 +1258,7 @@ function getProAppHtml() {
       if (e.key === 'r' || e.key === 'R') fetchEmails(true);
       if (e.key === 'n' || e.key === 'N') randomizeEmail();
       if (e.key === 'Escape') {
-        closeEmailViewer();
+        closeEmailReader();
         closeRecoveryModal();
         closeCustomModal();
         document.getElementById('historyModal').classList.add('hidden');

@@ -128,3 +128,32 @@ export async function clearAllForRecipient(recipient: string): Promise<number> {
   }
   return count;
 }
+
+const RECOVERY_FILE = path.join(DATA_DIR, 'recovery.json');
+
+export async function saveRecoveryKey(key: string, address: string): Promise<void> {
+  const normKey = key.trim().toUpperCase();
+  const normAddr = address.trim().toLowerCase();
+  let map: Record<string, string> = {};
+  try {
+    const raw = await fs.readFile(RECOVERY_FILE, 'utf-8');
+    map = JSON.parse(raw || '{}');
+  } catch (e) {}
+  map[normKey] = normAddr;
+  map[`addr_${normAddr}`] = normKey;
+  try {
+    await fs.mkdir(DATA_DIR, { recursive: true });
+    await fs.writeFile(RECOVERY_FILE, JSON.stringify(map, null, 2), 'utf-8');
+  } catch (e) {}
+}
+
+export async function getAddressByRecoveryKey(key: string): Promise<string | null> {
+  const normKey = key.trim().toUpperCase();
+  try {
+    const raw = await fs.readFile(RECOVERY_FILE, 'utf-8');
+    const map = JSON.parse(raw || '{}');
+    return map[normKey] || null;
+  } catch (e) {
+    return null;
+  }
+}
